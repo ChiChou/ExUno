@@ -10,6 +10,8 @@ struct CardsView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var leaving: CGFloat = 0
     @State private var cardKey = 0
+    /// Per device and not synced: roaming is a way to look around, not part of study progress.
+    @AppStorage("cards.roaming") private var roaming = false
 
     private var settings: PackSettings { progress.settings }
 
@@ -17,7 +19,9 @@ struct CardsView: View {
         let s = progress.strings
         VStack(spacing: 14) {
             topBar
-            ProgressView(value: min(1, Double(progress.todayLog().reviews) / Double(max(1, progress.app.goal)))).tint(Theme.accent)
+            if !roaming {
+                ProgressView(value: min(1, Double(progress.todayLog().reviews) / Double(max(1, progress.app.goal)))).tint(Theme.accent)
+            }
             if !vocab.isReady {
                 Spacer()
                 if let error = vocab.error { Text(error).foregroundStyle(Theme.ink2).multilineTextAlignment(.center).padding() } else { ProgressView() }
@@ -34,26 +38,44 @@ struct CardsView: View {
         .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
         .pageBackground()
         .toolbar(.hidden, for: .navigationBar)
-        .onAppear { if vocab.isReady && !deck.built { deck.build(vocab: vocab, progress: progress) } }
-        .onChange(of: vocab.isReady) { _, ready in if ready && !deck.built { deck.build(vocab: vocab, progress: progress) } }
+        .onAppear { if vocab.isReady && (!deck.built || deck.roaming != roaming) { rebuild() } }
+        .onChange(of: vocab.isReady) { _, ready in if ready && !deck.built { rebuild() } }
         .onChange(of: deck.summaryDue) { _, due in if due { deck.summaryDue = false; showSummary = true } }
-        .sheet(isPresented: $showOptions, onDismiss: { if !deck.built { deck.build(vocab: vocab, progress: progress) } }) {
+        .sheet(isPresented: $showOptions, onDismiss: { if !deck.built { rebuild() } }) {
             DeckOptionsView(deck: deck).presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showSummary) { SessionSummaryView().presentationDetents([.medium, .large]) }
         .onDisappear { speech.stop() }
     }
 
+    private func rebuild() {
+        if roaming { deck.buildRoaming(vocab: vocab, settings: settings) } else { deck.build(vocab: vocab, progress: progress) }
+        cardKey += 1
+    }
+
+    /// Flow and Recall are the synced study modes; Roam is a local, untracked browse.
+    private enum ModeChoice: Hashable { case study(StudyMode), roam }
+
     private var topBar: some View {
         HStack {
-            Picker("Mode", selection: Binding(get: { settings.mode }, set: { m in progress.settings.mode = m; deck.revealed = false })) {
-                Text("Flow").tag(StudyMode.flow)
-                Text("Recall").tag(StudyMode.recall)
+            Picker("Mode", selection: Binding<ModeChoice>(get: { roaming ? .roam : .study(settings.mode) }, set: { choice in
+                let wasRoaming = roaming
+                switch choice {
+                case .roam: roaming = true
+                case .study(let m): roaming = false; progress.settings.mode = m
+                }
+                if roaming != wasRoaming { rebuild() } else { deck.revealed = false }
+            })) {
+                Text("Flow").tag(ModeChoice.study(.flow))
+                Text("Recall").tag(ModeChoice.study(.recall))
+                Text("Roam").tag(ModeChoice.roam)
             }
             .pickerStyle(.segmented)
-            .frame(width: 170)
+            .frame(width: 230)
             Spacer()
-            Text("\(progress.todayLog().reviews) / \(progress.app.goal)").font(.footnote.monospacedDigit()).foregroundStyle(Theme.ink2)
+            if !roaming {
+                Text("\(progress.todayLog().reviews) / \(progress.app.goal)").font(.footnote.monospacedDigit()).foregroundStyle(Theme.ink2)
+            }
             Button { showOptions = true } label: {
                 Image(systemName: "slider.horizontal.3").font(.system(size: 16, weight: .semibold))
                     .frame(width: 40, height: 40).background(Theme.surface2, in: Circle()).foregroundStyle(Theme.ink)
@@ -63,7 +85,7 @@ struct CardsView: View {
 
     private func isShown(_ card: DeckCard) -> Bool {
         switch card {
-        case .word: return settings.mode == .flow || deck.revealed
+        case .word: return roaming || settings.mode == .flow || deck.revealed
         case .realia: return deck.revealed
         }
     }
@@ -94,7 +116,7 @@ struct CardsView: View {
                 .onEnded { v in
                     let dx = v.translation.width
                     if abs(dx) > 90 {
-                        if case .word = card, settings.mode == .recall, !deck.revealed { withAnimation { dragOffset = 0 }; deck.revealed = true }
+                        if case .word = card, !roaming, settings.mode == .recall, !deck.revealed { withAnimation { dragOffset = 0 }; deck.revealed = true }
                         else { leave(dx > 0 ? .good : .again) }
                     } else { withAnimation(.spring(duration: 0.25)) { dragOffset = 0 } }
                 }
@@ -123,6 +145,8 @@ struct CardsView: View {
             switch card {
             case .realia where !deck.revealed:
                 Button(s.howToSay) { deck.revealed = true }.buttonStyle(Pill(style: .primary))
+            case .word where roaming:
+                Button { leave(.good) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }.buttonStyle(Pill(style: .neutral))
             case .realia:
                 Button(s.didntKnow) { leave(.again) }.buttonStyle(Pill(style: .bad))
                 Button(s.knew) { leave(.good) }.buttonStyle(Pill(style: .good))

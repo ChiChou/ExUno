@@ -142,3 +142,26 @@ final class LanguageOrderTests: XCTestCase {
         XCTAssertEqual(LanguageCode.allCases, [.it, .es, .fr, .la], "case order seeds the daily challenge; don't reorder it")
     }
 }
+
+final class RoamingDeckTests: XCTestCase {
+    @MainActor
+    func testRoamingNeverTouchesProgress() async throws {
+        let vocab = Vocabulary()
+        vocab.load(.it)
+        for _ in 0..<200 where !vocab.isReady && vocab.error == nil { try await Task.sleep(nanoseconds: 50_000_000) }
+        guard vocab.isReady else { throw XCTSkip("it.json is not in the bundle; run sh Scripts/prepare_data.sh") }
+        let progress = StudyProgress()
+        let before = progress.pack
+        let deck = DeckEngine()
+        deck.buildRoaming(vocab: vocab, settings: progress.settings)
+        XCTAssertTrue(deck.roaming)
+        for g in Array(repeating: [Grade.again, .good, .easy], count: 14).flatMap({ $0 }) {
+            guard case .word = try XCTUnwrap(deck.current) else { return XCTFail("roaming shows words only") }
+            XCTAssertTrue(deck.revealed)
+            deck.advance(g, vocab: vocab, progress: progress)
+        }
+        XCTAssertNotNil(deck.current, "roaming refills and never runs out")
+        XCTAssertFalse(deck.summaryDue)
+        XCTAssertEqual(progress.pack, before, "roaming must not grade, schedule or log anything")
+    }
+}

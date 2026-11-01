@@ -19,6 +19,8 @@ final class DeckEngine {
     private var history: [Int] = []
     var revealed = false
     private(set) var built = false
+    /// Roaming: random words from the deck filters, answers shown, nothing graded or logged.
+    private(set) var roaming = false
     var summaryDue = false
 
     func invalidate() { built = false }
@@ -66,24 +68,36 @@ final class DeckEngine {
             for (i, c) in q.enumerated() { out.append(c); if (i + 1) % 5 == 0 { out.append(.realia(engine.realia())) } }
             q = out
         }
-        queue = q; index = 0; history = []; revealed = false; built = true; summaryDue = false
+        queue = q; index = 0; history = []; revealed = false; built = true; roaming = false; summaryDue = false
+    }
+
+    func buildRoaming(vocab: Vocabulary, settings: PackSettings) {
+        queue = roamBatch(vocab, settings); index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false
+    }
+
+    private func roamBatch(_ vocab: Vocabulary, _ s: PackSettings) -> [DeckCard] {
+        pool(vocab, s).shuffled().prefix(30).map { DeckCard.word($0.i, again: false) }
     }
 
     func advance(_ g: Grade, vocab: Vocabulary, progress: StudyProgress) {
         guard let c = current else { return }
-        switch c {
-        case .word(let id, _):
-            progress.grade(id, g)
-            if g == .again { queue.insert(.word(id, again: true), at: min(queue.count, index + 4)) }
-            let n = progress.todayLog().reviews
-            if n > 0 && n % progress.app.goal == 0 { summaryDue = true }
-        case .realia:
-            progress.logRealia(correct: g != .again)
+        if !roaming {
+            switch c {
+            case .word(let id, _):
+                progress.grade(id, g)
+                if g == .again { queue.insert(.word(id, again: true), at: min(queue.count, index + 4)) }
+                let n = progress.todayLog().reviews
+                if n > 0 && n % progress.app.goal == 0 { summaryDue = true }
+            case .realia:
+                progress.logRealia(correct: g != .again)
+            }
         }
         history.append(index)
         index += 1
-        revealed = false
-        if index >= queue.count { refill(vocab: vocab, progress: progress) }
+        revealed = roaming
+        if index >= queue.count {
+            if roaming { queue.append(contentsOf: roamBatch(vocab, progress.settings)) } else { refill(vocab: vocab, progress: progress) }
+        }
     }
 
     private func refill(vocab: Vocabulary, progress: StudyProgress) {
