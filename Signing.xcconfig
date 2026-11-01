@@ -1,0 +1,7 @@
+// Code signing for local builds. Put your Apple team ID in Local.xcconfig next to this
+// file; it is git-ignored, so the team never lands in the repository:
+//
+//   DEVELOPMENT_TEAM = ABCDE12345
+//
+// Without it, pick a team under Signing & Capabilities in Xcode.
+#include? "Local.xcconfig"
