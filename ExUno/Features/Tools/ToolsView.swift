@@ -11,6 +11,7 @@ struct ToolsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(progress.strings.tools).font(Theme.display(34))
+                    GrammarCourseRow()
                     VStack(spacing: 0) {
                         ForEach(engine.tools) { tool in
                             NavigationLink(value: tool) { ToolRow(tool: tool, title: engine.title(tool)) }.buttonStyle(.plain)

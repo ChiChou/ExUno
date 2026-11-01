@@ -170,6 +170,14 @@ struct LicensesScreen: View {
                     ("DCC Latin Core Vocabulary", "https://dcc.dickinson.edu/latin-vocabulary-list"),
                     ("DCC terms of use", "https://dcc.dickinson.edu/terms-use"),
                 ])
+                section("Grammar courses", "Example sentences from Tatoeba (Tatoeba contributors, CC BY 2.0 FR), via the OPUS release v2026-07-08. Verb and noun paradigms from UniMorph (CC BY-SA 3.0, extracted from English Wiktionary); Latin verb forms from the app's own rules with DCC principal parts. Unit notes and tables are written for Ex Uno.", [
+                    ("Tatoeba", "https://tatoeba.org/"),
+                    ("Tatoeba terms of use", "https://tatoeba.org/en/terms_of_use"),
+                    ("OPUS Tatoeba", "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba"),
+                    ("UniMorph", "https://unimorph.github.io/"),
+                    ("CC BY 2.0 FR", "https://creativecommons.org/licenses/by/2.0/fr/"),
+                    ("CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/"),
+                ])
                 section("Online", "Word definitions from the Wiktionary REST API (Wiktionary contributors, CC BY-SA 4.0). Exchange rates are European Central Bank reference rates served by Frankfurter.", [
                     ("Wiktionary", "https://en.wiktionary.org/"),
                     ("Frankfurter", "https://frankfurter.dev/"),
@@ -177,7 +185,7 @@ struct LicensesScreen: View {
                 ])
                 section("Speech", "The voices installed on this device. Latin is read by an Italian voice.", [])
                 section("Rules", "Number, time, date, calendar and verb rules are written by the app and cover standard usage; regional habits vary and rare irregular verbs may be wrong. Levels are teaching estimates, not CEFR certifications.", [])
-                section("Licenses", "Ex Uno's code is MIT-licensed. The vocabulary packs are shared under CC BY-SA 4.0; full notices are in ATTRIBUTIONS.md.", [
+                section("Licenses", "Ex Uno's code is MIT-licensed. The vocabulary packs and grammar courses are shared under CC BY-SA 4.0; full notices are in ATTRIBUTIONS.md.", [
                     ("Source code and data scripts", AppInfo.repository),
                     ("CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0/"),
                     ("CC BY 3.0", "https://creativecommons.org/licenses/by/3.0/"),

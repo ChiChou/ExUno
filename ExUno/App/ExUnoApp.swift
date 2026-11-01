@@ -4,6 +4,7 @@ import WidgetKit
 @main
 struct ExUnoApp: App {
     @State private var vocabulary = Vocabulary()
+    @State private var grammar = GrammarCourses()
     @State private var progress = StudyProgress()
     @State private var speech = Speech()
     @State private var rates = ExchangeRates()
@@ -19,6 +20,7 @@ struct ExUnoApp: App {
                 }
             }
             .environment(vocabulary)
+            .environment(grammar)
             .environment(progress)
             .environment(speech)
             .environment(rates)
@@ -33,6 +35,7 @@ struct ExUnoApp: App {
     private func activate(_ code: LanguageCode) {
         if progress.language != code { progress.switchTo(code) }
         vocabulary.load(code)
+        grammar.load(code)
         speech.stop()
         speech.language = code
         speech.rate = progress.app.rate

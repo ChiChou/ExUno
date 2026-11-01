@@ -1,5 +1,5 @@
 {
-  "comment": "Pinned upstream inputs for the language packs. fetch_sources.py downloads each file into .cache/sources/<id>/ and refuses any file whose SHA-256 differs. Bump a URL and its sha256 together.",
+  "comment": "Pinned upstream inputs for the language packs and grammar courses. fetch_sources.py downloads each file into .cache/sources/<id>/ and refuses any file whose SHA-256 differs. Bump a URL and its sha256 together.",
   "sources": [
     {
       "id": "decks-italian",
@@ -57,6 +57,82 @@
       "extract": "omw-en/omw-en.xml",
       "license": "WordNet 3.0 license (Princeton University)",
       "homepage": "https://wordnet.princeton.edu/"
+    },
+    {
+      "id": "tatoeba-it",
+      "name": "Tatoeba English–Italian sentence pairs (OPUS release v2026-07-08)",
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-it.txt.zip",
+      "file": "en-it.txt.zip",
+      "sha256": "cc2549ab5b38f4bf74adee586ef24104e00d8d627ae2c981969188a135358d8f",
+      "license": "CC BY 2.0 FR (Tatoeba contributors)",
+      "homepage": "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba",
+      "note": "Grammar course sentences. OPUS keeps dated Tatoeba releases at fixed URLs; tatoeba.org's own exports change weekly."
+    },
+    {
+      "id": "tatoeba-es",
+      "name": "Tatoeba English–Spanish sentence pairs (OPUS release v2026-07-08)",
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-es.txt.zip",
+      "file": "en-es.txt.zip",
+      "sha256": "7d77120231c77cb37e3a38d96e5a7e6ebde268f0c75c848504364adb97989b9c",
+      "license": "CC BY 2.0 FR (Tatoeba contributors)",
+      "homepage": "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba",
+      "note": "Grammar course sentences. OPUS keeps dated Tatoeba releases at fixed URLs; tatoeba.org's own exports change weekly."
+    },
+    {
+      "id": "tatoeba-fr",
+      "name": "Tatoeba English–French sentence pairs (OPUS release v2026-07-08)",
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-fr.txt.zip",
+      "file": "en-fr.txt.zip",
+      "sha256": "aa84650ff529e8debe094596eba6437af28d087605a5aa97c2e2a5c33bf18698",
+      "license": "CC BY 2.0 FR (Tatoeba contributors)",
+      "homepage": "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba",
+      "note": "Grammar course sentences. OPUS keeps dated Tatoeba releases at fixed URLs; tatoeba.org's own exports change weekly."
+    },
+    {
+      "id": "tatoeba-la",
+      "name": "Tatoeba English–Latin sentence pairs (OPUS release v2026-07-08)",
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-la.txt.zip",
+      "file": "en-la.txt.zip",
+      "sha256": "c719dabd76039ece66df805633704b41ff31b6c74c95d85d5d704a20b6f6bc00",
+      "license": "CC BY 2.0 FR (Tatoeba contributors)",
+      "homepage": "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba",
+      "note": "Grammar course sentences. OPUS keeps dated Tatoeba releases at fixed URLs; tatoeba.org's own exports change weekly."
+    },
+    {
+      "id": "unimorph-ita",
+      "name": "UniMorph: Italian paradigms",
+      "url": "https://raw.githubusercontent.com/unimorph/ita/fa2cc6ce173643e748bd8f4162709365bdc98805/ita",
+      "file": "ita",
+      "sha256": "6347bb15b3d2c3dafcbe4adc0e7beaa97a8bc61bcccc345079afb154c03f1321",
+      "license": "CC BY-SA 3.0 (extracted from English Wiktionary)",
+      "homepage": "https://github.com/unimorph/ita"
+    },
+    {
+      "id": "unimorph-spa",
+      "name": "UniMorph: Spanish paradigms",
+      "url": "https://raw.githubusercontent.com/unimorph/spa/b9655efb0e5ce0f99809badaa7f4e93017ab8430/spa",
+      "file": "spa",
+      "sha256": "7a165d4b44eb078d23964f3eee3813f5140c5df0ffab0143c806c562e67f8771",
+      "license": "CC BY-SA 3.0 (extracted from English Wiktionary)",
+      "homepage": "https://github.com/unimorph/spa"
+    },
+    {
+      "id": "unimorph-fra",
+      "name": "UniMorph: French paradigms",
+      "url": "https://raw.githubusercontent.com/unimorph/fra/f672f8cceb2d5f5a1e2241b5622c8845f8274635/fra",
+      "file": "fra",
+      "sha256": "4760fc36435a9ffba9b4de6f0787d8eca5b15022e6b141e3b242b129f0d88dcb",
+      "license": "CC BY-SA 3.0 (extracted from English Wiktionary)",
+      "homepage": "https://github.com/unimorph/fra"
+    },
+    {
+      "id": "unimorph-lat",
+      "name": "UniMorph: Latin paradigms",
+      "url": "https://raw.githubusercontent.com/unimorph/lat/050924c9f013e6aba4d7c87be243a1d79b6c5b10/lat",
+      "file": "lat",
+      "sha256": "7aed5a2fd17c29474e85e315d42654d1794a3d3efc956b387714ca601a608a2b",
+      "license": "CC BY-SA 3.0 (extracted from English Wiktionary)",
+      "homepage": "https://github.com/unimorph/lat"
     }
   ]
 }

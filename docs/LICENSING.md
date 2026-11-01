@@ -11,6 +11,7 @@ Ex Uno is distributed as source: anyone who wants the app builds it with Xcode a
 | Source code: app, widget, tests, scripts | **MIT** | Original work. |
 | Generated vocabulary packs | **CC BY-SA 4.0** | The strictest upstream terms are share-alike (wordfreq frequencies, DCC). |
 | Topic tags inside the packs | CC BY 3.0 + WordNet 3.0 license | Both permissive, and compatible with CC BY-SA 4.0 output. |
+| Generated grammar courses | **CC BY-SA 4.0** | Tatoeba (CC BY 2.0 FR) is permissive; UniMorph (CC BY-SA 3.0) is share-alike and allows a later version. |
 
 Code and data are separate works. The app reads the packs as data, so share-alike does not reach the Swift code. The repository ships no data at all, only the scripts that download and build it from pinned, publicly available sources.
 
@@ -25,6 +26,8 @@ Code and data are separate works. The app reads the packs as data, so share-alik
 | sjhuskey/latin-vocabulary | no license file | Download location of DCC's CSV only | Yes. We use DCC's data, not the mirror owner's own files (his Wheelock merge is not used). |
 | MultiWordNet via OMW 2.0 | CC BY 3.0 | Topic tags | Yes (attribution). |
 | Princeton WordNet 3.0 via OMW 2.0 | WordNet 3.0 license (BSD-like) | Topic hierarchy | Yes. Keep the notice; Princeton's name may not be used in advertising. |
+| Tatoeba via OPUS (release v2026-07-08) | CC BY 2.0 FR | Grammar course sentences and translations | Yes. CC BY allows adaptation under other terms with attribution; credited as a group (see ATTRIBUTIONS.md). |
+| UniMorph ita, spa, fra, lat | CC BY-SA 3.0 | Paradigms for grammar exercises | Yes. BY-SA 3.0 §4(b) allows adaptations under a later version, so 4.0. |
 | Wiktionary REST API (runtime) | CC BY-SA 4.0 | Definitions shown with a link back | Yes. Nothing is bundled. |
 | Frankfurter / ECB rates (runtime) | Free reuse with the source acknowledged | Currency estimate | Yes. Credited in the app. |
 | Apple system voices, SF Symbols, system fonts | Apple SDK terms | Speech, icons, type | Yes, for apps on Apple platforms. Symbols are referenced by name; none are in the repository. |
@@ -35,7 +38,11 @@ The project uses no material under a non-commercial (NC) or no-derivatives (ND) 
 
 - KELLY Italian/European word lists (CC BY-NC-SA)
 - XDailyDialog (CC BY-NC-SA)
-- Several open textbook grammar courses (CC BY-NC)
+- Several open textbook grammar courses (CC BY-NC), including every open Italian textbook found and the newer Pressbooks edition of *Français interactif* (CC BY-NC-SA)
+- Universal Dependencies treebanks under NC terms: Italian ISDT, VIT, ParTUT, PoSTWITA; Latin PROIEL, Perseus, ITTB, UDante
+- CEFR inventories that are not openly licensed: the Instituto Cervantes *Plan curricular*, the CEFR Companion Volume, *Profilo della lingua italiana*, the *Référentiels*. Ex Uno assigns its own grammar levels.
+
+The grammar survey in `docs/GRAMMAR.md` lists what was checked and why.
 
 When adding a source, check its license first. The source's NC/ND status decides, not where the file is hosted.
 

@@ -1,6 +1,6 @@
 # Language data
 
-The app bundles one JSON pack per language in `ExUno/Resources/Packs/`. The packs are generated from openly licensed public sources and are not committed. There are two ways to get them.
+The app bundles one JSON pack per language in `ExUno/Resources/Packs/`, plus a grammar course per language (`grammar-<code>.json`, see [`GRAMMAR.md`](GRAMMAR.md)). The packs are generated from openly licensed public sources and are not committed. There are two ways to get them.
 
 ## Option A: download the prebuilt packs
 
@@ -16,7 +16,7 @@ This fetches `exuno-packs.zip` from the repository's [`packs` release](https://g
 sh Scripts/prepare_data.sh
 ```
 
-This needs Python 3.9 or later (standard library only) and access to `raw.githubusercontent.com` and `github.com`. It downloads about 15 MB into `.cache/` and writes four packs:
+This needs Python 3.9 or later (standard library only) and access to `raw.githubusercontent.com` and `github.com`. It downloads about 160 MB into `.cache/` (15 MB for the vocabulary, the rest for the grammar courses' UniMorph paradigms and Tatoeba sentences) and writes four packs and four grammar courses (70–80 kB each):
 
 | Pack | Entries | Size |
 | --- | --- | --- |
@@ -37,6 +37,8 @@ Reads `Scripts/sources.json`. Every source has a URL pinned to a commit or relea
 | `dcc-latin` | DCC Latin Core Vocabulary, CSV copy | CC BY-SA |
 | `omw-it` | Open Multilingual Wordnet 2.0, Italian (MultiWordNet) | CC BY 3.0 |
 | `omw-en` | Open Multilingual Wordnet 2.0, English (Princeton WordNet 3.0) | WordNet 3.0 license |
+| `tatoeba-it`, `-es`, `-fr`, `-la` | Tatoeba English sentence pairs, OPUS release v2026-07-08 (grammar courses) | CC BY 2.0 FR |
+| `unimorph-ita`, `-spa`, `-fra`, `-lat` | UniMorph paradigms (grammar courses) | CC BY-SA 3.0 |
 
 Options:
 
@@ -58,6 +60,10 @@ Tags Italian words with 17 learner topics (Animals, Food & Drink, Transport and 
 | Latin | Lemma and principal parts split from the headword, gender from *m./f./n.*, four levels by frequency rank (I: 1–250 … IV: 751–1000), and 13 topic groups. |
 
 Every pack carries `"license": "CC BY-SA 4.0"` and an `"attribution"` string, so the notice travels with the file.
+
+### 4. Grammar courses: `Scripts/build_grammar.py`
+
+Reads the unit files in `Scripts/grammar/<code>.json` (notes, tables and which word forms compete in each unit, written for Ex Uno), the vocabulary packs from step 3, UniMorph and Tatoeba. Each unit gets up to 40 fill-in-the-blank items from real sentences, with English translations and wrong options from the same paradigm. The method, the filters and the format are described in [`GRAMMAR.md`](GRAMMAR.md).
 
 ## Pack format (schema 2)
 

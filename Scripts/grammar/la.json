@@ -1,0 +1,100 @@
+{
+  "comment": "Latin grammar course. Notes and tables are original Ex Uno text (MIT). Noun grids come from UniMorph, verb grids from the LatinConjugator rules (build_grammar.py) with DCC principal parts. Tatoeba Latin rarely marks vowel length, so matching ignores macrons and options follow the sentence's spelling.",
+  "language": {
+    "unimorph": "lat",
+    "levels": ["I", "II", "III", "IV"],
+    "persons": ["ego", "tū", "is/ea", "nōs", "vōs", "eī/eae"],
+    "you": [1, 4],
+    "cases": ["nōm.", "gen.", "dat.", "acc.", "abl."],
+    "preverbal": ["nōn", "nē", "mē", "tē", "sē", "nōs", "vōs", "mihi", "tibi", "eum", "eam", "id", "hoc", "quid", "cūr", "ubi", "quandō", "num", "nōnne", "iam", "semper", "numquam"]
+  },
+  "units": [
+    {
+      "id": "la-sum", "level": "I", "title": "Sum, esse", "en": "To be: present and imperfect",
+      "note": "Sum is irregular, as 'to be' is in most languages. Its present (sum, es, est, sumus, estis, sunt) and imperfect (eram, erās, erat, erāmus, erātis, erant) must be learned by heart. Latin rarely uses subject pronouns: est is 'he, she or it is'. Est also means 'there is', and the dative of the owner with est is a way of saying 'have': mihi est liber.",
+      "table": {"cols": ["", "praesēns", "imperfectum"], "rows": [
+        ["ego", "sum", "eram"], ["tū", "es", "erās"], ["is/ea", "est", "erat"], ["nōs", "sumus", "erāmus"], ["vōs", "estis", "erātis"], ["eī/eae", "sunt", "erant"]]},
+      "verbForms": true,
+      "grids": [{"cols": ["ego", "tū", "is/ea", "nōs", "vōs", "eī/eae"], "you": [1, 4], "lemma": "sum",
+                 "rows": [["prs", "praesēns", ["sum", "es", "est", "sumus", "estis", "sunt"]],
+                          ["ipfv", "imperfectum", ["eram", "erās", "erat", "erāmus", "erātis", "erant"]]]}]
+    },
+    {
+      "id": "la-decl1", "level": "I", "title": "Prīma dēclīnātiō", "en": "First declension nouns",
+      "note": "Latin shows a noun's role with case endings instead of word order. The nominative is the subject, the accusative the direct object, the genitive 'of', the dative 'to/for' and the ablative 'by, with, from' (often after a preposition). First declension nouns end in -a and are mostly feminine (puella, via, terra); a few men's words like nauta and agricola are masculine. Note that -ae can be genitive or dative singular, or nominative plural.",
+      "table": {"lemmas": ["puella", "via"], "both": true},
+      "nouns": {"declensions": [1]}
+    },
+    {
+      "id": "la-decl2", "level": "I", "title": "Secunda dēclīnātiō", "en": "Second declension nouns",
+      "note": "Second declension nouns are mostly masculine in -us (dominus, servus) or -er (puer, ager), and neuter in -um (bellum, verbum). Their genitive singular ends in -ī. Neuters follow the neuter rule of every declension: nominative and accusative are the same, and their plural ends in -a (bella, verba).",
+      "table": {"lemmas": ["dominus", "bellum"], "both": true},
+      "nouns": {"declensions": [2]}
+    },
+    {
+      "id": "la-praesens", "level": "I", "title": "Praesēns", "en": "The present tense",
+      "note": "Verbs are grouped into four conjugations by the stem vowel of the infinitive: amāre (1st), habēre (2nd), dūcere (3rd, with a short e) and audīre (4th); capere is a 3rd conjugation -iō verb. The personal endings are the same for all: -ō/-m, -s, -t, -mus, -tis, -nt. The ending alone shows the subject: amat is 'he loves' or 'she loves'.",
+      "table": {"lemmas": ["amō", "habeō", "dūcō", "capiō", "audiō"]},
+      "verbs": {"rows": [["PRS", "praesēns", "PRS"]], "exclude": ["sum"], "notAlso": ["PRF", "FUT"]}
+    },
+    {
+      "id": "la-decl3", "level": "II", "title": "Tertia dēclīnātiō", "en": "Third declension nouns",
+      "note": "The third declension is the largest and includes all genders. The nominative singular varies (rēx, corpus, nōmen, urbs), so learn each noun with its genitive in -is, which gives the stem: rēx, rēg-is; corpus, corpor-is. Masculine and feminine nouns take -em in the accusative and -ēs in the plural; neuters keep the nominative form and end in -a in the plural.",
+      "table": {"lemmas": ["rēx", "corpus"], "both": true},
+      "nouns": {"declensions": [3]}
+    },
+    {
+      "id": "la-imperfectum", "level": "II", "title": "Imperfectum", "en": "The imperfect",
+      "note": "The imperfect describes ongoing or repeated action in the past: 'was doing, used to do'. It inserts -bā- between the stem and the endings: amābam, habēbam, dūcēbam, audiēbam. The first person singular ends in -m, not -ō. Sum has its own imperfect: eram.",
+      "table": {"lemmas": ["amō", "habeō", "dūcō", "audiō"]},
+      "verbs": {"rows": [["IPFV", "imperfectum", "IPFV"]]}
+    },
+    {
+      "id": "la-futurum", "level": "II", "title": "Futūrum", "en": "The future tense",
+      "note": "The future has two patterns. The 1st and 2nd conjugations use -b-: amābō, amābis, amābit… habēbō. The 3rd and 4th use vowels instead: dūcam, dūcēs, dūcet, dūcēmus, dūcētis, dūcent; audiam, audiēs… So dūcet is 'he will lead' while dūcit is 'he leads'. Sum: erō, eris, erit, erimus, eritis, erunt.",
+      "table": {"lemmas": ["amō", "habeō", "dūcō", "audiō"]},
+      "skipAnswers": "am$",
+      "verbs": {"rows": [["FUT", "futūrum", "FUT"]], "notAlso": ["PRS"]}
+    },
+    {
+      "id": "la-pronomina", "level": "II", "title": "Prōnōmina persōnālia", "en": "Personal pronouns",
+      "note": "Ego, tū, nōs and vōs decline like nouns: mē videt (he sees me), tibi dō (I give to you), nōbīscum (with us). In the nominative they are used only for emphasis or contrast. For the third person Latin uses is, ea, id or a demonstrative, and sē for 'himself, herself, themselves'.",
+      "table": {"cols": ["", "ego", "tū", "nōs", "vōs"], "rows": [
+        ["nōm.", "ego", "tū", "nōs", "vōs"], ["gen.", "meī", "tuī", "nostrum", "vestrum"], ["dat.", "mihi", "tibi", "nōbīs", "vōbīs"],
+        ["acc.", "mē", "tē", "nōs", "vōs"], ["abl.", "mē", "tē", "nōbīs", "vōbīs"]]},
+      "agreeFirst": true,
+      "grids": [{"cols": ["nōm.", "gen.", "dat.", "acc.", "abl."], "you_rows": [1, 3],
+                 "rows": [["ego", "ego", ["ego", "meī", "mihi", "mē", "mē"]], ["tu", "tū", ["tū", "tuī", "tibi", "tē", "tē"]],
+                          ["nos", "nōs", ["nōs", "nostrum", "nōbīs", "nōs", "nōbīs"]], ["vos", "vōs", ["vōs", "vestrum", "vōbīs", "vōs", "vōbīs"]]]}]
+    },
+    {
+      "id": "la-perfectum", "level": "III", "title": "Perfectum", "en": "The perfect tense",
+      "note": "The perfect reports a completed action: 'I did, I have done'. It is built on the third principal part, which you learn with each verb (amō, amāre, amāvī, amātum; dūcō, dūcere, dūxī, ductum), and adds -ī, -istī, -it, -imus, -istis, -ērunt. Watch the vowel length: venit is 'he comes', vēnit 'he came'.",
+      "table": {"lemmas": ["videō", "habeō", "dūcō", "veniō"]},
+      "verbs": {"rows": [["PRF", "perfectum", "PRF"]], "notAlso": ["PRS"]}
+    },
+    {
+      "id": "la-decl45", "level": "III", "title": "Quārta et quīnta dēclīnātiō", "en": "Fourth and fifth declension nouns",
+      "note": "The fourth declension has -us nouns with a genitive in -ūs (manus, exercitus, domus) and a few neuters in -ū (cornū). The fifth has nouns in -ēs with a genitive in -eī, nearly all feminine; the two common ones are rēs (thing, matter) and diēs (day). Rēs pūblica, 'the public matter', is the Roman state.",
+      "table": {"lemmas": ["manus", "rēs"], "both": true},
+      "nouns": {"declensions": [4, 5]}
+    },
+    {
+      "id": "la-demonstrativa", "level": "III", "title": "Hic et ille", "en": "Demonstratives: this and that",
+      "note": "Hic, haec, hoc points to something near ('this'), ille, illa, illud to something farther away ('that'). Both agree with their noun in gender, number and case, and both often stand alone as 'he, she, it': hic dīxit, 'this man said'. Their genitive singular ends in -īus and their dative singular in -ī for all genders (huius, huic; illīus, illī).",
+      "table": {"cols": ["", "m.", "f.", "n."], "rows": [
+        ["nōm. sg.", "hic / ille", "haec / illa", "hoc / illud"], ["acc. sg.", "hunc / illum", "hanc / illam", "hoc / illud"],
+        ["abl. sg.", "hōc / illō", "hāc / illā", "hōc / illō"], ["nōm. pl.", "hī / illī", "hae / illae", "haec / illa"],
+        ["acc. pl.", "hōs / illōs", "hās / illās", "haec / illa"]]},
+      "agreeFirst": true,
+      "grids": [{"cols": ["nōm.", "gen.", "dat.", "acc.", "abl."],
+                 "rows": [["hic-m-sg", "m. sg.", ["hic", "huius", "huic", "hunc", "hōc"]], ["hic-f-sg", "f. sg.", ["haec", "huius", "huic", "hanc", "hāc"]],
+                          ["hic-n-sg", "n. sg.", ["hoc", "huius", "huic", "hoc", "hōc"]], ["hic-m-pl", "m. pl.", ["hī", "hōrum", "hīs", "hōs", "hīs"]],
+                          ["hic-f-pl", "f. pl.", ["hae", "hārum", "hīs", "hās", "hīs"]], ["hic-n-pl", "n. pl.", ["haec", "hōrum", "hīs", "haec", "hīs"]]]},
+                {"cols": ["nōm.", "gen.", "dat.", "acc.", "abl."],
+                 "rows": [["ille-m-sg", "m. sg.", ["ille", "illīus", "illī", "illum", "illō"]], ["ille-f-sg", "f. sg.", ["illa", "illīus", "illī", "illam", "illā"]],
+                          ["ille-n-sg", "n. sg.", ["illud", "illīus", "illī", "illud", "illō"]], ["ille-m-pl", "m. pl.", ["illī", "illōrum", "illīs", "illōs", "illīs"]],
+                          ["ille-f-pl", "f. pl.", ["illae", "illārum", "illīs", "illās", "illīs"]], ["ille-n-pl", "n. pl.", ["illa", "illōrum", "illīs", "illa", "illīs"]]]}]
+    }
+  ]
+}

@@ -16,6 +16,8 @@ This inventory is a practical compliance record, not legal advice.
 | Italian, Spanish and French packs | `ExUno/Resources/Packs/{it,es,fr}.json` (generated) | MIT (Language-Learning-decks) + CC BY-SA 4.0 (wordfreq data) → CC BY-SA 4.0 |
 | Latin pack | `ExUno/Resources/Packs/la.json` (generated) | CC BY-SA (DCC Latin Core Vocabulary) → CC BY-SA 4.0 |
 | Topic tags (it, es, fr) | `c` field of the packs | CC BY 3.0 (MultiWordNet) + WordNet 3.0 license (Princeton) |
+| Grammar courses | `ExUno/Resources/Packs/grammar-{it,es,fr,la}.json` (generated) | CC BY 2.0 FR (Tatoeba) + CC BY-SA 3.0 (UniMorph) → CC BY-SA 4.0 |
+| Grammar unit notes, tables and word sets | `Scripts/grammar/` | MIT (original) |
 
 ## Language-Learning-decks (Italian, Spanish, French)
 
@@ -43,6 +45,19 @@ This inventory is a practical compliance record, not legal advice.
   - Headwords are split into lemma and principal parts, and gender is read from the headword.
   - Frequency ranks are grouped into four levels (I: 1–250, II: 251–500, III: 501–750, IV: 751–1000).
   - DCC's semantic groups are regrouped into 13 topics with Latin names.
+
+## Tatoeba (grammar course sentences)
+
+- Sentences and English translations by the contributors of Tatoeba, https://tatoeba.org. License: CC BY 2.0 FR (https://creativecommons.org/licenses/by/2.0/fr/); the legal code is in `LICENSES/CC-BY-2.0-FR.txt`. Terms of use: https://tatoeba.org/en/terms_of_use.
+- Downloaded from OPUS's dated release of the corpus, `OPUS-Tatoeba/v2026-07-08` (Moses format), https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba. Cite: J. Tiedemann, 2012, *Parallel Data, Tools and Interfaces in OPUS*, Proceedings of LREC 2012.
+- The OPUS text release has no per-sentence ids or authors, so contributors are credited as a group. Any sentence can be found on tatoeba.org by searching its text.
+- Changes in Ex Uno: one word or short phrase per sentence is replaced by a gap, and other forms of the same word are added as wrong options. Translations are kept as published; when a sentence had several, the shortest is used.
+
+## UniMorph (grammar course paradigms)
+
+- Inflection tables for Italian, Spanish, French and Latin, extracted from English Wiktionary by the UniMorph project, https://unimorph.github.io and https://github.com/unimorph. License: CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/). Wiktionary text is by the Wiktionary contributors.
+- Cite: A. D. McCarthy et al., *UniMorph 3.0: Universal Morphology*, Proceedings of LREC 2020; K. Batsuren et al., *UniMorph 4.0: Universal Morphology*, Proceedings of LREC 2022.
+- Use in Ex Uno: the forms that compete in a gap (for example the six present forms of a verb, or the cases of a Latin noun). Latin verb forms are not taken from UniMorph; they come from Ex Uno's own rules with DCC principal parts.
 
 ## Online services (called at runtime, nothing bundled)
 

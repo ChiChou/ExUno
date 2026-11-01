@@ -62,6 +62,8 @@ struct PackProgress: Codable, Equatable {
     var challenge = Challenge()
     var settings = PackSettings()
     var settingsModified = Date.distantPast
+    /// Grammar lesson results by unit id. Optional so progress files written before the grammar course still decode.
+    var grammar: [String: LessonScore]?
 
     /// Combine two devices' histories without losing reviews from either.
     func merged(with other: PackProgress) -> PackProgress {
@@ -84,6 +86,11 @@ struct PackProgress: Codable, Equatable {
             out.challenge = other.challenge
         }
         if other.settingsModified > out.settingsModified { out.settings = other.settings; out.settingsModified = other.settingsModified }
+        if let theirs = other.grammar {
+            var g = out.grammar ?? [:]
+            for (id, s) in theirs { g[id] = g[id].map { $0.merged(with: s) } ?? s }
+            out.grammar = g
+        }
         return out
     }
 }

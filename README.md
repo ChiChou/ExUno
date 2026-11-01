@@ -49,7 +49,7 @@ Folders are Xcode 16 synchronized groups:
 
 ## Data
 
-`Scripts/prepare_data.sh` downloads every input listed in `Scripts/sources.json` (pinned commits, SHA-256 checked). It builds the Italian topic tags from Open Multilingual Wordnet and writes `ExUno/Resources/Packs/{it,es,fr,la}.json`. A GitHub workflow runs the same script and publishes the result as the `packs` release. See [`docs/DATA.md`](docs/DATA.md) for the steps and the pack format.
+`Scripts/prepare_data.sh` downloads every input listed in `Scripts/sources.json` (pinned commits, SHA-256 checked). It builds the Italian topic tags from Open Multilingual Wordnet and writes `ExUno/Resources/Packs/{it,es,fr,la}.json` plus the grammar courses `grammar-{it,es,fr,la}.json` ([`docs/GRAMMAR.md`](docs/GRAMMAR.md)). A GitHub workflow runs the same script and publishes the result as the `packs` release. See [`docs/DATA.md`](docs/DATA.md) for the steps and the pack format.
 
 ## Licenses
 
