@@ -7,7 +7,6 @@ struct ExUnoWidgets: WidgetBundle {
     var body: some Widget {
         ClockWidget()
         CardWidget()
-        ToolsWidget()
     }
 }
 
@@ -106,7 +105,7 @@ struct CardWidget: Widget {
                 .widgetURL(DeepLink.cards)
         }
         .configurationDisplayName("Flashcard")
-        .description("Your next card. Tap the eye to flip it, the arrow for the next one.")
+        .description("A random word from your levels. Tap the eye to flip it, the arrow for another. Nothing is recorded.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
@@ -165,57 +164,6 @@ struct CardWidgetView: View {
                     .frame(width: 36, height: 32).background(Theme.accent, in: Capsule()).foregroundStyle(Theme.onAccent)
             }.buttonStyle(.plain)
         }
-    }
-}
-
-// MARK: - Tools launcher
-
-struct ToolsEntry: TimelineEntry {
-    let date: Date
-    let language: LanguageCode
-}
-
-struct ToolsProvider: TimelineProvider {
-    func placeholder(in context: Context) -> ToolsEntry { ToolsEntry(date: Date(), language: .it) }
-    func getSnapshot(in context: Context, completion: @escaping (ToolsEntry) -> Void) { completion(ToolsEntry(date: Date(), language: WidgetBridge.language)) }
-    func getTimeline(in context: Context, completion: @escaping (Timeline<ToolsEntry>) -> Void) {
-        completion(Timeline(entries: [ToolsEntry(date: Date(), language: WidgetBridge.language)], policy: .never))
-    }
-}
-
-struct ToolsWidget: Widget {
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: WidgetBridge.toolsKind, provider: ToolsProvider()) { entry in
-            ToolsWidgetView(entry: entry)
-                .containerBackground(for: .widget) { Theme.bg }
-        }
-        .configurationDisplayName("Tools")
-        .description("Jump straight to a converter: prices, time, numbers and more.")
-        .supportedFamilies([.systemSmall, .systemMedium])
-    }
-}
-
-struct ToolsWidgetView: View {
-    @Environment(\.widgetFamily) private var family
-    let entry: ToolsEntry
-    var body: some View {
-        let engine = entry.language.engine
-        let tools = Array(engine.tools.prefix(family == .systemSmall ? 4 : 8))
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: family == .systemSmall ? 2 : 4)
-        LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(tools) { t in
-                Link(destination: DeepLink.tool(t)) {
-                    VStack(spacing: 4) {
-                        Image(systemName: t.icon).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onAccent)
-                            .frame(width: 38, height: 38).background(Theme.accent, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        if family != .systemSmall {
-                            Text(engine.title(t)).font(.system(size: 10, weight: .semibold)).foregroundStyle(Theme.ink).lineLimit(1).minimumScaleFactor(0.7)
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

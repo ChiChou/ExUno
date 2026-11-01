@@ -18,7 +18,6 @@ enum WidgetBridge {
     static let appGroup = "group.me.chichou.ExUno"
     static let clockKind = "ExUnoClock"
     static let cardKind = "ExUnoCard"
-    static let toolsKind = "ExUnoTools"
 
     static var defaults: UserDefaults { UserDefaults(suiteName: appGroup) ?? .standard }
 
@@ -57,7 +56,7 @@ enum WidgetBridge {
     }
 }
 
-/// Deep links the widgets open: exuno://tool/prices, exuno://cards, exuno://today
+/// In-app links from the widgets and the app icon's quick actions: exuno://tool/prices, exuno://cards, exuno://today
 enum DeepLink {
     static func tool(_ t: ToolKind) -> URL { URL(string: "exuno://tool/\(t.rawValue)")! }
     static let cards = URL(string: "exuno://cards")!

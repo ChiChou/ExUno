@@ -3,11 +3,12 @@ import WidgetKit
 
 @main
 struct ExUnoApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var vocabulary = Vocabulary()
     @State private var grammar = GrammarCourses()
     @State private var progress = StudyProgress()
     @State private var speech = Speech()
-    @State private var router = Router()
+    @State private var router = Router.shared
 
     var body: some Scene {
         WindowGroup {
@@ -39,6 +40,7 @@ struct ExUnoApp: App {
         speech.rate = progress.app.rate
         speech.voiceIdentifier = progress.app.voices[code.rawValue] ?? ""
         WidgetBridge.language = code
+        QuickActions.update(for: code)
         WidgetBridge.cardIndex = 0
         WidgetBridge.cardRevealed = false
         let vocab = vocabulary, prog = progress
@@ -52,6 +54,8 @@ enum AppTab: Int { case today, cards, grammar, words, tools }
 /// Tab selection plus deep links from widgets and the Today screen.
 @Observable
 final class Router {
+    /// One router for the app, so quick actions arriving through the scene delegate reach the same tabs.
+    static let shared = Router()
     var tab: AppTab = .today
     var tool: ToolKind?
     var grammar: GrammarRoute?
@@ -109,27 +113,29 @@ struct RootView: View {
     }
 }
 
-/// Writes the next cards for the widget into the App Group.
+/// Writes a shuffled set of words for the Flashcard widget into the App Group. The widget roams: it never
+/// reads or writes study progress, it just shows random words from the selected levels.
 enum WidgetSnapshot {
     private static var pending: DispatchWorkItem?
+    /// Language and levels of the deck last written; grading cards doesn't reshuffle the widget.
+    private static var lastKey: String?
 
+    /// Called on any progress change; rebuilds only when the language or the selected levels changed.
     static func scheduleRefresh(vocab: Vocabulary, progress: StudyProgress) {
         pending?.cancel()
-        let work = DispatchWorkItem { refresh(vocab: vocab, progress: progress) }
+        let work = DispatchWorkItem { refresh(vocab: vocab, progress: progress, onlyIfChanged: true) }
         pending = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
     }
 
-    static func refresh(vocab: Vocabulary, progress: StudyProgress) {
+    static func refresh(vocab: Vocabulary, progress: StudyProgress, onlyIfChanged: Bool = false) {
         guard let pack = vocab.current, pack.code == progress.language else { return }
-        let today = StudyProgress.today()
         let levels = progress.settings.levels.isEmpty ? pack.defaultLevels : progress.settings.levels
-        var ids = progress.pack.cards.filter { $0.value.due <= today }.sorted { $0.value.due < $1.value.due }.map(\.key)
-        if ids.count < 30 {
-            let fresh = pack.entries.lazy.filter { levels.contains($0.l) && progress.pack.cards[$0.i] == nil && !$0.isPhrase }.prefix(60).map(\.i)
-            ids += Array(fresh).shuffled()
-        }
-        let cards = ids.prefix(30).compactMap { pack.byId[$0] }.map {
+        let key = pack.code.rawValue + "|" + levels.joined(separator: ",")
+        if onlyIfChanged && key == lastKey { return }
+        lastKey = key
+        let pool = pack.entries.filter { levels.contains($0.l) && !$0.isPhrase }
+        let cards = pool.shuffled().prefix(60).map {
             WidgetCard(id: $0.i, word: $0.w, article: $0.article, translation: $0.t, example: $0.x, level: $0.l)
         }
         WidgetBridge.setDeck(cards, for: pack.code)
