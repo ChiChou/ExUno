@@ -14,7 +14,7 @@ Learn a language the way you meet it: on receipts, clocks, train tickets and sto
 - **Grammar**: a short course per language (A1–B1; Latin I–III) with a rule, a table and fill-in-the-blank practice on real sentences, plus the verb conjugator. See [`docs/GRAMMAR.md`](docs/GRAMMAR.md).
 - **Tools**: one row per converter. Italian, Spanish and French: numbers (cardinal, ordinal, percent, degrees, floor), prices, time, dates, phone numbers, market quantities, years and centuries. Latin: numerals (words ↔ Roman), the Roman calendar, years *ab urbe conditā*. Each converter also has a listening drill.
 - **Words**: search both directions, or browse my deck, phrases, levels and topics; Wiktionary definitions when you're online.
-- **Widgets**: *Clock* (time in the language, small/medium/lock screen) and *Flashcard* (random words from your levels; flip and skip from the home screen, nothing is recorded).
+- **Widgets**: *Clock* (time in the language, small/medium/lock screen) and *Flashcard* (a random word from your levels with its meaning, a new one every half hour; tap it to roam on from that word in Cards, nothing is recorded).
 - **Quick actions**: long-press the app icon to open one of the first four converters.
 - **iCloud**: progress and settings sync through iCloud key-value storage on every device signed in to the same Apple ID.
 
@@ -45,7 +45,7 @@ Folders are Xcode 16 synchronized groups:
 | Folder | Targets |
 | --- | --- |
 | `ExUno/` | app |
-| `Shared/` (language engines, widget bridge, intents, palette) | app + widget |
+| `Shared/` (language engines, widget bridge, palette) | app + widget |
 | `ExUnoWidgets/` | widget extension |
 | `ExUnoTests/` | unit tests (number, time, date, calendar and verb rules for all four languages) |
 

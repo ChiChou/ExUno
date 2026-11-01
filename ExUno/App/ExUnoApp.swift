@@ -41,8 +41,6 @@ struct ExUnoApp: App {
         speech.voiceIdentifier = progress.app.voices[code.rawValue] ?? ""
         WidgetBridge.language = code
         QuickActions.update(for: code)
-        WidgetBridge.cardIndex = 0
-        WidgetBridge.cardRevealed = false
         let vocab = vocabulary, prog = progress
         progress.onPackChange = { WidgetSnapshot.scheduleRefresh(vocab: vocab, progress: prog) }
         if vocabulary.isReady { WidgetSnapshot.refresh(vocab: vocabulary, progress: progress) }
@@ -59,6 +57,8 @@ final class Router {
     var tab: AppTab = .today
     var tool: ToolKind?
     var grammar: GrammarRoute?
+    /// A word from the Flashcard widget for Cards to roam from.
+    var card: Int?
 
     func open(_ url: URL) {
         guard url.scheme == "exuno" else { return }
@@ -66,7 +66,7 @@ final class Router {
         case "tool":
             let t = ToolKind(rawValue: url.lastPathComponent)
             if t == .verbs { openGrammar(.verbs) } else { tab = .tools; tool = t }
-        case "cards": tab = .cards
+        case "cards": tab = .cards; card = Int(url.lastPathComponent)
         case "grammar": tab = .grammar
         default: tab = .today
         }
@@ -117,25 +117,26 @@ struct RootView: View {
 /// reads or writes study progress, it just shows random words from the selected levels.
 enum WidgetSnapshot {
     private static var pending: DispatchWorkItem?
-    /// Language and levels of the deck last written; grading cards doesn't reshuffle the widget.
-    private static var lastKey: String?
 
-    /// Called on any progress change; rebuilds only when the language or the selected levels changed.
+    /// Called on any progress change, debounced.
     static func scheduleRefresh(vocab: Vocabulary, progress: StudyProgress) {
         pending?.cancel()
-        let work = DispatchWorkItem { refresh(vocab: vocab, progress: progress, onlyIfChanged: true) }
+        let work = DispatchWorkItem { refresh(vocab: vocab, progress: progress) }
         pending = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
     }
 
-    static func refresh(vocab: Vocabulary, progress: StudyProgress, onlyIfChanged: Bool = false) {
+    /// Rebuilds only when the language or the selected levels changed: grading cards or relaunching the app
+    /// (say from a tap on the widget) keeps the word on screen.
+    static func refresh(vocab: Vocabulary, progress: StudyProgress) {
         guard let pack = vocab.current, pack.code == progress.language else { return }
         let levels = progress.settings.levels.isEmpty ? pack.defaultLevels : progress.settings.levels
-        let key = pack.code.rawValue + "|" + levels.joined(separator: ",")
-        if onlyIfChanged && key == lastKey { return }
-        lastKey = key
+        let key = "2|" + pack.code.rawValue + "|" + levels.joined(separator: ",")
+        if key == WidgetBridge.deckKey && !WidgetBridge.deck(pack.code).isEmpty { return }
+        WidgetBridge.deckKey = key
         let pool = pack.entries.filter { levels.contains($0.l) && !$0.isPhrase }
-        let cards = pool.shuffled().prefix(60).map {
+        // Half-hourly words: 240 of them last five days before the widget comes round again.
+        let cards = pool.shuffled().prefix(240).map {
             WidgetCard(id: $0.i, word: $0.w, article: $0.article, translation: $0.t, example: $0.x, level: $0.l)
         }
         WidgetBridge.setDeck(cards, for: pack.code)

@@ -1,4 +1,3 @@
-import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -76,24 +75,29 @@ struct ClockWidgetView: View {
     }
 }
 
-// MARK: - Flashcard: flip and advance right from the home screen
+// MARK: - Flashcard: a word and its meaning, a new one every half hour
 
 struct CardEntry: TimelineEntry {
     let date: Date
     let language: LanguageCode
     let card: WidgetCard?
-    let revealed: Bool
 }
 
 struct CardProvider: TimelineProvider {
     private static let sample = WidgetCard(id: 0, word: "piazza", article: "la", translation: "square, town square", example: "Ci vediamo in piazza alle sei.", level: "A1")
-    func placeholder(in context: Context) -> CardEntry { CardEntry(date: Date(), language: .it, card: Self.sample, revealed: true) }
+    func placeholder(in context: Context) -> CardEntry { CardEntry(date: Date(), language: .it, card: Self.sample) }
     func getSnapshot(in context: Context, completion: @escaping (CardEntry) -> Void) {
-        completion(CardEntry(date: Date(), language: WidgetBridge.language, card: WidgetBridge.currentCard() ?? Self.sample, revealed: true))
+        completion(CardEntry(date: Date(), language: WidgetBridge.language, card: WidgetBridge.card(at: Date()) ?? Self.sample))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<CardEntry>) -> Void) {
-        let entry = CardEntry(date: Date(), language: WidgetBridge.language, card: WidgetBridge.currentCard(), revealed: WidgetBridge.cardRevealed)
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(3600))))
+        let lang = WidgetBridge.language
+        let step = WidgetBridge.cardInterval
+        let slot = Date(timeIntervalSince1970: (Date().timeIntervalSince1970 / step).rounded(.down) * step)
+        let entries = (0..<48).map { i -> CardEntry in
+            let d = i == 0 ? Date() : slot.addingTimeInterval(Double(i) * step)
+            return CardEntry(date: d, language: lang, card: WidgetBridge.card(at: d))
+        }
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
 }
 
@@ -102,10 +106,10 @@ struct CardWidget: Widget {
         StaticConfiguration(kind: WidgetBridge.cardKind, provider: CardProvider()) { entry in
             CardWidgetView(entry: entry)
                 .containerBackground(for: .widget) { Theme.surface }
-                .widgetURL(DeepLink.cards)
+                .widgetURL(entry.card.map { DeepLink.card($0.id) } ?? DeepLink.cards)
         }
         .configurationDisplayName("Flashcard")
-        .description("A random word from your levels. Tap the eye to flip it, the arrow for another. Nothing is recorded.")
+        .description("A word from your levels with its meaning, a new one every half hour. Tap to keep roaming from it in Cards. Nothing is recorded.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
@@ -118,32 +122,36 @@ struct CardWidgetView: View {
             switch family {
             case .accessoryRectangular:
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(card.display).font(.headline).lineLimit(1).minimumScaleFactor(0.7)
+                    Text(card.display).font(.headline).lineLimit(1).minimumScaleFactor(0.7).widgetAccentable()
                     Text(card.translation).font(.caption).lineLimit(2)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             case .systemSmall:
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack { Text(card.level).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.amber); Spacer(); Monogram(code: entry.language, small: true) }
-                    Spacer(minLength: 0)
-                    Text(card.display).font(Theme.display(20)).foregroundStyle(Theme.ink).minimumScaleFactor(0.5).lineLimit(2)
-                    Text(entry.revealed ? card.translation : " ").font(.caption).foregroundStyle(Theme.green).lineLimit(2)
-                    Spacer(minLength: 0)
-                    buttons
+                VStack(alignment: .leading, spacing: 0) {
+                    header(card)
+                    Spacer(minLength: 6)
+                    Text(card.display).font(Theme.display(22)).foregroundStyle(Theme.ink).minimumScaleFactor(0.5).lineLimit(2)
+                    Text(card.translation).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.green)
+                        .lineLimit(3).minimumScaleFactor(0.8).padding(.top, 3)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             default:
-                HStack(alignment: .top, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 6) { Monogram(code: entry.language, small: true); Text(card.level).font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.amber) }
-                        Text(card.display).font(Theme.display(24)).foregroundStyle(Theme.ink).minimumScaleFactor(0.5).lineLimit(2)
-                        if entry.revealed {
-                            Text(card.translation).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.green).lineLimit(2)
-                            if !card.example.isEmpty { Text(card.example).font(.caption).foregroundStyle(Theme.ink2).lineLimit(2) }
+                VStack(alignment: .leading, spacing: 0) {
+                    header(card)
+                    Spacer(minLength: 4)
+                    Text(card.display).font(Theme.display(26)).foregroundStyle(Theme.ink).minimumScaleFactor(0.5).lineLimit(1)
+                    Text(card.translation).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.green)
+                        .lineLimit(2).minimumScaleFactor(0.8).padding(.top, 2)
+                    if !card.example.isEmpty {
+                        HStack(spacing: 8) {
+                            Capsule().fill(Theme.accent.opacity(0.6)).frame(width: 2)
+                            Text(card.example).font(.footnote).italic().foregroundStyle(Theme.ink2).lineLimit(2)
                         }
-                        Spacer(minLength: 0)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 8)
                     }
-                    Spacer(minLength: 0)
-                    VStack { buttons }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         } else {
             VStack(spacing: 6) {
@@ -153,16 +161,12 @@ struct CardWidgetView: View {
         }
     }
 
-    private var buttons: some View {
-        HStack(spacing: 8) {
-            Button(intent: RevealCardIntent()) {
-                Image(systemName: entry.revealed ? "eye.slash" : "eye").font(.system(size: 14, weight: .semibold))
-                    .frame(width: 36, height: 32).background(Theme.surface2, in: Capsule()).foregroundStyle(Theme.ink)
-            }.buttonStyle(.plain)
-            Button(intent: NextCardIntent()) {
-                Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold))
-                    .frame(width: 36, height: 32).background(Theme.accent, in: Capsule()).foregroundStyle(Theme.onAccent)
-            }.buttonStyle(.plain)
+    private func header(_ card: WidgetCard) -> some View {
+        HStack(spacing: 6) {
+            Text(card.level).font(.system(size: 10, weight: .bold, design: .rounded)).foregroundStyle(Theme.amber)
+                .padding(.horizontal, 6).padding(.vertical, 2).background(Theme.amberSoft, in: Capsule())
+            Spacer(minLength: 0)
+            Monogram(code: entry.language, small: true)
         }
     }
 }

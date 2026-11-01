@@ -4,6 +4,7 @@ struct CardsView: View {
     @Environment(Vocabulary.self) private var vocab
     @Environment(StudyProgress.self) private var progress
     @Environment(Speech.self) private var speech
+    @Environment(Router.self) private var router
     @State private var deck = DeckEngine()
     @State private var showOptions = false
     @State private var showSummary = false
@@ -39,8 +40,9 @@ struct CardsView: View {
         .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 12)
         .pageBackground()
         .toolbar(.hidden, for: .navigationBar)
-        .onAppear { if vocab.isReady && (!deck.built || deck.roaming != roaming) { rebuild() } }
-        .onChange(of: vocab.isReady) { _, ready in if ready && !deck.built { rebuild() } }
+        .onAppear { if !openWidgetCard() && vocab.isReady && (!deck.built || deck.roaming != roaming) { rebuild() } }
+        .onChange(of: vocab.isReady) { _, ready in if ready && !openWidgetCard() && !deck.built { rebuild() } }
+        .onChange(of: router.card) { _, _ in openWidgetCard() }
         .onChange(of: deck.summaryDue) { _, due in if due { deck.summaryDue = false; showSummary = true } }
         .sheet(isPresented: $showOptions, onDismiss: { if !deck.built { rebuild() } }) {
             DeckOptionsView(deck: deck).presentationDetents([.medium, .large])
@@ -52,6 +54,18 @@ struct CardsView: View {
     private func rebuild() {
         if roaming { deck.buildRoaming(vocab: vocab, settings: settings) } else { deck.build(vocab: vocab, progress: progress) }
         cardKey += 1
+    }
+
+    /// A word tapped on the Flashcard widget opens here roaming from it, since the widget roams too and a study mode would grade it.
+    @discardableResult
+    private func openWidgetCard() -> Bool {
+        guard vocab.isReady, let id = router.card else { return false }
+        router.card = nil
+        roaming = true
+        deck.buildRoaming(vocab: vocab, settings: settings, first: id)
+        cardKey += 1
+        speech.stop()
+        return true
     }
 
     /// Flow and Recall are the synced study modes; Roam is a local, untracked browse.

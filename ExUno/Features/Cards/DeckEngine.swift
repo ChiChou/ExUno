@@ -73,8 +73,14 @@ final class DeckEngine {
         queue = q; index = 0; history = []; revealed = false; built = true; roaming = false; summaryDue = false; generation += 1
     }
 
-    func buildRoaming(vocab: Vocabulary, settings: PackSettings) {
-        queue = roamBatch(vocab, settings); index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false; generation += 1
+    /// `first` puts a word at the front, such as the one tapped on the Flashcard widget.
+    func buildRoaming(vocab: Vocabulary, settings: PackSettings, first: Int? = nil) {
+        var batch = roamBatch(vocab, settings)
+        if let first, vocab.entry(first) != nil {
+            batch.removeAll { $0.id == DeckCard.word(first, again: false).id }
+            batch.insert(.word(first, again: false), at: 0)
+        }
+        queue = batch; index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false; generation += 1
     }
 
     private func roamBatch(_ vocab: Vocabulary, _ s: PackSettings) -> [DeckCard] {
