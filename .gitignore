@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Generated language packs: sh Scripts/download_packs.sh or sh Scripts/prepare_data.sh
+ExUno/Resources/Packs/*.json
+
+# Raw upstream data downloaded by Scripts/fetch_sources.py
+.cache/
+*.tar.xz
+*.json.gz
+dist/
+exuno-packs*.zip*
+
+# Python
+__pycache__/
+*.pyc

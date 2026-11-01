@@ -1,0 +1,62 @@
+{
+  "comment": "Pinned upstream inputs for the language packs. fetch_sources.py downloads each file into .cache/sources/<id>/ and refuses any file whose SHA-256 differs. Bump a URL and its sha256 together.",
+  "sources": [
+    {
+      "id": "decks-italian",
+      "name": "Language-Learning-decks: Italian",
+      "url": "https://raw.githubusercontent.com/vbvss199/Language-Learning-decks/efd235e692efd47eda026d0a1cbd703ce23d7692/italian/italian.json",
+      "file": "italian.json",
+      "sha256": "357e0e83144493e50dbf01a7cb7b038e2833e840eb271175235da733e22b813d",
+      "license": "MIT (© 2025 GENERAL NEURO); frequency data from wordfreq, CC BY-SA 4.0",
+      "homepage": "https://github.com/vbvss199/Language-Learning-decks"
+    },
+    {
+      "id": "decks-spanish",
+      "name": "Language-Learning-decks: Spanish",
+      "url": "https://raw.githubusercontent.com/vbvss199/Language-Learning-decks/efd235e692efd47eda026d0a1cbd703ce23d7692/spanish/spanish.json",
+      "file": "spanish.json",
+      "sha256": "784efaa88f041919486e95434bc771b7695535e23076f58390c7e94603693888",
+      "license": "MIT (© 2025 GENERAL NEURO); frequency data from wordfreq, CC BY-SA 4.0",
+      "homepage": "https://github.com/vbvss199/Language-Learning-decks"
+    },
+    {
+      "id": "decks-french",
+      "name": "Language-Learning-decks: French",
+      "url": "https://raw.githubusercontent.com/vbvss199/Language-Learning-decks/efd235e692efd47eda026d0a1cbd703ce23d7692/french/french.json",
+      "file": "french.json",
+      "sha256": "5172c671b096d5a7ddfff82f45355e763182cc732d58e573c14ddf521e8047da",
+      "license": "MIT (© 2025 GENERAL NEURO); frequency data from wordfreq, CC BY-SA 4.0",
+      "homepage": "https://github.com/vbvss199/Language-Learning-decks"
+    },
+    {
+      "id": "dcc-latin",
+      "name": "Dickinson College Commentaries Latin Core Vocabulary (CSV mirror)",
+      "url": "https://raw.githubusercontent.com/sjhuskey/latin-vocabulary/d52672f21b3d448f8fccd60c0aa018092a1c8d33/dcc-latin-core-list.csv",
+      "file": "dcc-latin-core-list.csv",
+      "sha256": "02c9093eb3087940243b080ab7e49b8f00f91e8db29206ec1a9ced22bd1d78b2",
+      "license": "CC BY-SA (Dickinson College Commentaries terms of use)",
+      "homepage": "https://dcc.dickinson.edu/latin-vocabulary-list",
+      "note": "A copy of DCC's published list kept on GitHub by Samuel J. Huskey. The data and its license are DCC's."
+    },
+    {
+      "id": "omw-it",
+      "name": "Open Multilingual Wordnet 2.0: Italian (MultiWordNet)",
+      "url": "https://github.com/omwn/omw-data/releases/download/v2.0/omw-it-2.0.tar.xz",
+      "file": "omw-it-2.0.tar.xz",
+      "sha256": "d329dd3984f3eb19e4ca0cdff22f75ac7edf367c1d3f515d3635ec42825b37bb",
+      "extract": "omw-it/omw-it.xml",
+      "license": "CC BY 3.0",
+      "homepage": "https://github.com/omwn/omw-data/releases/tag/v2.0"
+    },
+    {
+      "id": "omw-en",
+      "name": "Open Multilingual Wordnet 2.0: English (Princeton WordNet 3.0)",
+      "url": "https://github.com/omwn/omw-data/releases/download/v2.0/omw-en-2.0.tar.xz",
+      "file": "omw-en-2.0.tar.xz",
+      "sha256": "0e09dfb7f096bc3f10b9de68ffecf13839fa22ae46fd9b227cec890d204ca1dc",
+      "extract": "omw-en/omw-en.xml",
+      "license": "WordNet 3.0 license (Princeton University)",
+      "homepage": "https://wordnet.princeton.edu/"
+    }
+  ]
+}
