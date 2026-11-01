@@ -17,7 +17,7 @@ struct CardsView: View {
         let s = progress.strings
         VStack(spacing: 14) {
             topBar
-            ProgressView(value: min(1, Double(progress.todayLog().reviews) / Double(max(1, progress.app.goal)))).tint(Theme.blue)
+            ProgressView(value: min(1, Double(progress.todayLog().reviews) / Double(max(1, progress.app.goal)))).tint(Theme.accent)
             if !vocab.isReady {
                 Spacer()
                 if let error = vocab.error { Text(error).foregroundStyle(Theme.ink2).multilineTextAlignment(.center).padding() } else { ProgressView() }

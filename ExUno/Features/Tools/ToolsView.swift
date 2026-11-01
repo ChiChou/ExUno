@@ -43,9 +43,9 @@ struct ToolRow: View {
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: tool.icon)
-                .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.onBlue)
+                .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.onAccent)
                 .frame(width: 40, height: 40)
-                .background(Theme.blue, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                .background(Theme.accent, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
             Text(title).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.ink)
             Spacer()
             Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(Theme.ink2)
@@ -144,7 +144,7 @@ struct ConverterTool: View {
             HStack { Spacer(); ClockFace(hour: input.hour, minute: input.minute).frame(width: 150, height: 150); Spacer() }
         case .date, .calendar:
             DatePicker("", selection: $input.date, displayedComponents: .date)
-                .datePickerStyle(.graphical).tint(Theme.blue).labelsHidden()
+                .datePickerStyle(.graphical).tint(Theme.accent).labelsHidden()
                 .padding(8).background(Theme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         case .phone:
             BigField(text: $input.text, placeholder: "06 12 34 56 78", keyboard: .phonePad)

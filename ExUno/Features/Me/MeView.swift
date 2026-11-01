@@ -134,7 +134,7 @@ struct HistoryChart: View {
                 let n = log[d]?.reviews ?? 0
                 VStack(spacing: 4) {
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(d == today ? Theme.amber : Theme.blue)
+                        .fill(d == today ? Theme.amber : Theme.accent)
                         .frame(height: n > 0 ? max(4, CGFloat(n) / CGFloat(maxN) * 60) : 2)
                         .frame(maxHeight: 60, alignment: .bottom)
                     Text(dayLabel(d)).font(.system(size: 9)).foregroundStyle(Theme.ink2)
@@ -202,7 +202,7 @@ struct LicensesScreen: View {
                                 Link(destination: url) {
                                     Label(link.0, systemImage: "arrow.up.right.square").font(.footnote.weight(.medium))
                                 }
-                                .tint(Theme.blue)
+                                .tint(Theme.accent)
                             }
                         }
                     }

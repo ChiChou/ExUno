@@ -148,7 +148,7 @@ struct CardWidgetView: View {
             }
         } else {
             VStack(spacing: 6) {
-                Image(systemName: "rectangle.on.rectangle").font(.title2).foregroundStyle(Theme.blue)
+                Image(systemName: "rectangle.on.rectangle").font(.title2).foregroundStyle(Theme.accent)
                 Text("Open Ex Uno to load your cards").font(.caption).multilineTextAlignment(.center).foregroundStyle(Theme.ink2)
             }
         }
@@ -162,7 +162,7 @@ struct CardWidgetView: View {
             }.buttonStyle(.plain)
             Button(intent: NextCardIntent()) {
                 Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold))
-                    .frame(width: 36, height: 32).background(Theme.blue, in: Capsule()).foregroundStyle(Theme.onBlue)
+                    .frame(width: 36, height: 32).background(Theme.accent, in: Capsule()).foregroundStyle(Theme.onAccent)
             }.buttonStyle(.plain)
         }
     }
@@ -206,8 +206,8 @@ struct ToolsWidgetView: View {
             ForEach(tools) { t in
                 Link(destination: DeepLink.tool(t)) {
                     VStack(spacing: 4) {
-                        Image(systemName: t.icon).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onBlue)
-                            .frame(width: 38, height: 38).background(Theme.blue, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        Image(systemName: t.icon).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.onAccent)
+                            .frame(width: 38, height: 38).background(Theme.accent, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                         if family != .systemSmall {
                             Text(engine.title(t)).font(.system(size: 10, weight: .semibold)).foregroundStyle(Theme.ink).lineLimit(1).minimumScaleFactor(0.7)
                         }

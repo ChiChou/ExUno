@@ -20,7 +20,7 @@ struct Tag: View {
         case .plain: return Theme.ink2
         case .level: return Theme.amber
         case .pos: return Theme.green
-        case .gender: return Theme.blue
+        case .gender: return Theme.accent
         }
     }
     private var bg: Color {
@@ -28,7 +28,7 @@ struct Tag: View {
         case .plain: return Theme.surface2
         case .level: return Theme.amberSoft
         case .pos: return Theme.greenSoft
-        case .gender: return Theme.blueSoft
+        case .gender: return Theme.accentSoft
         }
     }
 }
@@ -98,7 +98,7 @@ struct Pill: ButtonStyle {
     }
     private var bg: Color {
         switch style {
-        case .primary: return Theme.blue
+        case .primary: return Theme.accent
         case .neutral: return Theme.surface2
         case .ghost: return .clear
         case .good: return Theme.greenSoft
@@ -108,7 +108,7 @@ struct Pill: ButtonStyle {
     }
     private var fg: Color {
         switch style {
-        case .primary: return Theme.onBlue
+        case .primary: return Theme.onAccent
         case .neutral, .ghost: return Theme.ink
         case .good: return Theme.green
         case .bad: return Theme.red
@@ -254,10 +254,10 @@ struct LevelRangeSlider: View {
             let x = { (i: Int) in inset + CGFloat(i) * step }
             ZStack(alignment: .topLeading) {
                 Capsule().fill(Theme.rule).frame(width: usable, height: 4).position(x: width / 2, y: 16)
-                Capsule().fill(Theme.blue).frame(width: max(x(upper) - x(lower), 4), height: 4).position(x: (x(lower) + x(upper)) / 2, y: 16)
+                Capsule().fill(Theme.accent).frame(width: max(x(upper) - x(lower), 4), height: 4).position(x: (x(lower) + x(upper)) / 2, y: 16)
                 ForEach(levels.indices, id: \.self) { i in
                     let inRange = i >= lower && i <= upper
-                    Circle().fill(inRange ? Theme.blue : Theme.rule).frame(width: 8, height: 8).position(x: x(i), y: 16)
+                    Circle().fill(inRange ? Theme.accent : Theme.rule).frame(width: 8, height: 8).position(x: x(i), y: 16)
                     Text(levels[i]).font(.caption.weight(.semibold).monospaced())
                         .foregroundStyle(inRange ? Theme.ink : Theme.ink2)
                         .position(x: x(i), y: 46)
@@ -293,7 +293,7 @@ struct LevelRangeSlider: View {
 
     private func thumb(at x: CGFloat, label: String, value: String?, adjust: @escaping (Int) -> Void) -> some View {
         Circle().fill(Theme.surface).frame(width: 28, height: 28)
-            .overlay(Circle().stroke(Theme.blue, lineWidth: 3))
+            .overlay(Circle().stroke(Theme.accent, lineWidth: 3))
             .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
             .position(x: x, y: 16)
             .accessibilityLabel(label)

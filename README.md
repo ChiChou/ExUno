@@ -1,5 +1,7 @@
 # Ex Uno: Latin & Romance
 
+<img src="ExUno/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" alt="Ex Uno app icon" width="128" height="128">
+
 *Out of one, many.*
 
 Learn a language the way you meet it: on receipts, clocks, train tickets and stone inscriptions. A native iOS app (SwiftUI, iOS 18+) for English speakers learning **Italian, Spanish, French or Latin**, with home-screen widgets and iCloud sync.

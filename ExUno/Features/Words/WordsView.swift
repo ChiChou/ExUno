@@ -79,7 +79,7 @@ struct WordsView: View {
             }.buttonStyle(.plain)
             if counts.phrases > 0 {
                 NavigationLink(value: WordFilter(phrasesOnly: true)) {
-                    Shelf(icon: "text.quote", title: s.phrases, count: counts.phrases, tint: Theme.blue)
+                    Shelf(icon: "text.quote", title: s.phrases, count: counts.phrases, tint: Theme.accent)
                 }.buttonStyle(.plain)
             }
         }
@@ -102,7 +102,7 @@ struct WordsView: View {
             ForEach(vocab.topics) { t in
                 NavigationLink(value: WordFilter(topic: t.id)) {
                     VStack(spacing: 6) {
-                        Image(systemName: t.icon).font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.blue)
+                        Image(systemName: t.icon).font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.accent)
                         Text(t.name).font(.caption.weight(.semibold)).foregroundStyle(Theme.ink).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.85)
                         Text((counts.topics[t.id] ?? 0).formatted()).font(.caption2.monospacedDigit()).foregroundStyle(Theme.ink2)
                     }

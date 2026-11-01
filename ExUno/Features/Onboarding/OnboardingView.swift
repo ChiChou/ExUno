@@ -12,7 +12,7 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             HStack(spacing: 6) {
                 ForEach(0..<3) { i in
-                    Capsule().fill(i <= step ? Theme.blue : Theme.surface2).frame(height: 4)
+                    Capsule().fill(i <= step ? Theme.accent : Theme.surface2).frame(height: 4)
                 }
             }
             .padding(.horizontal, 24).padding(.top, 12)
@@ -74,16 +74,16 @@ struct OnboardingView: View {
                 ForEach(code.startLevels, id: \.self) { l in
                     Button { level = l } label: {
                         HStack(spacing: 14) {
-                            Text(l).font(Theme.display(20)).foregroundStyle(level == l ? Theme.onBlue : Theme.amber)
+                            Text(l).font(Theme.display(20)).foregroundStyle(level == l ? Theme.onAccent : Theme.amber)
                                 .frame(width: 52, height: 44)
-                                .background(level == l ? Theme.blue : Theme.amberSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .background(level == l ? Theme.accent : Theme.amberSoft, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                             Text(levelBlurb(code, l)).foregroundStyle(Theme.ink).multilineTextAlignment(.leading)
                             Spacer()
-                            if level == l { Image(systemName: "checkmark").fontWeight(.bold).foregroundStyle(Theme.blue) }
+                            if level == l { Image(systemName: "checkmark").fontWeight(.bold).foregroundStyle(Theme.accent) }
                         }
                         .padding(12)
                         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(level == l ? Theme.blue : Theme.rule, lineWidth: level == l ? 2 : 1))
+                        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(level == l ? Theme.accent : Theme.rule, lineWidth: level == l ? 2 : 1))
                     }.buttonStyle(.plain)
                 }
             }
@@ -101,9 +101,9 @@ struct OnboardingView: View {
                             Text("\(g)").font(Theme.display(30))
                             Text(g == 10 ? "≈ 5 min" : g == 20 ? "≈ 10 min" : "≈ 15 min").font(.caption)
                         }
-                        .foregroundStyle(goal == g ? Theme.onBlue : Theme.ink)
+                        .foregroundStyle(goal == g ? Theme.onAccent : Theme.ink)
                         .frame(maxWidth: .infinity, minHeight: 96)
-                        .background(goal == g ? Theme.blue : Theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .background(goal == g ? Theme.accent : Theme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.rule, lineWidth: goal == g ? 0 : 1))
                     }.buttonStyle(.plain)
                 }
@@ -155,10 +155,10 @@ struct LanguageRow: View {
                 Text(compact ? code.englishName : "\(code.hello)! · \(code.englishName)").font(.subheadline).foregroundStyle(Theme.ink2)
             }
             Spacer()
-            if selected { Image(systemName: "checkmark.circle.fill").font(.title2).foregroundStyle(Theme.blue) }
+            if selected { Image(systemName: "checkmark.circle.fill").font(.title2).foregroundStyle(Theme.accent) }
         }
         .padding(compact ? 10 : 14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(selected ? Theme.blue : Theme.rule, lineWidth: selected ? 2 : 1))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(selected ? Theme.accent : Theme.rule, lineWidth: selected ? 2 : 1))
     }
 }

@@ -97,7 +97,7 @@ struct RootView: View {
                 .tabItem { Label(s.me, systemImage: "person") }
         }
         .id(progress.language)   // switching language rebuilds every tab's state
-        .tint(Theme.blue)
+        .tint(Theme.accent)
     }
 }
 
