@@ -7,7 +7,6 @@ struct ExUnoApp: App {
     @State private var grammar = GrammarCourses()
     @State private var progress = StudyProgress()
     @State private var speech = Speech()
-    @State private var rates = ExchangeRates()
     @State private var router = Router()
 
     var body: some Scene {
@@ -23,7 +22,6 @@ struct ExUnoApp: App {
             .environment(grammar)
             .environment(progress)
             .environment(speech)
-            .environment(rates)
             .environment(router)
             .onAppear { activate(progress.app.language) }
             .onChange(of: progress.app.language) { _, code in activate(code) }

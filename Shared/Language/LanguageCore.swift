@@ -47,7 +47,6 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         }
     }
     var strings: UIStrings { UIStrings.for(self) }
-    var usesEuro: Bool { self != .la }
     /// Level labels shown on the onboarding level step.
     var startLevels: [String] { self == .la ? ["I", "II", "III", "IV"] : ["A1", "A2", "B1", "B2"] }
 }

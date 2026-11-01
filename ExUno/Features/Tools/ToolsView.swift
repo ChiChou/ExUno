@@ -90,7 +90,6 @@ struct ToolPage: View {
 
 struct ConverterTool: View {
     @Environment(StudyProgress.self) private var progress
-    @Environment(ExchangeRates.self) private var rates
     let tool: ToolKind
     @State private var input = ToolInput()
 
@@ -101,7 +100,6 @@ struct ConverterTool: View {
             output(engine)
         }
         .onAppear(perform: setDefaults)
-        .task { if tool == .prices { await rates.load() } }
     }
 
     private func setDefaults() {
@@ -175,50 +173,9 @@ struct ConverterTool: View {
             case .success(let out):
                 Readout(label: out.label, text: out.headline, sub: out.sub)
                 ForEach(out.rows) { AltRow(label: $0.label, text: $0.text) }
-                if tool == .prices, let p = try? NumberParsing.parse(input.text), let c = try? NumberParsing.cents(p) {
-                    fx(Double(p.whole) + Double(c) / 100)
-                }
             case .failure(let e):
                 ErrorReadout(message: e.localizedDescription)
             }
-        }
-    }
-
-    @ViewBuilder
-    private func fx(_ eur: Double) -> some View {
-        let cur = progress.app.currency
-        if let r = rates.rates, let rate = r.rates[cur] {
-            Card {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Eyebrow(text: "≈ \(cur)")
-                        Text((eur * rate).formatted(.currency(code: cur))).font(Theme.mono(22))
-                        Hint(text: "1 € = \(rate.formatted()) \(cur) · ECB \(r.date)")
-                    }
-                    Spacer()
-                    Picker("Currency", selection: Binding(get: { cur }, set: { progress.app.currency = $0 })) {
-                        ForEach(r.rates.keys.sorted(), id: \.self) { Text($0).tag($0) }
-                    }.labelsHidden()
-                }
-            }
-        }
-    }
-}
-
-/// ECB reference rates via Frankfurter (free, no key).
-@Observable
-final class ExchangeRates {
-    struct Payload: Codable { let base: String; let date: String; let rates: [String: Double] }
-    private(set) var rates: Payload?
-    private(set) var loading = false
-
-    func load() async {
-        if rates != nil || loading { return }
-        loading = true
-        defer { loading = false }
-        guard let url = URL(string: "https://api.frankfurter.dev/v1/latest?from=EUR") else { return }
-        if let result = try? await URLSession.shared.data(from: url), let p = try? JSONDecoder().decode(Payload.self, from: result.0) {
-            rates = p
         }
     }
 }

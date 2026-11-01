@@ -29,7 +29,6 @@ Code and data are separate works. The app reads the packs as data, so share-alik
 | Tatoeba via OPUS (release v2026-07-08) | CC BY 2.0 FR | Grammar course sentences and translations | Yes. CC BY allows adaptation under other terms with attribution; credited as a group (see ATTRIBUTIONS.md). |
 | UniMorph ita, spa, fra, lat | CC BY-SA 3.0 | Paradigms for grammar exercises | Yes. BY-SA 3.0 §4(b) allows adaptations under a later version, so 4.0. |
 | Wiktionary REST API (runtime) | CC BY-SA 4.0 | Definitions shown with a link back | Yes. Nothing is bundled. |
-| Frankfurter / ECB rates (runtime) | Free reuse with the source acknowledged | Currency estimate | Yes. Credited in the app. |
 | Apple system voices, SF Symbols, system fonts | Apple SDK terms | Speech, icons, type | Yes, for apps on Apple platforms. Symbols are referenced by name; none are in the repository. |
 
 ## Deliberately not used

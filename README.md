@@ -8,11 +8,12 @@ Learn a language the way you meet it: on receipts, clocks, train tickets and sto
 
 ## What's in it
 
-- **First run** asks for a language, a starting level and a daily goal. Switch language any time from the badge on the first tab or from the last tab; every language keeps its own progress.
-- **Today**: the time and date said in the language (Latin: today's Roman date, *ante diem III Nōnās Novembrēs*), today's session, and a five-item listening challenge that's the same all day.
+- **First run** asks for a language, a starting level and a daily goal. Switch language any time from the badge on Today; every language keeps its own progress. The gear next to it opens Settings.
+- **Today**: the time and date said in the language (Latin: today's Roman date, *ante diem III Nōnās Novembrēs*), today's session, the next grammar lesson, a five-item listening challenge that's the same all day, and your streak and last two weeks.
 - **Cards**: *Flow* (answer visible, swipe, mark hard ones) or *Recall* (hide, say it, grade yourself). Every fifth card is a real-life object: a receipt, a clock, a ticket, a deli tag; in Latin a carved inscription or a calendar stone. Level range is always contiguous.
-- **Tools**: one row per converter. Italian, Spanish and French: numbers (cardinal, ordinal, percent, degrees, floor), prices with your home currency, time, dates, phone numbers, market quantities, years and centuries, verbs. Latin: numerals (words ↔ Roman), the Roman calendar, years *ab urbe conditā*, verbs. Each converter also has a listening drill.
-- **Words**: search both directions, or browse my deck, phrases, levels and topics; Wiktionary online fallback.
+- **Grammar**: a short course per language (A1–B1; Latin I–III) with a rule, a table and fill-in-the-blank practice on real sentences, plus the verb conjugator. See [`docs/GRAMMAR.md`](docs/GRAMMAR.md).
+- **Tools**: one row per converter. Italian, Spanish and French: numbers (cardinal, ordinal, percent, degrees, floor), prices, time, dates, phone numbers, market quantities, years and centuries. Latin: numerals (words ↔ Roman), the Roman calendar, years *ab urbe conditā*. Each converter also has a listening drill.
+- **Words**: search both directions, or browse my deck, phrases, levels and topics; Wiktionary definitions when you're online.
 - **Widgets**: *Clock* (time in the language, small/medium/lock screen), *Flashcard* (flip and advance from the home screen), *Tools* (one tap into a converter).
 - **iCloud**: progress and settings sync through iCloud key-value storage on every device signed in to the same Apple ID.
 

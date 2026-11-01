@@ -62,7 +62,6 @@ This inventory is a practical compliance record, not legal advice.
 ## Online services (called at runtime, nothing bundled)
 
 - **Wiktionary REST API** (`en.wiktionary.org/api/rest_v1/page/definition/…`): definitions are shown with a link back. Text is CC BY-SA 4.0 by the Wiktionary contributors. Requests send a User-Agent with the project URL, as Wikimedia's API etiquette asks.
-- **Frankfurter** (https://frankfurter.dev): European Central Bank reference rates; shown as approximations.
 - **Apple speech synthesis**: the voices installed on the device. Latin is read by an Italian voice.
 
 ## Not used

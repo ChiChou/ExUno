@@ -18,7 +18,6 @@ struct AppSettings: Codable, Equatable {
     var goal = 20
     var newPerDay = 15
     var rate = 0.95
-    var currency = "USD"
     var voices: [String: String] = [:]     // language code → voice identifier
     var modified = Date.distantPast
 }

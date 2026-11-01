@@ -37,14 +37,6 @@ struct SettingsView: View {
                                     Text("Slow").tag(0.7); Text("Relaxed").tag(0.85); Text("Natural").tag(0.95); Text("Fast").tag(1.1)
                                 }
                             }
-                            if progress.language.usesEuro {
-                                Divider()
-                                settingRow("Home currency") {
-                                    Picker("", selection: $progress.app.currency) {
-                                        ForEach(["USD", "GBP", "CHF", "JPY", "CNY", "CAD", "AUD", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "BRL", "MXN", "INR", "KRW", "SGD", "HKD", "NZD", "ZAR", "TRY"], id: \.self) { Text($0).tag($0) }
-                                    }
-                                }
-                            }
                             Divider()
                             HStack {
                                 Image(systemName: progress.cloud.isAvailable ? "icloud" : "icloud.slash").foregroundStyle(progress.cloud.isAvailable ? Theme.green : Theme.ink2)
@@ -132,10 +124,8 @@ struct LicensesScreen: View {
                     ("CC BY 2.0 FR", "https://creativecommons.org/licenses/by/2.0/fr/"),
                     ("CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/"),
                 ])
-                section("Online", "Word definitions from the Wiktionary REST API (Wiktionary contributors, CC BY-SA 4.0). Exchange rates are European Central Bank reference rates served by Frankfurter.", [
+                section("Online", "Everything works offline. When you're online, the Wiktionary button in Words fetches definitions from the Wiktionary REST API (Wiktionary contributors, CC BY-SA 4.0).", [
                     ("Wiktionary", "https://en.wiktionary.org/"),
-                    ("Frankfurter", "https://frankfurter.dev/"),
-                    ("ECB reference rates", "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"),
                 ])
                 section("Speech", "The voices installed on this device. Latin is read by an Italian voice.", [])
                 section("Rules", "Number, time, date, calendar and verb rules are written by the app and cover standard usage; regional habits vary and rare irregular verbs may be wrong. Levels are teaching estimates, not CEFR certifications.", [])
