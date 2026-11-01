@@ -136,7 +136,7 @@ struct LanguagePicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Language").font(Theme.display(24)).padding(.bottom, 4)
-            ForEach(LanguageCode.allCases) { code in
+            ForEach(LanguageCode.alphabetical) { code in
                 Button {
                     if code != progress.language { progress.switchTo(code) }
                     dismiss()

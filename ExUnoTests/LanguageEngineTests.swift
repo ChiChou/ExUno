@@ -135,3 +135,10 @@ final class DrillTests: XCTestCase {
         }
     }
 }
+
+final class LanguageOrderTests: XCTestCase {
+    func testPickersListLanguagesAlphabetically() {
+        XCTAssertEqual(LanguageCode.alphabetical, [.es, .fr, .it, .la])
+        XCTAssertEqual(LanguageCode.allCases, [.it, .es, .fr, .la], "case order seeds the daily challenge; don't reorder it")
+    }
+}

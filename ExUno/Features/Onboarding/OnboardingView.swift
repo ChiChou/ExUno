@@ -55,7 +55,7 @@ struct OnboardingView: View {
             }
             Text("Which language?").font(Theme.display(21)).padding(.top, 6)
             VStack(spacing: 10) {
-                ForEach(LanguageCode.allCases) { code in
+                ForEach(LanguageCode.alphabetical) { code in
                     Button { language = code; level = code.startLevels[0] } label: { LanguageRow(code: code, selected: language == code) }
                         .buttonStyle(.plain)
                 }

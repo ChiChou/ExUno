@@ -6,6 +6,12 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
     case it, es, fr, la
     var id: String { rawValue }
 
+    /// Languages as shown in pickers: alphabetical by native name (Español, Français, Italiano, Latīna), so none comes first by design.
+    /// Case order stays fixed because the daily challenge seeds on it.
+    static var alphabetical: [LanguageCode] {
+        allCases.sorted { $0.nativeName.compare($1.nativeName, options: [.diacriticInsensitive, .caseInsensitive]) == .orderedAscending }
+    }
+
     var englishName: String {
         switch self {
         case .it: return "Italian"
