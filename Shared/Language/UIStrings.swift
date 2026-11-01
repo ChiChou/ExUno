@@ -2,7 +2,7 @@ import Foundation
 
 /// Learning-surface labels in the target language (settings and onboarding stay in English).
 struct UIStrings {
-    var today, cards, tools, words, me: String
+    var today, cards, tools, words: String
     var morning, afternoon, evening: String
     var reviewToday: String
     var due: (Int) -> String
@@ -26,7 +26,7 @@ struct UIStrings {
     static func `for`(_ code: LanguageCode) -> UIStrings {
         switch code {
         case .it:
-            return UIStrings(today: "Oggi", cards: "Carte", tools: "Strumenti", words: "Parole", me: "Io",
+            return UIStrings(today: "Oggi", cards: "Carte", tools: "Strumenti", words: "Parole",
                              morning: "Buongiorno", afternoon: "Buon pomeriggio", evening: "Buonasera",
                              reviewToday: "Ripasso di oggi", due: { "\($0) da ripassare" }, goalReached: "Obiettivo raggiunto", readyForNew: "Pronto per nuove parole",
                              cardsToday: { "\($0) di \($1) carte oggi" }, start: "Inizia", keepGoing: "Continua",
@@ -39,7 +39,7 @@ struct UIStrings {
                              nothingHere: "Niente qui.", filter: "Filtra…", session: "Sessione", toReview: "Da rivedere",
                              streak: "giorni di fila", seen: "parole viste", solid: "in memoria")
         case .es:
-            return UIStrings(today: "Hoy", cards: "Tarjetas", tools: "Herramientas", words: "Palabras", me: "Yo",
+            return UIStrings(today: "Hoy", cards: "Tarjetas", tools: "Herramientas", words: "Palabras",
                              morning: "Buenos días", afternoon: "Buenas tardes", evening: "Buenas noches",
                              reviewToday: "Repaso de hoy", due: { "\($0) por repasar" }, goalReached: "Objetivo cumplido", readyForNew: "Listo para palabras nuevas",
                              cardsToday: { "\($0) de \($1) tarjetas hoy" }, start: "Empezar", keepGoing: "Seguir",
@@ -52,7 +52,7 @@ struct UIStrings {
                              nothingHere: "Nada aquí.", filter: "Filtrar…", session: "Sesión", toReview: "Para repasar",
                              streak: "días seguidos", seen: "palabras vistas", solid: "aprendidas")
         case .fr:
-            return UIStrings(today: "Aujourd'hui", cards: "Cartes", tools: "Outils", words: "Mots", me: "Moi",
+            return UIStrings(today: "Aujourd'hui", cards: "Cartes", tools: "Outils", words: "Mots",
                              morning: "Bonjour", afternoon: "Bon après-midi", evening: "Bonsoir",
                              reviewToday: "Révision du jour", due: { "\($0) à réviser" }, goalReached: "Objectif atteint", readyForNew: "Prêt pour de nouveaux mots",
                              cardsToday: { "\($0) sur \($1) cartes aujourd'hui" }, start: "Commencer", keepGoing: "Continuer",
@@ -65,7 +65,7 @@ struct UIStrings {
                              nothingHere: "Rien ici.", filter: "Filtrer…", session: "Séance", toReview: "À revoir",
                              streak: "jours d'affilée", seen: "mots vus", solid: "mémorisés")
         case .la:
-            return UIStrings(today: "Hodiē", cards: "Chartae", tools: "Īnstrūmenta", words: "Lexicon", me: "Ego",
+            return UIStrings(today: "Hodiē", cards: "Chartae", tools: "Īnstrūmenta", words: "Lexicon",
                              morning: "Salvē", afternoon: "Salvē", evening: "Salvē",
                              reviewToday: "Hodiē repetenda", due: { "\($0) repetenda" }, goalReached: "Fīnis attāctus", readyForNew: "Nova verba exspectant",
                              cardsToday: { "\($0) ex \($1) chartīs hodiē" }, start: "Incipe", keepGoing: "Perge",

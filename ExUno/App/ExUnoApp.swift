@@ -49,23 +49,30 @@ struct ExUnoApp: App {
     }
 }
 
-enum AppTab: Int { case today, cards, tools, words, me }
+enum AppTab: Int { case today, cards, grammar, words, tools }
 
-/// Tab selection plus deep links from widgets.
+/// Tab selection plus deep links from widgets and the Today screen.
 @Observable
 final class Router {
     var tab: AppTab = .today
     var tool: ToolKind?
+    var grammar: GrammarRoute?
 
     func open(_ url: URL) {
         guard url.scheme == "exuno" else { return }
         switch url.host {
         case "tool":
-            tab = .tools
-            tool = ToolKind(rawValue: url.lastPathComponent)
+            let t = ToolKind(rawValue: url.lastPathComponent)
+            if t == .verbs { openGrammar(.verbs) } else { tab = .tools; tool = t }
         case "cards": tab = .cards
+        case "grammar": tab = .grammar
         default: tab = .today
         }
+    }
+
+    func openGrammar(_ route: GrammarRoute) {
+        tab = .grammar
+        grammar = route
     }
 }
 
@@ -89,15 +96,15 @@ struct RootView: View {
             NavigationStack { CardsView() }
                 .tag(AppTab.cards)
                 .tabItem { Label(s.cards, systemImage: "rectangle.on.rectangle") }
-            ToolsView()
-                .tag(AppTab.tools)
-                .tabItem { Label(s.tools, systemImage: "list.number") }
+            GrammarTab()
+                .tag(AppTab.grammar)
+                .tabItem { Label(GrammarStrings.for(progress.language).grammar, systemImage: "character.book.closed") }
             NavigationStack { WordsView() }
                 .tag(AppTab.words)
                 .tabItem { Label(s.words, systemImage: "magnifyingglass") }
-            NavigationStack { MeView() }
-                .tag(AppTab.me)
-                .tabItem { Label(s.me, systemImage: "person") }
+            ToolsView()
+                .tag(AppTab.tools)
+                .tabItem { Label(s.tools, systemImage: "list.number") }
         }
         .id(progress.language)   // switching language rebuilds every tab's state
         .tint(Theme.accent)

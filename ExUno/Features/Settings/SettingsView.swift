@@ -1,102 +1,83 @@
 import AVFoundation
 import SwiftUI
 
-struct MeView: View {
+/// Study and app settings, opened from the gear on Today.
+struct SettingsView: View {
     @Environment(StudyProgress.self) private var progress
     @Environment(Speech.self) private var speech
+    @Environment(\.dismiss) private var dismiss
     @State private var confirmReset = false
-    @State private var showLanguages = false
 
     var body: some View {
         @Bindable var progress = progress
-        let s = progress.strings
-        let total = progress.pack.log.values.reduce(0) { $0 + $1.reviews }
-        let good = progress.pack.log.values.reduce(0) { $0 + $1.good }
         let voices = Speech.voices(for: progress.language)
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text(s.me).font(Theme.display(34))
-                Button { showLanguages = true } label: { LanguageRow(code: progress.language, selected: false, compact: true).overlay(alignment: .trailing) {
-                    Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(Theme.ink2).padding(.trailing, 14)
-                } }.buttonStyle(.plain)
-                HStack(spacing: 8) {
-                    StatTile(value: "\(progress.streak)", label: s.streak)
-                    StatTile(value: "\(total)", label: s.cards.lowercased())
-                    StatTile(value: total > 0 ? "\(Int((Double(good) / Double(total) * 100).rounded()))%" : "–", label: s.good.lowercased())
-                }
-                Card {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            Text("14").font(.caption.weight(.bold)).foregroundStyle(Theme.ink2)
-                            Spacer()
-                            Hint(text: "\(progress.pack.cards.count) · \(progress.pack.cards.values.filter { $0.interval >= 7 }.count) \(s.solid)")
-                        }
-                        HistoryChart(log: progress.pack.log)
-                    }
-                }
-
-                Card(padding: 4) {
-                    VStack(spacing: 0) {
-                        settingRow("Daily goal") {
-                            Picker("", selection: $progress.app.goal) { ForEach([10, 15, 20, 30, 40, 60], id: \.self) { Text("\($0)").tag($0) } }
-                        }
-                        Divider()
-                        settingRow("New words per day") {
-                            Picker("", selection: $progress.app.newPerDay) { ForEach([5, 10, 15, 20, 30], id: \.self) { Text("\($0)").tag($0) } }
-                        }
-                        Divider()
-                        settingRow(voices.isEmpty ? "Voice (none installed)" : "Voice") {
-                            Picker("", selection: Binding(get: { progress.app.voices[progress.language.rawValue] ?? "" },
-                                                          set: { progress.app.voices[progress.language.rawValue] = $0; speech.voiceIdentifier = $0; speech.speak(progress.language.hello) })) {
-                                Text("Automatic").tag("")
-                                ForEach(voices, id: \.identifier) { Text(voiceName($0)).tag($0.identifier) }
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Card(padding: 4) {
+                        VStack(spacing: 0) {
+                            settingRow("Daily goal") {
+                                Picker("", selection: $progress.app.goal) { ForEach([10, 15, 20, 30, 40, 60], id: \.self) { Text("\($0)").tag($0) } }
                             }
-                        }
-                        Divider()
-                        settingRow("Speech rate") {
-                            Picker("", selection: Binding(get: { progress.app.rate }, set: { progress.app.rate = $0; speech.rate = $0; speech.speak(progress.language.hello) })) {
-                                Text("Slow").tag(0.7); Text("Relaxed").tag(0.85); Text("Natural").tag(0.95); Text("Fast").tag(1.1)
-                            }
-                        }
-                        if progress.language.usesEuro {
                             Divider()
-                            settingRow("Home currency") {
-                                Picker("", selection: $progress.app.currency) {
-                                    ForEach(["USD", "GBP", "CHF", "JPY", "CNY", "CAD", "AUD", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "BRL", "MXN", "INR", "KRW", "SGD", "HKD", "NZD", "ZAR", "TRY"], id: \.self) { Text($0).tag($0) }
+                            settingRow("New words per day") {
+                                Picker("", selection: $progress.app.newPerDay) { ForEach([5, 10, 15, 20, 30], id: \.self) { Text("\($0)").tag($0) } }
+                            }
+                            Divider()
+                            settingRow(voices.isEmpty ? "Voice (none installed)" : "Voice") {
+                                Picker("", selection: Binding(get: { progress.app.voices[progress.language.rawValue] ?? "" },
+                                                              set: { progress.app.voices[progress.language.rawValue] = $0; speech.voiceIdentifier = $0; speech.speak(progress.language.hello) })) {
+                                    Text("Automatic").tag("")
+                                    ForEach(voices, id: \.identifier) { Text(voiceName($0)).tag($0.identifier) }
                                 }
                             }
+                            Divider()
+                            settingRow("Speech rate") {
+                                Picker("", selection: Binding(get: { progress.app.rate }, set: { progress.app.rate = $0; speech.rate = $0; speech.speak(progress.language.hello) })) {
+                                    Text("Slow").tag(0.7); Text("Relaxed").tag(0.85); Text("Natural").tag(0.95); Text("Fast").tag(1.1)
+                                }
+                            }
+                            if progress.language.usesEuro {
+                                Divider()
+                                settingRow("Home currency") {
+                                    Picker("", selection: $progress.app.currency) {
+                                        ForEach(["USD", "GBP", "CHF", "JPY", "CNY", "CAD", "AUD", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "BRL", "MXN", "INR", "KRW", "SGD", "HKD", "NZD", "ZAR", "TRY"], id: \.self) { Text($0).tag($0) }
+                                    }
+                                }
+                            }
+                            Divider()
+                            HStack {
+                                Image(systemName: progress.cloud.isAvailable ? "icloud" : "icloud.slash").foregroundStyle(progress.cloud.isAvailable ? Theme.green : Theme.ink2)
+                                Text(progress.cloud.isAvailable ? "Synced with iCloud" : "Sign in to iCloud to sync").font(.subheadline)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12).padding(.vertical, 12)
                         }
-                        Divider()
-                        HStack {
-                            Image(systemName: progress.cloud.isAvailable ? "icloud" : "icloud.slash").foregroundStyle(progress.cloud.isAvailable ? Theme.green : Theme.ink2)
-                            Text(progress.cloud.isAvailable ? "Synced with iCloud" : "Sign in to iCloud to sync").font(.subheadline)
-                            Spacer()
-                        }
-                        .padding(.horizontal, 12).padding(.vertical, 12)
                     }
-                }
 
-                VStack(spacing: 0) {
-                    NavigationLink { LicensesScreen() } label: { linkRow("Data & licenses") }.buttonStyle(.plain)
-                    Divider().padding(.leading, 14)
-                    Button {
-                        if confirmReset { progress.resetCurrentLanguage(); confirmReset = false }
-                        else { confirmReset = true; DispatchQueue.main.asyncAfter(deadline: .now() + 4) { confirmReset = false } }
-                    } label: {
-                        HStack {
-                            Text(confirmReset ? "Tap again to reset \(progress.language.englishName)" : "Reset \(progress.language.englishName) progress").foregroundStyle(Theme.red)
-                            Spacer()
-                        }.padding(14).contentShape(Rectangle())
-                    }.buttonStyle(.plain)
+                    VStack(spacing: 0) {
+                        NavigationLink { LicensesScreen() } label: { linkRow("Data & licenses") }.buttonStyle(.plain)
+                        Divider().padding(.leading, 14)
+                        Button {
+                            if confirmReset { progress.resetCurrentLanguage(); confirmReset = false }
+                            else { confirmReset = true; DispatchQueue.main.asyncAfter(deadline: .now() + 4) { confirmReset = false } }
+                        } label: {
+                            HStack {
+                                Text(confirmReset ? "Tap again to reset \(progress.language.englishName)" : "Reset \(progress.language.englishName) progress").foregroundStyle(Theme.red)
+                                Spacer()
+                            }.padding(14).contentShape(Rectangle())
+                        }.buttonStyle(.plain)
+                    }
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.rule, lineWidth: 1))
                 }
-                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.rule, lineWidth: 1))
+                .padding(.horizontal, 16).padding(.vertical, 12)
             }
-            .padding(.horizontal, 16).padding(.vertical, 12)
+            .pageBackground()
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.fontWeight(.semibold) } }
         }
-        .pageBackground()
-        .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showLanguages) { LanguagePicker().presentationDetents([.height(460), .large]) }
     }
 
     private func linkRow(_ title: String) -> some View {
@@ -120,33 +101,6 @@ struct MeView: View {
             control().labelsHidden().tint(Theme.ink)
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
-    }
-}
-
-struct HistoryChart: View {
-    let log: [Int: DayLog]
-    var body: some View {
-        let today = StudyProgress.today()
-        let days = (0..<14).map { today - 13 + $0 }
-        let maxN = max(1, days.map { log[$0]?.reviews ?? 0 }.max() ?? 1)
-        HStack(alignment: .bottom, spacing: 4) {
-            ForEach(days, id: \.self) { d in
-                let n = log[d]?.reviews ?? 0
-                VStack(spacing: 4) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(d == today ? Theme.amber : Theme.accent)
-                        .frame(height: n > 0 ? max(4, CGFloat(n) / CGFloat(maxN) * 60) : 2)
-                        .frame(maxHeight: 60, alignment: .bottom)
-                    Text(dayLabel(d)).font(.system(size: 9)).foregroundStyle(Theme.ink2)
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-        .frame(height: 80)
-    }
-    private func dayLabel(_ day: Int) -> String {
-        let date = Date(timeIntervalSince1970: Double(day) * 86_400 - Double(TimeZone.current.secondsFromGMT()) + 43_200)
-        return "\(Calendar.current.component(.day, from: date))"
     }
 }
 

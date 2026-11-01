@@ -117,8 +117,8 @@ struct CardsView: View {
     private func controls(_ card: DeckCard, _ s: UIStrings) -> some View {
         HStack(spacing: 8) {
             Button { deck.back(); cardKey += 1 } label: {
-                Image(systemName: "chevron.left").font(.system(size: 16, weight: .bold))
-                    .frame(width: 44, height: 50).background(Theme.surface2, in: Circle()).foregroundStyle(Theme.ink)
+                Image(systemName: "chevron.left").font(.system(size: 15, weight: .semibold))
+                    .frame(width: 32, height: 44).foregroundStyle(Theme.ink2).contentShape(Rectangle())
             }.buttonStyle(.plain).disabled(!deck.canGoBack).opacity(deck.canGoBack ? 1 : 0.4).accessibilityLabel("Previous card")
             switch card {
             case .realia where !deck.revealed:
@@ -132,27 +132,41 @@ struct CardsView: View {
             case .word where !deck.revealed:
                 Button(s.showAnswer) { deck.revealed = true }.buttonStyle(Pill(style: .primary))
             case .word(let id, _):
-                GradeButton(title: s.again, sub: s.todayShort, style: .bad) { leave(.again) }
-                GradeButton(title: s.good, sub: progress.nextInterval(id, .good, strings: s), style: .good) { leave(.good) }
-                GradeButton(title: s.easy, sub: progress.nextInterval(id, .easy, strings: s), style: .primary) { leave(.easy) }
+                GradeButton(title: s.again, sub: s.todayShort, color: Theme.red) { leave(.again) }
+                GradeButton(title: s.good, sub: progress.nextInterval(id, .good, strings: s), color: Theme.green) { leave(.good) }
+                GradeButton(title: s.easy, sub: progress.nextInterval(id, .easy, strings: s), color: Theme.accent) { leave(.easy) }
             }
         }
     }
 }
 
+/// A quiet, single-line grade choice: colored label on the card surface, interval underneath.
 struct GradeButton: View {
     let title: String
     let sub: String
-    let style: PillStyle
+    let color: Color
     let action: () -> Void
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 1) {
-                Text(title)
-                Text(sub).font(.system(size: 11, weight: .medium)).opacity(0.75)
+            VStack(spacing: 0) {
+                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(color)
+                Text(sub).font(.system(size: 11, weight: .medium)).foregroundStyle(Theme.ink2)
             }
+            .lineLimit(1).minimumScaleFactor(0.75)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .padding(.horizontal, 6)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Theme.rule, lineWidth: 1))
+            .contentShape(Rectangle())
         }
-        .buttonStyle(Pill(style: style))
+        .buttonStyle(PressFade())
+    }
+}
+
+/// Dims a plain button while it is pressed.
+struct PressFade: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.opacity(configuration.isPressed ? 0.6 : 1).animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

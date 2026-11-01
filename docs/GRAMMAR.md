@@ -107,8 +107,7 @@ The output is deterministic: two runs give byte-identical files.
 
 ## App
 
-- **Tools tab:** a *Corso di grammatica / Curso de gramática / Cours de grammaire / Cursus grammaticus* row, showing how many lessons are passed.
-- **Course screen:** units grouped by level.
+- **Grammar tab:** its own tab, with units grouped by level and the verb conjugator (moved from Tools) as a reference row at the top. Today shows the next unit not yet passed.
 - **Unit screen:** the note and table, then a practice round of 10 items as multiple choice. After answering, it shows the completed sentence, the label (*presente · io*) and a speak button.
 - **Rotation:** each round moves to the next 10 items, so four rounds cover a unit.
 - **Results:** best scores are stored per unit in the language's progress file (`grammar`, optional, so old files still decode) and merged across devices by taking the maximum. A unit counts as passed at 8/10.

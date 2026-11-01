@@ -7,15 +7,15 @@ struct ToolsView: View {
 
     var body: some View {
         let engine = progress.engine
+        let tools = engine.tools.filter { $0 != .verbs }   // the conjugator lives in the Grammar tab
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Text(progress.strings.tools).font(Theme.display(34))
-                    GrammarCourseRow()
                     VStack(spacing: 0) {
-                        ForEach(engine.tools) { tool in
+                        ForEach(tools) { tool in
                             NavigationLink(value: tool) { ToolRow(tool: tool, title: engine.title(tool)) }.buttonStyle(.plain)
-                            if tool != engine.tools.last { Divider().padding(.leading, 66) }
+                            if tool != tools.last { Divider().padding(.leading, 66) }
                         }
                     }
                     .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))

@@ -2,7 +2,7 @@
 
 Ex Uno's source code is MIT-licensed (see `LICENSE`). The vocabulary packs are not committed. They are built from the upstream sources below, either locally by `Scripts/prepare_data.sh` or by the GitHub workflow that publishes them as a release asset (see `docs/DATA.md`). The packs are distributed under **CC BY-SA 4.0**.
 
-Keep this file and the in-app **Data & licenses** screen (Me → Data & licenses) with any copy. License texts are in `LICENSES/`, and the compatibility review is in `docs/LICENSING.md`.
+Keep this file and the in-app **Data & licenses** screen (Today → Settings → Data & licenses) with any copy. License texts are in `LICENSES/`, and the compatibility review is in `docs/LICENSING.md`.
 
 This inventory is a practical compliance record, not legal advice.
 

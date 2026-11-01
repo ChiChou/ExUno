@@ -5,8 +5,10 @@ struct TodayView: View {
     @Environment(StudyProgress.self) private var progress
     @Environment(Vocabulary.self) private var vocab
     @Environment(Router.self) private var router
+    @Environment(GrammarCourses.self) private var courses
     @State private var now = Date()
     @State private var showLanguages = false
+    @State private var showSettings = false
     private let timer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -26,16 +28,22 @@ struct TodayView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Language: \(progress.language.englishName)")
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape").font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Theme.ink)
+                            .frame(width: 32, height: 32)
+                            .background(Theme.surface2, in: Circle())
+                            .overlay(Circle().stroke(Theme.rule, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                 }
                 LiveClock(now: now)
                 sessionCard(s)
-                HStack(spacing: 8) {
-                    StatTile(value: "\(progress.streak)", label: s.streak)
-                    StatTile(value: "\(progress.pack.cards.count)", label: s.seen)
-                    StatTile(value: "\(progress.pack.cards.values.filter { $0.interval >= 7 }.count)", label: s.solid)
-                }
+                grammarCard()
                 Text(s.dailyChallenge).font(Theme.display(21))
                 DailyChallengeView()
+                progressSection(s)
             }
             .padding(.horizontal, 16).padding(.vertical, 12)
         }
@@ -43,6 +51,61 @@ struct TodayView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onReceive(timer) { now = $0 }
         .sheet(isPresented: $showLanguages) { LanguagePicker().presentationDetents([.height(460), .large]) }
+        .sheet(isPresented: $showSettings) { SettingsView() }
+    }
+
+    /// The next grammar unit not yet passed, in course order.
+    @ViewBuilder
+    private func grammarCard() -> some View {
+        if let course = courses.current, !course.units.isEmpty {
+            let g = GrammarStrings.for(progress.language)
+            let passed = course.units.filter { progress.lessonScore($0.id).passed }.count
+            let next = course.units.first { !progress.lessonScore($0.id).passed }
+            Card {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Eyebrow(text: g.grammar)
+                        Spacer()
+                        Hint(text: g.lessons(passed, course.units.count))
+                    }
+                    if let next {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(next.title).font(Theme.display(20)).foregroundStyle(Theme.ink)
+                            Tag(text: next.level, style: .level)
+                        }
+                        Text(next.en).font(.footnote).foregroundStyle(Theme.ink2)
+                        Button(progress.lessonScore(next.id).runs > 0 ? progress.strings.keepGoing : g.practice) { router.openGrammar(.unit(next.id)) }
+                            .buttonStyle(Pill(style: .neutral))
+                    } else {
+                        Text(g.passed).font(Theme.display(20)).foregroundStyle(Theme.ink)
+                        Button(g.course) { router.tab = .grammar }.buttonStyle(Pill(style: .neutral))
+                    }
+                }
+            }
+        }
+    }
+
+    /// Streak, deck size and the last two weeks, in one place.
+    private func progressSection(_ s: UIStrings) -> some View {
+        let total = progress.pack.log.values.reduce(0) { $0 + $1.reviews }
+        let good = progress.pack.log.values.reduce(0) { $0 + $1.good }
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                StatTile(value: "\(progress.streak)", label: s.streak)
+                StatTile(value: "\(progress.pack.cards.count)", label: s.seen)
+                StatTile(value: "\(progress.pack.cards.values.filter { $0.interval >= 7 }.count)", label: s.solid)
+            }
+            Card {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("14").font(.caption.weight(.bold)).foregroundStyle(Theme.ink2)
+                        Spacer()
+                        Hint(text: total > 0 ? "\(total) \(s.cards.lowercased()) · \(Int((Double(good) / Double(total) * 100).rounded()))% \(s.good.lowercased())" : "–")
+                    }
+                    HistoryChart(log: progress.pack.log)
+                }
+            }
+        }
     }
 
     private func sessionCard(_ s: UIStrings) -> some View {
@@ -217,5 +280,32 @@ struct AnswerField: View {
             .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.rule, lineWidth: 1))
             .onSubmit(onSubmit)
+    }
+}
+
+struct HistoryChart: View {
+    let log: [Int: DayLog]
+    var body: some View {
+        let today = StudyProgress.today()
+        let days = (0..<14).map { today - 13 + $0 }
+        let maxN = max(1, days.map { log[$0]?.reviews ?? 0 }.max() ?? 1)
+        HStack(alignment: .bottom, spacing: 4) {
+            ForEach(days, id: \.self) { d in
+                let n = log[d]?.reviews ?? 0
+                VStack(spacing: 4) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(d == today ? Theme.amber : Theme.accent)
+                        .frame(height: n > 0 ? max(4, CGFloat(n) / CGFloat(maxN) * 60) : 2)
+                        .frame(maxHeight: 60, alignment: .bottom)
+                    Text(dayLabel(d)).font(.system(size: 9)).foregroundStyle(Theme.ink2)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .frame(height: 80)
+    }
+    private func dayLabel(_ day: Int) -> String {
+        let date = Date(timeIntervalSince1970: Double(day) * 86_400 - Double(TimeZone.current.secondsFromGMT()) + 43_200)
+        return "\(Calendar.current.component(.day, from: date))"
     }
 }

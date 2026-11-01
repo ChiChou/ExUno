@@ -1,34 +1,36 @@
 import SwiftUI
 
-/// Entry row at the top of the Tools tab.
-struct GrammarCourseRow: View {
-    @Environment(StudyProgress.self) private var progress
+/// Where the Grammar tab can navigate: a unit, or the verb conjugator (moved here from Tools).
+enum GrammarRoute: Hashable {
+    case unit(String)
+    case verbs
+}
+
+/// The Grammar tab: the course by level, with the conjugator as a reference at the top.
+struct GrammarTab: View {
     @Environment(GrammarCourses.self) private var courses
+    @Environment(Router.self) private var router
+    @State private var path: [GrammarRoute] = []
 
     var body: some View {
-        let g = GrammarStrings.for(progress.language)
-        let units = courses.units
-        NavigationLink { GrammarCourseView() } label: {
-            HStack(spacing: 14) {
-                Image(systemName: "character.book.closed.fill")
-                    .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.onAccent)
-                    .frame(width: 40, height: 40)
-                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(g.course).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.ink)
-                    if !units.isEmpty {
-                        Text(g.lessons(units.filter { progress.lessonScore($0.id).passed }.count, units.count)).font(.footnote).foregroundStyle(Theme.ink2)
+        NavigationStack(path: $path) {
+            GrammarCourseView()
+                .navigationDestination(for: GrammarRoute.self) { route in
+                    switch route {
+                    case .verbs: ToolPage(tool: .verbs)
+                    case .unit(let id):
+                        if let unit = courses.units.first(where: { $0.id == id }) { GrammarUnitView(unit: unit) }
                     }
                 }
-                Spacer()
-                Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(Theme.ink2)
-            }
-            .padding(.horizontal, 14).padding(.vertical, 12)
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.rule, lineWidth: 1))
+        .onAppear { consumeRoute() }
+        .onChange(of: router.grammar) { _, _ in consumeRoute() }
+    }
+
+    private func consumeRoute() {
+        guard let r = router.grammar else { return }
+        router.grammar = nil
+        path = [r]
     }
 }
 
@@ -39,8 +41,19 @@ struct GrammarCourseView: View {
 
     var body: some View {
         let g = GrammarStrings.for(progress.language)
+        let engine = progress.engine
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(g.grammar).font(Theme.display(34))
+                    if let course = courses.current {
+                        Hint(text: g.lessons(course.units.filter { progress.lessonScore($0.id).passed }.count, course.units.count))
+                    }
+                }
+                NavigationLink(value: GrammarRoute.verbs) { ToolRow(tool: .verbs, title: engine.title(.verbs)) }
+                    .buttonStyle(.plain)
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.rule, lineWidth: 1))
                 if let course = courses.current {
                     ForEach(course.levels, id: \.self) { level in
                         let units = course.units.filter { $0.level == level }
@@ -48,7 +61,7 @@ struct GrammarCourseView: View {
                             Eyebrow(text: level)
                             VStack(spacing: 0) {
                                 ForEach(units) { unit in
-                                    NavigationLink { GrammarUnitView(unit: unit) } label: { UnitRow(unit: unit, score: progress.lessonScore(unit.id)) }
+                                    NavigationLink(value: GrammarRoute.unit(unit.id)) { UnitRow(unit: unit, score: progress.lessonScore(unit.id)) }
                                         .buttonStyle(.plain)
                                     if unit != units.last { Divider().padding(.leading, 14) }
                                 }
@@ -67,9 +80,7 @@ struct GrammarCourseView: View {
             .padding(.horizontal, 16).padding(.vertical, 12)
         }
         .pageBackground()
-        .navigationTitle(g.grammar)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.visible, for: .navigationBar)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 
@@ -128,6 +139,7 @@ struct GrammarUnitView: View {
         .pageBackground()
         .navigationTitle(GrammarStrings.for(progress.language).grammar)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
         .toolbar {
             if round != nil {
                 ToolbarItem(placement: .topBarTrailing) {
