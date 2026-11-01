@@ -70,7 +70,6 @@ struct GrammarCourseView: View {
                             .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.rule, lineWidth: 1))
                         }
                     }
-                    Hint(text: course.attribution)
                 } else if courses.missing {
                     ErrorReadout(message: "The \(progress.language.englishName) grammar course isn't installed. Build it with sh Scripts/prepare_data.sh, or download it with sh Scripts/download_packs.sh.")
                 } else {
