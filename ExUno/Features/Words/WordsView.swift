@@ -323,6 +323,11 @@ struct WiktionaryView: View {
         switch progress.language { case .it: return "Italian"; case .es: return "Spanish"; case .fr: return "French"; case .la: return "Latin" }
     }
 
+    /// Wiktionary titles Latin pages without macrons or diaeresis (nōn → non); the headword on the page keeps them.
+    private var pageTitle: String {
+        progress.language == .la ? term.folding(options: .diacriticInsensitive, locale: nil) : term
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
@@ -342,7 +347,7 @@ struct WiktionaryView: View {
                     .padding(14).frame(maxWidth: .infinity, alignment: .leading)
                     .background(Theme.surface2.opacity(0.6), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                if let url = URL(string: "https://en.wiktionary.org/wiki/\(term.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? term)#\(anchor)") {
+                if let url = URL(string: "https://en.wiktionary.org/wiki/\(pageTitle.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? pageTitle)#\(anchor)") {
                     Link("en.wiktionary.org", destination: url).font(.subheadline)
                     Hint(text: "Wiktionary contributors, CC BY-SA 4.0.")
                 }
@@ -354,7 +359,7 @@ struct WiktionaryView: View {
     }
 
     private func lookup() async {
-        let t = term.lowercased().addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? term
+        let t = pageTitle.lowercased().addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? pageTitle
         guard let url = URL(string: "https://en.wiktionary.org/api/rest_v1/page/definition/\(t)?redirect=true") else { status = "—"; return }
         var req = URLRequest(url: url)
         req.setValue("application/json", forHTTPHeaderField: "Accept")
