@@ -163,5 +163,8 @@ final class RoamingDeckTests: XCTestCase {
         XCTAssertNotNil(deck.current, "roaming refills and never runs out")
         XCTAssertFalse(deck.summaryDue)
         XCTAssertEqual(progress.pack, before, "roaming must not grade, schedule or log anything")
+        let g = deck.generation
+        deck.build(vocab: vocab, progress: progress)
+        XCTAssertNotEqual(deck.generation, g, "a rebuild lets CardsView drop advances queued for the old deck")
     }
 }

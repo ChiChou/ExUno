@@ -21,6 +21,8 @@ final class DeckEngine {
     private(set) var built = false
     /// Roaming: random words from the deck filters, answers shown, nothing graded or logged.
     private(set) var roaming = false
+    /// Bumped on every build, so a delayed advance from the previous deck (mid swipe animation) can be dropped.
+    private(set) var generation = 0
     var summaryDue = false
 
     func invalidate() { built = false }
@@ -68,11 +70,11 @@ final class DeckEngine {
             for (i, c) in q.enumerated() { out.append(c); if (i + 1) % 5 == 0 { out.append(.realia(engine.realia())) } }
             q = out
         }
-        queue = q; index = 0; history = []; revealed = false; built = true; roaming = false; summaryDue = false
+        queue = q; index = 0; history = []; revealed = false; built = true; roaming = false; summaryDue = false; generation += 1
     }
 
     func buildRoaming(vocab: Vocabulary, settings: PackSettings) {
-        queue = roamBatch(vocab, settings); index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false
+        queue = roamBatch(vocab, settings); index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false; generation += 1
     }
 
     private func roamBatch(_ vocab: Vocabulary, _ s: PackSettings) -> [DeckCard] {

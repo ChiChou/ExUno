@@ -127,8 +127,10 @@ struct CardsView: View {
     private func leave(_ g: Grade) {
         leaving = g == .again ? -1 : 1
         dragOffset = 0
+        let generation = deck.generation
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-            deck.advance(g, vocab: vocab, progress: progress)
+            // The deck may have been rebuilt meanwhile (e.g. switching from Roam to Recall); a roaming tap must never grade a study card.
+            if deck.generation == generation { deck.advance(g, vocab: vocab, progress: progress) }
             leaving = 0
             cardKey += 1
             speech.stop()
