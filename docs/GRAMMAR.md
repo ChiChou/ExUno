@@ -127,7 +127,7 @@ The course is loaded from `ExUno/Resources/Packs/grammar-<code>.json`. If it is 
   - Italian, Spanish and French verb items from UniMorph must agree at least 95% with the app's own conjugators.
 - **Results:** all 35 tests in the project pass on the iOS Simulator (iPhone 17), with the generated courses bundled.
 - **Item quality:** spot-checked by reading samples of every unit; the filters above are the result.
-- **Not done:** the new screens have not been looked at in the simulator, because Claude was not given access to drive it. The app builds and the Tools tab loads.
+- **Checked by hand in the simulator (iPhone 18 Pro):** the Tools entry, the course list, the unit screen with its note and table, and answering items (colours, labels). The end-of-round screen was not reached.
 
 ## Licensing
 

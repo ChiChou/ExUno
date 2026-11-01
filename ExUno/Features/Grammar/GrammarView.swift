@@ -190,9 +190,9 @@ struct GrammarPractice: View {
                     Text(item.e).font(.subheadline).foregroundStyle(Theme.ink2).fixedSize(horizontal: false, vertical: true)
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
                         ForEach(item.o, id: \.self) { option in
+                            // Repeat taps are ignored by GrammarRound.choose; disabling hit-testing mid-tap kept the pill from restyling.
                             Button(option) { answer(option) }
                                 .buttonStyle(Pill(style: style(for: option, item: item)))
-                                .allowsHitTesting(!round.answered)
                         }
                     }
                     if round.answered {
@@ -223,8 +223,8 @@ struct GrammarPractice: View {
     }
 
     private func sentence(_ item: GrammarItem) -> Text {
-        let gap = round.answered ? Text(item.a).foregroundStyle(round.wasCorrect ? Theme.green : Theme.red) : Text(" \u{2009}___\u{2009} ").foregroundStyle(Theme.accent)
-        return Text(item.before).foregroundStyle(Theme.ink) + gap.underline() + Text(item.after).foregroundStyle(Theme.ink)
+        let gap = round.answered ? Text(item.a).foregroundStyle(round.wasCorrect ? Theme.green : Theme.red).underline() : Text("____").foregroundStyle(Theme.accent)
+        return Text(item.before).foregroundStyle(Theme.ink) + gap + Text(item.after).foregroundStyle(Theme.ink)
     }
 
     private func style(for option: String, item: GrammarItem) -> PillStyle {
