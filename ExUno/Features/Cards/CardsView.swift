@@ -11,7 +11,8 @@ struct CardsView: View {
     @State private var leaving: CGFloat = 0
     @State private var cardKey = 0
     /// Per device and not synced: roaming is a way to look around, not part of study progress.
-    @AppStorage("cards.roaming") private var roaming = false
+    /// It is the default; the last mode picked is kept here and in the synced study mode.
+    @AppStorage("cards.roaming") private var roaming = true
 
     private var settings: PackSettings { progress.settings }
 
@@ -66,9 +67,9 @@ struct CardsView: View {
                 }
                 if roaming != wasRoaming { rebuild() } else { deck.revealed = false }
             })) {
+                Text("Roam").tag(ModeChoice.roam)
                 Text("Flow").tag(ModeChoice.study(.flow))
                 Text("Recall").tag(ModeChoice.study(.recall))
-                Text("Roam").tag(ModeChoice.roam)
             }
             .pickerStyle(.segmented)
             .frame(width: 230)
