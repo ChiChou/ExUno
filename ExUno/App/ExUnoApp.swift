@@ -123,6 +123,8 @@ private struct RootTabs: View {
         .tint(Theme.accent)
         .onAppear(perform: prewarm)
         .onChange(of: vocab.current?.code) { _, _ in prewarm() }
+        // The level range can change from Settings, Words or Grammar, not only from the deck options.
+        .onChange(of: progress.settings.levels) { _, _ in deck.invalidate(); prewarm() }
     }
 
     private func prewarm() {

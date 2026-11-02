@@ -14,6 +14,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
+                    Card { LevelRangeControl() }
                     Card(padding: 4) {
                         VStack(spacing: 0) {
                             settingRow("Daily goal") {

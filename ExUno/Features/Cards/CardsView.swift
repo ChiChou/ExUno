@@ -378,18 +378,9 @@ struct DeckOptionsView: View {
     var body: some View {
         let s = progress.settings
         let str = progress.strings
-        let levels = vocab.levels
-        let active = s.levels.isEmpty ? (vocab.current?.defaultLevels ?? []) : s.levels
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Eyebrow(text: str.levels)
-                    let idx = active.compactMap { levels.firstIndex(of: $0) }
-                    LevelRangeSlider(levels: levels, lower: idx.min() ?? 0, upper: idx.max() ?? 0) { lo, hi in
-                        let next = Array(levels[lo...hi])
-                        if next != progress.settings.levels { progress.settings.levels = next; deck.invalidate() }
-                    }
-                }
+                LevelRangeControl()
                 if progress.language != .la {
                     Picker("", selection: Binding(get: { s.kinds }, set: { progress.settings.kinds = $0; deck.invalidate() })) {
                         Text(str.all).tag("both"); Text(str.words).tag("words"); Text(str.phrases).tag("phrases")

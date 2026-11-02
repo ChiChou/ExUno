@@ -77,7 +77,6 @@ struct GrammarCourseView: View {
                             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Theme.rule, lineWidth: 1))
                         }
                     }
-                    Text(course.attribution).font(.caption2).foregroundStyle(Theme.ink2.opacity(0.8)).padding(.horizontal, 4)
                 } else if courses.missing {
                     ErrorReadout(message: "The \(progress.language.englishName) grammar course isn't installed. Build it with sh Scripts/prepare_data.sh, or download it with sh Scripts/download_packs.sh.")
                 } else {
