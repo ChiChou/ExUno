@@ -114,6 +114,10 @@ struct CardsView: View {
                         WordCardView(entry: e, showAnswer: true, reveal: {})
                             .padding(.horizontal, 16)
                             .containerRelativeFrame([.horizontal, .vertical])
+                            // Tilts away while sliding, like the thrown cards of the study modes; pivoting on the bottom keeps neighbours apart.
+                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                                content.rotationEffect(.degrees(phase.value * 14), anchor: .bottom)
+                            }
                     }
                 }
             }
