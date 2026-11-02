@@ -5,7 +5,7 @@ struct CardsView: View {
     @Environment(StudyProgress.self) private var progress
     @Environment(Speech.self) private var speech
     @Environment(Router.self) private var router
-    @State private var deck = DeckEngine()
+    var deck: DeckEngine
     @State private var showOptions = false
     @State private var showSummary = false
     @State private var dragOffset: CGFloat = 0
@@ -29,7 +29,7 @@ struct CardsView: View {
                 if let error = vocab.error { Text(error).foregroundStyle(Theme.ink2).multilineTextAlignment(.center).padding() } else { ProgressView() }
                 Spacer()
             } else if let card = deck.current {
-                stage(card)
+                if deck.roaming { roamPager } else { stage(card) }
                 controls(card, s)
             } else {
                 Spacer()
@@ -105,6 +105,39 @@ struct CardsView: View {
         }
     }
 
+    /// Roaming pages through the prewarmed shuffle: swipe left for the next word, right for the previous one.
+    private var roamPager: some View {
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: 0) {
+                ForEach(deck.queue.indices, id: \.self) { i in
+                    if case .word(let id, _) = deck.queue[i], let e = vocab.entry(id) {
+                        WordCardView(entry: e, showAnswer: true, reveal: {})
+                            .padding(.horizontal, 16)
+                            .containerRelativeFrame([.horizontal, .vertical])
+                    }
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: Binding<Int?>(get: { deck.index }, set: { i in
+            guard let i, i != deck.index else { return }
+            deck.roam(to: i, vocab: vocab, settings: settings)
+            speech.stop()
+        }))
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+        .id(deck.generation)
+        .padding(.horizontal, -16)
+        .frame(maxHeight: .infinity)
+    }
+
+    /// The previous and next buttons slide the roaming pager like a swipe would.
+    private func roamStep(_ by: Int) {
+        speech.stop()
+        withAnimation(.snappy(duration: 0.3)) { deck.roam(to: deck.index + by, vocab: vocab, settings: settings) }
+    }
+
     @ViewBuilder
     private func stage(_ card: DeckCard) -> some View {
         ZStack {
@@ -155,15 +188,15 @@ struct CardsView: View {
     @ViewBuilder
     private func controls(_ card: DeckCard, _ s: UIStrings) -> some View {
         HStack(spacing: 8) {
-            Button { deck.back(); cardKey += 1 } label: {
+            Button { if deck.roaming { roamStep(-1) } else { deck.back(); cardKey += 1 } } label: {
                 Image(systemName: "chevron.left").font(.system(size: 15, weight: .semibold))
                     .frame(width: 32, height: 44).foregroundStyle(Theme.ink2).contentShape(Rectangle())
             }.buttonStyle(.plain).disabled(!deck.canGoBack).opacity(deck.canGoBack ? 1 : 0.4).accessibilityLabel("Previous card")
             switch card {
             case .realia where !deck.revealed:
                 Button(s.howToSay) { deck.revealed = true }.buttonStyle(Pill(style: .primary))
-            case .word where roaming:
-                Button { leave(.good) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }.buttonStyle(Pill(style: .neutral))
+            case .word where deck.roaming:
+                Button { roamStep(1) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }.buttonStyle(Pill(style: .neutral))
             case .realia:
                 Button(s.didntKnow) { leave(.again) }.buttonStyle(Pill(style: .bad))
                 Button(s.knew) { leave(.good) }.buttonStyle(Pill(style: .good))

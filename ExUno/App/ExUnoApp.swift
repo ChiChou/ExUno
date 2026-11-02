@@ -86,7 +86,19 @@ extension StudyProgress {
 
 struct RootView: View {
     @Environment(StudyProgress.self) private var progress
+
+    var body: some View {
+        RootTabs().id(progress.language)   // switching language rebuilds every tab's state
+    }
+}
+
+private struct RootTabs: View {
+    @Environment(StudyProgress.self) private var progress
+    @Environment(Vocabulary.self) private var vocab
     @Environment(Router.self) private var router
+    /// Owned here rather than by Cards, so the roaming deck is shuffled before the tab is first opened.
+    @State private var deck = DeckEngine()
+    @AppStorage("cards.roaming") private var roaming = true
 
     var body: some View {
         @Bindable var router = router
@@ -95,7 +107,7 @@ struct RootView: View {
             NavigationStack { TodayView() }
                 .tag(AppTab.today)
                 .tabItem { Label(s.today, systemImage: "sun.max") }
-            NavigationStack { CardsView() }
+            NavigationStack { CardsView(deck: deck) }
                 .tag(AppTab.cards)
                 .tabItem { Label(s.cards, systemImage: "rectangle.on.rectangle") }
             GrammarTab()
@@ -108,8 +120,14 @@ struct RootView: View {
                 .tag(AppTab.tools)
                 .tabItem { Label(s.tools, systemImage: "list.number") }
         }
-        .id(progress.language)   // switching language rebuilds every tab's state
         .tint(Theme.accent)
+        .onAppear(perform: prewarm)
+        .onChange(of: vocab.current?.code) { _, _ in prewarm() }
+    }
+
+    private func prewarm() {
+        guard roaming, !deck.built, vocab.isReady, vocab.current?.code == progress.language, router.card == nil else { return }
+        deck.buildRoaming(vocab: vocab, settings: progress.settings)
     }
 }
 

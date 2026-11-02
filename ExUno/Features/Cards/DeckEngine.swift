@@ -28,7 +28,7 @@ final class DeckEngine {
     func invalidate() { built = false }
 
     var current: DeckCard? { index < queue.count ? queue[index] : nil }
-    var canGoBack: Bool { !history.isEmpty }
+    var canGoBack: Bool { roaming ? index > 0 : !history.isEmpty }
 
     private func levels(_ vocab: Vocabulary, _ s: PackSettings) -> [String] {
         s.levels.isEmpty ? (vocab.current?.defaultLevels ?? []) : s.levels
@@ -83,29 +83,34 @@ final class DeckEngine {
         queue = batch; index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false; generation += 1
     }
 
+    /// The whole filtered pool, shuffled up front, so roaming pages back and forth through a fixed list.
     private func roamBatch(_ vocab: Vocabulary, _ s: PackSettings) -> [DeckCard] {
-        pool(vocab, s).shuffled().prefix(30).map { DeckCard.word($0.i, again: false) }
+        pool(vocab, s).shuffled().map { DeckCard.word($0.i, again: false) }
+    }
+
+    /// Moves to a roaming page; another shuffle is appended before the end is reached.
+    func roam(to i: Int, vocab: Vocabulary, settings: PackSettings) {
+        guard roaming, i >= 0, i < queue.count else { return }
+        index = i
+        if index >= queue.count - 3 { queue.append(contentsOf: roamBatch(vocab, settings)) }
     }
 
     func advance(_ g: Grade, vocab: Vocabulary, progress: StudyProgress) {
         guard let c = current else { return }
-        if !roaming {
-            switch c {
-            case .word(let id, _):
-                progress.grade(id, g)
-                if g == .again { queue.insert(.word(id, again: true), at: min(queue.count, index + 4)) }
-                let n = progress.todayLog().reviews
-                if n > 0 && n % progress.app.goal == 0 { summaryDue = true }
-            case .realia:
-                progress.logRealia(correct: g != .again)
-            }
+        if roaming { return roam(to: index + 1, vocab: vocab, settings: progress.settings) }
+        switch c {
+        case .word(let id, _):
+            progress.grade(id, g)
+            if g == .again { queue.insert(.word(id, again: true), at: min(queue.count, index + 4)) }
+            let n = progress.todayLog().reviews
+            if n > 0 && n % progress.app.goal == 0 { summaryDue = true }
+        case .realia:
+            progress.logRealia(correct: g != .again)
         }
         history.append(index)
         index += 1
-        revealed = roaming
-        if index >= queue.count {
-            if roaming { queue.append(contentsOf: roamBatch(vocab, progress.settings)) } else { refill(vocab: vocab, progress: progress) }
-        }
+        revealed = false
+        if index >= queue.count { refill(vocab: vocab, progress: progress) }
     }
 
     private func refill(vocab: Vocabulary, progress: StudyProgress) {
@@ -119,6 +124,7 @@ final class DeckEngine {
     }
 
     func back() {
+        if roaming { index = max(0, index - 1); return }
         guard let i = history.popLast() else { return }
         index = i
         revealed = true
