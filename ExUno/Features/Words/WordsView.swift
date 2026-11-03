@@ -14,6 +14,7 @@ struct WordsView: View {
     @Environment(StudyProgress.self) private var progress
     @State private var query = ""
     @State private var selected: Entry?
+    @State private var browsingEntries: [Entry] = []
     @State private var wiktionaryTerm: String?
     @State private var counts = Counts()
 
@@ -48,7 +49,10 @@ struct WordsView: View {
                             Button("Wiktionary") { wiktionaryTerm = query.trimmingCharacters(in: .whitespaces) }.buttonStyle(Pill(style: .ghost, compact: true))
                         }.frame(maxWidth: .infinity).padding(30)
                     } else {
-                        EntryList(entries: list) { selected = $0 }
+                        EntryList(entries: list) {
+                            browsingEntries = list
+                            selected = $0
+                        }
                         HStack { Spacer(); Button("Wiktionary") { wiktionaryTerm = query.trimmingCharacters(in: .whitespaces) }.buttonStyle(Pill(style: .ghost, compact: true)); Spacer() }
                     }
                 }
@@ -59,7 +63,9 @@ struct WordsView: View {
         .scrollDismissesKeyboard(.immediately)
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: WordFilter.self) { WordListScreen(filter: $0) }
-        .sheet(item: $selected) { e in WordDetailView(entry: e).presentationDetents([.large]) }
+        .sheet(item: $selected) { e in
+            WordDetailPager(entries: browsingEntries, selected: e).presentationDetents([.large])
+        }
         .sheet(item: Binding(get: { wiktionaryTerm.map { WiktionaryTerm(term: $0) } }, set: { wiktionaryTerm = $0?.term })) { t in
             WiktionaryView(term: t.term).presentationDetents([.medium, .large])
         }
@@ -156,6 +162,7 @@ struct WordListScreen: View {
     let filter: WordFilter
     @State private var query = ""
     @State private var selected: Entry?
+    @State private var browsingEntries: [Entry] = []
 
     private var title: String {
         let s = progress.strings
@@ -207,7 +214,12 @@ struct WordListScreen: View {
                         Section {
                             ForEach(section.entries) { e in
                                 VStack(spacing: 0) {
-                                    EntryRow(entry: e) { selected = e }
+                                    EntryRow(entry: e) {
+                                        // Keep the visible order stable while the detail sheet is open,
+                                        // including when a word is removed from the deck.
+                                        browsingEntries = list.flatMap(\.entries)
+                                        selected = e
+                                    }
                                     if e.id != section.entries.last?.id { Divider() }
                                 }
                                 .padding(.horizontal, 14)
@@ -235,7 +247,69 @@ struct WordListScreen: View {
         .scrollDismissesKeyboard(.immediately)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $selected) { e in WordDetailView(entry: e).presentationDetents([.large]) }
+        .sheet(item: $selected) { e in
+            WordDetailPager(entries: browsingEntries, selected: e).presentationDetents([.large])
+        }
+    }
+}
+
+/// Swipe through a snapshot of the directory or search results in their displayed order.
+struct WordDetailPager: View {
+    let entries: [Entry]
+    @State private var index: Int
+
+    init(entries: [Entry], selected: Entry) {
+        self.entries = entries.isEmpty ? [selected] : entries
+        _index = State(initialValue: entries.firstIndex(where: { $0.id == selected.id }) ?? 0)
+    }
+
+    var body: some View {
+        if entries.count == 1 {
+            WordDetailView(entry: entries[0])
+        } else {
+            VStack(spacing: 0) {
+                TabView(selection: $index) {
+                    ForEach(entries.indices, id: \.self) { i in
+                        Group {
+                            // Large directories only need the current detail and its neighbors ready.
+                            if abs(i - index) <= 1 {
+                                WordDetailView(entry: entries[i])
+                            } else {
+                                Color.clear
+                            }
+                        }
+                        .tag(i)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
+                HStack {
+                    Button { move(by: -1) } label: {
+                        Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel("Previous word")
+                    .disabled(index == 0)
+                    Spacer()
+                    Text("\(index + 1) / \(entries.count)")
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(Theme.ink2)
+                        .accessibilityLabel("Word \(index + 1) of \(entries.count)")
+                    Spacer()
+                    Button { move(by: 1) } label: {
+                        Image(systemName: "chevron.right").frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel("Next word")
+                    .disabled(index == entries.count - 1)
+                }
+                .tint(Theme.accent)
+                .padding(.horizontal, 20)
+            }
+            .pageBackground()
+        }
+    }
+
+    private func move(by offset: Int) {
+        withAnimation { index = min(max(index + offset, 0), entries.count - 1) }
     }
 }
 
@@ -409,7 +483,8 @@ struct WiktionaryView: View {
     @Environment(StudyProgress.self) private var progress
     let term: String
     @State private var sections: [WiktionarySection] = []
-    @State private var status: String? = "…"
+    @State private var status: String?
+    @State private var isLoading = true
 
     private var anchor: String {
         switch progress.language { case .it: return "Italian"; case .es, .esLatAm: return "Spanish"; case .fr: return "French"; case .la: return "Latin"; case .pt, .ptBR: return "Portuguese" }
@@ -425,7 +500,15 @@ struct WiktionaryView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Eyebrow(text: "Wiktionary · \(anchor)")
                 HStack { Text(term).font(Theme.display(28)); Spacer(); SpeakButton(text: term) }
-                if let status { Text(status).foregroundStyle(Theme.ink2) }
+                if isLoading {
+                    ProgressView("Loading definitions…")
+                        .tint(Theme.accent)
+                        .foregroundStyle(Theme.ink2)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
+                } else if let status {
+                    Text(status).foregroundStyle(Theme.ink2)
+                }
                 ForEach(sections) { s in
                     VStack(alignment: .leading, spacing: 6) {
                         Eyebrow(text: s.partOfSpeech)
@@ -451,6 +534,11 @@ struct WiktionaryView: View {
     }
 
     private func lookup() async {
+        isLoading = true
+        status = nil
+        sections = []
+        defer { isLoading = false }
+
         let t = pageTitle.lowercased().addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? pageTitle
         guard let url = URL(string: "https://en.wiktionary.org/api/rest_v1/page/definition/\(t)?redirect=true") else { status = "—"; return }
         var req = URLRequest(url: url)

@@ -78,7 +78,7 @@ struct GrammarCourseView: View {
                         }
                     }
                 } else if courses.missing {
-                    ErrorReadout(message: "The \(progress.language.englishName) grammar course isn't installed. Build it with sh Scripts/prepare_data.sh, or download it with sh Scripts/download_packs.sh.")
+                    ErrorReadout(message: "The \(progress.language.englishName) grammar course is unavailable. You can still use the other study tools.")
                 } else {
                     ProgressView().frame(maxWidth: .infinity)
                 }
