@@ -268,20 +268,24 @@ struct WordDetailPager: View {
             WordDetailView(entry: entries[0])
         } else {
             VStack(spacing: 0) {
-                TabView(selection: $index) {
-                    ForEach(entries.indices, id: \.self) { i in
-                        Group {
-                            // Large directories only need the current detail and its neighbors ready.
-                            if abs(i - index) <= 1 {
+                GeometryReader { geometry in
+                    ScrollView(.horizontal) {
+                        LazyHStack(spacing: 0) {
+                            ForEach(entries.indices, id: \.self) { i in
                                 WordDetailView(entry: entries[i])
-                            } else {
-                                Color.clear
+                                    .frame(width: geometry.size.width, height: geometry.size.height)
+                                    .id(i)
                             }
                         }
-                        .tag(i)
+                        .scrollTargetLayout()
                     }
+                    .scrollTargetBehavior(.paging)
+                    .scrollIndicators(.hidden)
+                    .scrollPosition(id: Binding<Int?>(
+                        get: { index },
+                        set: { if let newIndex = $0 { index = newIndex } }
+                    ))
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
 
                 HStack {
                     Button { move(by: -1) } label: {
@@ -309,7 +313,7 @@ struct WordDetailPager: View {
     }
 
     private func move(by offset: Int) {
-        withAnimation { index = min(max(index + offset, 0), entries.count - 1) }
+        withAnimation(.smooth) { index = min(max(index + offset, 0), entries.count - 1) }
     }
 }
 
