@@ -40,19 +40,6 @@ struct TodayView: View {
                 }
                 LiveClock(now: now)
                 sessionCard(s)
-                if progress.language != .la {
-                    Button { router.openGrammar(.coach) } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: "bubble.left.and.bubble.right.fill").foregroundStyle(Theme.accent)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Talk with a coach").font(.headline).foregroundStyle(Theme.ink)
-                                Text("A conversation in \(progress.language.englishName)").font(.footnote).foregroundStyle(Theme.ink2)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right").foregroundStyle(Theme.ink2)
-                        }.padding(16).background(Theme.surface, in: RoundedRectangle(cornerRadius: 16))
-                    }.buttonStyle(.plain)
-                }
                 grammarCard()
                 Text(s.dailyChallenge).font(Theme.display(21))
                 DailyChallengeView()

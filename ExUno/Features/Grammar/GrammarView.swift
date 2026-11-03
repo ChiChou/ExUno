@@ -4,7 +4,6 @@ import SwiftUI
 enum GrammarRoute: Hashable {
     case unit(String)
     case verbs
-    case coach
 }
 
 /// The Grammar tab: the course by level, with the conjugator as a reference at the top.
@@ -19,7 +18,6 @@ struct GrammarTab: View {
                 .navigationDestination(for: GrammarRoute.self) { route in
                     switch route {
                     case .verbs: ToolPage(tool: .verbs)
-                    case .coach: CoachView()
                     case .unit(let id):
                         if let unit = courses.units.first(where: { $0.id == id }) { GrammarUnitView(unit: unit) }
                     }
@@ -57,10 +55,6 @@ struct GrammarCourseView: View {
                 }
                 NavigationLink(value: GrammarRoute.verbs) { ReferenceRow(icon: ToolKind.verbs.icon, title: progress.engine.title(.verbs)) }
                     .buttonStyle(.plain)
-                if progress.language != .la {
-                    NavigationLink(value: GrammarRoute.coach) { ReferenceRow(icon: "bubble.left.and.text.bubble.right", title: "Practice with a coach") }
-                        .buttonStyle(.plain)
-                }
                 if let course = courses.current {
                     ForEach(course.levels, id: \.self) { level in
                         let units = course.units.filter { $0.level == level }
