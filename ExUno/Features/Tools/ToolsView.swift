@@ -196,6 +196,7 @@ struct ConverterTool: View {
     let tool: ToolKind
     @State private var input = ToolInput()
     @State private var followsClock = true
+    @State private var wikipediaArticle: WikipediaYearArticle?
 
     private var marketUnits: [MarketUnit] {
         guard let pack = vocab.current, pack.code == progress.language else { return [] }
@@ -234,6 +235,9 @@ struct ConverterTool: View {
             }
         }
         .onAppear(perform: setDefaults)
+        .sheet(item: $wikipediaArticle) { article in
+            YearWikipediaSheet(article: article)
+        }
         .task(id: clockIsRunning) {
             guard clockIsRunning else { return }
             syncClock()
@@ -421,6 +425,12 @@ struct ConverterTool: View {
                             .foregroundStyle(Theme.ink2)
                         ForEach(out.rows) { AltRow(label: $0.label, text: $0.text) }
                     }
+                }
+                if tool == .years, let year = Int(out.sub ?? ""),
+                   let article = WikipediaYearArticle(year: year, language: progress.language) {
+                    Button("Wikipedia") { wikipediaArticle = article }
+                        .buttonStyle(Pill(style: .ghost, compact: true))
+                        .accessibilityHint("Read about \(year) in \(progress.language.englishName). Requires an internet connection.")
                 }
             case .failure(let e):
                 ErrorReadout(message: e.localizedDescription)

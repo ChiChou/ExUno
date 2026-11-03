@@ -1,6 +1,6 @@
 # Online APIs for language study
 
-This page reviews online services that could add study features to Ex Uno. It is research for planning; nothing here is built yet. Checked on 2026-11-01 by calling each API and reading its published terms. It is an engineering review, not legal advice.
+This page reviews online services that could add study features to Ex Uno. The candidate integrations below are research for planning; the implemented readers are listed separately below. Checked on 2026-11-01 by calling each API and reading its published terms. It is an engineering review, not legal advice.
 
 ## The rule
 
@@ -13,7 +13,7 @@ From [`AGENTS.md`](../AGENTS.md): Ex Uno must work fully offline. An online API 
 
 Content and API terms follow `LICENSING.md`: non-commercial (NC), no-derivatives (ND) or unclear terms are a reject. An API that needs a secret key is also a reject. Ex Uno is distributed as source, so a key would either be committed to a public repository or have to be supplied by everyone who builds the app.
 
-Today the only runtime call is the Wiktionary REST definitions sheet (`WiktionaryView` in `ExUno/Features/Words/WordsView.swift`). It sends `User-Agent: ExUno/<version> (https://github.com/ChiChou/ExUno)` and shows "Could not reach Wiktionary." when offline.
+Current runtime readers are the Wiktionary REST definitions sheet (`WiktionaryView` in `ExUno/Features/Words/WordsView.swift`) and the optional Wikipedia year article sheet (`YearWikipediaSheet` in `ExUno/Features/Tools/YearWikipediaSheet.swift`). Wiktionary sends `User-Agent: ExUno/<version> (https://github.com/ChiChou/ExUno)` and shows "Could not reach Wiktionary." when offline. Wikipedia opens `https://{language}.wikipedia.org/wiki/{year}` only after a tap in Years, loads the original page and Wikimedia assets in a nonpersistent web view, and shows a connection message with Retry if unavailable offline. Spanish and Portuguese regional packs share their language's Wikipedia edition. No article is prefetched; following a link inside the sheet loads that destination.
 
 ## Summary
 

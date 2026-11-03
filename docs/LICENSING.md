@@ -29,6 +29,7 @@ Code and data are separate works. The app reads the packs as data, so share-alik
 | Tatoeba via OPUS (release v2026-07-08) | CC BY 2.0 FR | Grammar course sentences and translations | Yes. CC BY allows adaptation under other terms with attribution; credited as a group (see ATTRIBUTIONS.md). |
 | UniMorph ita, spa, fra, lat, por | CC BY-SA 3.0 | Paradigms for grammar exercises and bundled Portuguese conjugation tables | Yes. BY-SA 3.0 §4(b) allows adaptations under a later version, so 4.0. |
 | Wiktionary REST API (runtime) | CC BY-SA 4.0 | Definitions shown with a link back | Yes. Nothing is bundled. |
+| Wikipedia year pages and their Wikimedia assets (runtime) | Text generally CC BY-SA 4.0; media licenses vary as credited on the original page | Optional reading in the study language, opened explicitly from Years in a web sheet | Original page, contributor and license links remain intact. Nothing is bundled or prefetched; unavailable connections show a retry message. Article URLs use `https://{language}.wikipedia.org/wiki/{year}`; subsequent user navigation loads linked destinations. |
 | Apple system voices, SF Symbols, system fonts | Apple SDK terms | Speech, icons, type | Yes, for apps on Apple platforms. Symbols are referenced by name; none are in the repository. |
 
 ## Deliberately not used

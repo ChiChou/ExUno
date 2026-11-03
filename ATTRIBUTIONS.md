@@ -74,6 +74,7 @@ This inventory is a practical compliance record, not legal advice.
 ## Online services (called at runtime, nothing bundled)
 
 - **Wiktionary REST API** (`en.wiktionary.org/api/rest_v1/page/definition/…`): definitions are shown with a link back. Text is CC BY-SA 4.0 by the Wiktionary contributors. Requests send a User-Agent with the project URL, as Wikimedia's API etiquette asks.
+- **Wikipedia year articles** (`https://{language}.wikipedia.org/wiki/{year}`): optional reading in the Years tool, opened by the learner in a web sheet. The study language selects the edition; Spanish and Portuguese regional packs share `es` and `pt`. Wikipedia serves the article and Wikimedia serves its page assets (including images); following links inside the sheet loads their destinations. Original contributor credits, license links and media notices remain on the page. Wikipedia text is generally CC BY-SA 4.0; individual media have their own licenses. Nothing is bundled or prefetched. A connection message and Retry action appear when the page cannot load offline.
 - **Apple speech synthesis**: the voices installed on the device. Latin is read by an Italian voice.
 
 ## Not used

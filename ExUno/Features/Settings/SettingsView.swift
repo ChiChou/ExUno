@@ -147,8 +147,9 @@ struct LicensesScreen: View {
                     ("CC BY 2.0 FR", "https://creativecommons.org/licenses/by/2.0/fr/"),
                     ("CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/"),
                 ])
-                section("Online", "Everything works offline. When you're online, the Wiktionary button in Words fetches definitions from the Wiktionary REST API (Wiktionary contributors, CC BY-SA 4.0).", [
+                section("Online", "Study tools work offline. Optional online reading: the Wiktionary button in Words fetches definitions (Wiktionary contributors, CC BY-SA 4.0). The Wikipedia button in Years opens that year's article in the study language, with its original credits and license links. Wikipedia and Wikimedia serve the page and its assets only when you open it. Both readers show a connection message when unavailable offline.", [
                     ("Wiktionary", "https://en.wiktionary.org/"),
+                    ("Wikipedia", "https://www.wikipedia.org/"),
                 ])
                 section("Speech", "The voices installed on this device. Latin is read by an Italian voice.", [])
                 section("Rules", "Number, time, date, calendar and verb rules are written by the app and cover standard usage; regional habits vary and rare irregular verbs may be wrong. Levels are teaching estimates, not CEFR certifications.", [])
