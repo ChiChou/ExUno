@@ -64,6 +64,19 @@ struct UIStrings {
                              myDeck: "Mon paquet", phrases: "Expressions", levels: "Niveaux", topics: "Thèmes", all: "Tous", entries: { $0 == 1 ? "1 entrée" : "\($0) entrées" },
                              nothingHere: "Rien ici.", filter: "Filtrer…", session: "Séance", toReview: "À revoir",
                              streak: "jours d'affilée", seen: "mots vus", solid: "mémorisés")
+        case .pt:
+            return UIStrings(today: "Hoje", cards: "Cartões", tools: "Ferramentas", words: "Palavras",
+                             morning: "Bom dia", afternoon: "Boa tarde", evening: "Boa noite",
+                             reviewToday: "Revisão de hoje", due: { "\($0) para rever" }, goalReached: "Objetivo alcançado", readyForNew: "Pronto para palavras novas",
+                             cardsToday: { "\($0) de \($1) cartões hoje" }, start: "Começar", keepGoing: "Continuar",
+                             dailyChallenge: "Desafio do dia", done: "Concluído", comeBack: "Volta amanhã.", correctCount: { "\($0) / \($1) corretas" },
+                             check: "Verificar", next: "Seguinte", finish: "Terminar", right: "Certo!", was: { "Era \($0)" }, showText: "Mostrar texto",
+                             hard: "Difícil", show: "Mostrar", again: "Outra vez", good: "Bem", easy: "Fácil", todayShort: "hoje",
+                             days: { $0 == 1 ? "1 dia" : "\($0) dias" }, showAnswer: "Mostrar a resposta", howToSay: "Como se diz?",
+                             knew: "Sabia", didntKnow: "Não sabia", realLife: "vida real", write: "Escrever", listen: "Ouvir",
+                             myDeck: "O meu baralho", phrases: "Frases", levels: "Níveis", topics: "Temas", all: "Todos", entries: { $0 == 1 ? "1 entrada" : "\($0) entradas" },
+                             nothingHere: "Nada aqui.", filter: "Filtrar…", session: "Sessão", toReview: "Para rever",
+                             streak: "dias seguidos", seen: "palavras vistas", solid: "memorizadas")
         case .la:
             return UIStrings(today: "Hodiē", cards: "Chartae", tools: "Īnstrūmenta", words: "Lexicon",
                              morning: "Salvē", afternoon: "Salvē", evening: "Salvē",

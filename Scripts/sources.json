@@ -133,6 +133,33 @@
       "sha256": "7aed5a2fd17c29474e85e315d42654d1794a3d3efc956b387714ca601a608a2b",
       "license": "CC BY-SA 3.0 (extracted from English Wiktionary)",
       "homepage": "https://github.com/unimorph/lat"
+    },
+    {
+      "id": "decks-portuguese",
+      "name": "European Portuguese vocabulary (shared and European entries)",
+      "file": "portuguese_european_with_mixed_unsorted.json",
+      "url": "https://raw.githubusercontent.com/vbvss199/Language-Learning-decks/efd235e692efd47eda026d0a1cbd703ce23d7692/portuguese/european_portuguese/portuguese_european_with_mixed_unsorted.json",
+      "sha256": "8358907aa944f89d98812aa0868cf8f7dae329c3f6535aad0e5855640838787b",
+      "license": "MIT (© 2025 GENERAL NEURO); wordfreq CC BY-SA 4.0",
+      "homepage": "https://github.com/vbvss199/Language-Learning-decks"
+    },
+    {
+      "id": "unimorph-por",
+      "name": "UniMorph: Portuguese paradigms",
+      "file": "por",
+      "url": "https://raw.githubusercontent.com/unimorph/por/fc2778e08e2da476d9d2f27f15f218b1cbb25ad5/por",
+      "sha256": "af71c94afbb857b3875817d8edb8ea4a1211d902326b74de4d86de85ea348944",
+      "license": "CC BY-SA 3.0 (source: Wikipedia, as stated by UniMorph por)",
+      "homepage": "https://github.com/unimorph/por"
+    },
+    {
+      "id": "tatoeba-pt",
+      "name": "Tatoeba English–Portuguese sentence pairs (OPUS release v2026-07-08)",
+      "file": "en-pt.txt.zip",
+      "url": "https://object.pouta.csc.fi/OPUS-Tatoeba/v2026-07-08/moses/en-pt.txt.zip",
+      "sha256": "90b673f477dc654e5d31824478b8a3af8f2f67fc7638fe130413dcb2bf7bf09b",
+      "license": "CC BY 2.0 FR (Tatoeba contributors)",
+      "homepage": "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba"
     }
   ]
 }

@@ -16,6 +16,12 @@ actual=$(echo "$actual" | cut -d' ' -f1)
 [ "$expected" = "$actual" ] || { echo "checksum mismatch" >&2; exit 1; }
 
 unzip -q "$TMP/exuno-packs.zip" -d "$TMP"
+for file in pt.json grammar-pt.json verbs-pt.json; do
+    [ -f "$TMP/exuno-packs/$file" ] || {
+        echo "The packs release predates Portuguese support. Run sh Scripts/prepare_data.sh or use an updated packs release." >&2
+        exit 1
+    }
+done
 mkdir -p ExUno/Resources/Packs
 cp "$TMP"/exuno-packs/*.json ExUno/Resources/Packs/
 ${PYTHON:-python3} Scripts/apply_pack_metadata.py

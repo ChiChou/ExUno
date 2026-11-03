@@ -131,7 +131,7 @@ struct LicensesScreen: View {
                     ("MultiWordNet", "https://multiwordnet.fbk.eu/"),
                     ("Princeton WordNet", "https://wordnet.princeton.edu/"),
                 ])
-                section("Spanish and French", "Language-Learning-decks Spanish and French decks (© 2025 GENERAL NEURO, MIT) with wordfreq frequencies (CC BY-SA 4.0, Robyn Speer). Articles come from the decks' own example sentences; topics are projected from the Italian tags through shared English glosses.", [
+                section("Spanish, French and Portuguese", "Language-Learning-decks Spanish, French and European Portuguese decks (© 2025 GENERAL NEURO, MIT) with wordfreq frequencies (CC BY-SA 4.0, Robyn Speer). Articles come from the decks' own example sentences; topics are projected from the Italian tags through shared English glosses.", [
                     ("Language-Learning-decks", "https://github.com/vbvss199/Language-Learning-decks"),
                     ("wordfreq", "https://github.com/rspeer/wordfreq"),
                 ])
@@ -139,7 +139,7 @@ struct LicensesScreen: View {
                     ("DCC Latin Core Vocabulary", "https://dcc.dickinson.edu/latin-vocabulary-list"),
                     ("DCC terms of use", "https://dcc.dickinson.edu/terms-use"),
                 ])
-                section("Grammar courses", "Example sentences from Tatoeba (Tatoeba contributors, CC BY 2.0 FR), via the OPUS release v2026-07-08. Verb and noun paradigms from UniMorph (CC BY-SA 3.0, extracted from English Wiktionary); Latin verb forms from the app's own rules with DCC principal parts. Unit notes and tables are written for Ex Uno.", [
+                section("Grammar courses", "Example sentences from Tatoeba (Tatoeba contributors, CC BY 2.0 FR), via the OPUS release v2026-07-08. Verb and noun paradigms from UniMorph (CC BY-SA 3.0, from English Wiktionary, or Wikipedia for Portuguese as credited by UniMorph por); Portuguese verb tables are bundled from UniMorph; Latin verb forms from the app's own rules with DCC principal parts. Unit notes and tables are written for Ex Uno.", [
                     ("Tatoeba", "https://tatoeba.org/"),
                     ("Tatoeba terms of use", "https://tatoeba.org/en/terms_of_use"),
                     ("OPUS Tatoeba", "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba"),

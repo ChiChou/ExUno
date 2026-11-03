@@ -11,15 +11,16 @@ This inventory is a practical compliance record, not legal advice.
 | Material | Where | License |
 | --- | --- | --- |
 | App, widget, tests and data scripts | `ExUno/`, `Shared/`, `ExUnoWidgets/`, `ExUnoTests/`, `Scripts/` | MIT |
-| Number, time, date, calendar, quantity, year and verb rules for all four languages | `Shared/Language/` | MIT (original code) |
+| Number, time, date, calendar, quantity, year and verb rules for all five languages (Portuguese verb forms from UniMorph, below) | `Shared/Language/` | MIT (original code) |
 | App icon and UI | `ExUno/Assets.xcassets`, `ExUno/Support`, `Shared/Palette.swift` | MIT (original) |
-| Italian, Spanish and French packs | `ExUno/Resources/Packs/{it,es,fr}.json` (generated) | MIT (Language-Learning-decks) + CC BY-SA 4.0 (wordfreq data) → CC BY-SA 4.0 |
+| Italian, Spanish, French and Portuguese packs | `ExUno/Resources/Packs/{it,es,fr,pt}.json` (generated) | MIT (Language-Learning-decks) + CC BY-SA 4.0 (wordfreq data) → CC BY-SA 4.0 |
 | Latin pack | `ExUno/Resources/Packs/la.json` (generated) | CC BY-SA (DCC Latin Core Vocabulary) → CC BY-SA 4.0 |
-| Topic tags (it, es, fr) | `c` field of the packs | CC BY 3.0 (MultiWordNet) + WordNet 3.0 license (Princeton) |
-| Grammar courses | `ExUno/Resources/Packs/grammar-{it,es,fr,la}.json` (generated) | CC BY 2.0 FR (Tatoeba) + CC BY-SA 3.0 (UniMorph) → CC BY-SA 4.0 |
+| Topic tags (it, es, fr, pt) | `c` field of the packs | CC BY 3.0 (MultiWordNet) + WordNet 3.0 license (Princeton) |
+| Grammar courses | `ExUno/Resources/Packs/grammar-{it,es,fr,la,pt}.json` (generated) | CC BY 2.0 FR (Tatoeba) + CC BY-SA 3.0 (UniMorph) → CC BY-SA 4.0 |
+| Portuguese conjugation tables | `ExUno/Resources/Packs/verbs-pt.json` (generated) | CC BY-SA 3.0 (UniMorph por) → CC BY-SA 4.0 |
 | Grammar unit notes, tables and word sets | `Scripts/grammar/` | MIT (original) |
 
-## Language-Learning-decks (Italian, Spanish, French)
+## Language-Learning-decks (Italian, Spanish, French, European Portuguese)
 
 - © 2025 GENERAL NEURO, https://github.com/vbvss199/Language-Learning-decks. MIT; the notice is in `LICENSES/Language-Learning-decks-MIT.txt`.
 - The decks' word-frequency data comes from **wordfreq** (CC BY-SA 4.0), https://github.com/rspeer/wordfreq. Cite: Robyn Speer (2022), *rspeer/wordfreq: v3.0 (v3.0.2)*, Zenodo, https://doi.org/10.5281/zenodo.7199437. wordfreq credits SUBTLEX, Wikipedia, OpenSubtitles and other corpora among its sources.
@@ -27,14 +28,14 @@ This inventory is a practical compliance record, not legal advice.
 - Changes in Ex Uno:
   - Entries flagged as not useful for flashcards, or with no CEFR level, are dropped.
   - Semicolons in translations become commas, and POS labels are normalized.
-  - Gender and articles: French from the deck's `article_with_word` (for *l'*, from *un/une* in the example). Spanish and Italian only when the deck's own example shows a determiner before the noun.
+  - Gender and articles: French from the deck's `article_with_word` (for *l'*, from *un/une* in the example). Spanish, Portuguese and Italian only when the deck's own example shows a determiner before the noun.
   - Topic tags are added (below).
 
 ## MultiWordNet and Princeton WordNet (topic tags)
 
 - MultiWordNet (Italian), via Open Multilingual Wordnet 2.0, https://github.com/omwn/omw-data/releases/tag/v2.0. CC BY 3.0; the notice is in `LICENSES/MultiWordNet-CC-BY-3.0-notice.txt`. Cite: Emanuele Pianta, Luisa Bentivogli, Christian Girardi, "MultiWordNet: Developing an Aligned Multilingual Database", *Proceedings of the First International Conference on Global WordNet*, 2002, pp. 293–302.
 - Princeton WordNet 3.0, via OMW 2.0. Its license is in `LICENSES/Princeton-WordNet-3.0.txt`. The names Princeton University and Princeton may not be used in advertising or publicity for the distributed database.
-- Use in Ex Uno: `Scripts/build_topics.py` maps Italian words to 17 topics through MultiWordNet synsets and the WordNet hierarchy. Spanish and French receive the tags through matching English gloss and part of speech.
+- Use in Ex Uno: `Scripts/build_topics.py` maps Italian words to 17 topics through MultiWordNet synsets and the WordNet hierarchy. Spanish, French and Portuguese receive the tags through matching English gloss and part of speech.
 
 ## Dickinson College Commentaries Latin Core Vocabulary
 
@@ -58,6 +59,11 @@ This inventory is a practical compliance record, not legal advice.
 - Inflection tables for Italian, Spanish, French and Latin, extracted from English Wiktionary by the UniMorph project, https://unimorph.github.io and https://github.com/unimorph. License: CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/). Wiktionary text is by the Wiktionary contributors.
 - Cite: A. D. McCarthy et al., *UniMorph 3.0: Universal Morphology*, Proceedings of LREC 2020; K. Batsuren et al., *UniMorph 4.0: Universal Morphology*, Proceedings of LREC 2022.
 - Use in Ex Uno: the forms that compete in a gap (for example the six present forms of a verb, or the cases of a Latin noun). Latin verb forms are not taken from UniMorph; they come from Ex Uno's own rules with DCC principal parts.
+
+## Portuguese conjugation tables
+
+- `verbs-pt.json` is generated from the pinned UniMorph `por` repository, whose README credits Wikipedia as its source and CC BY-SA 3.0 as its license: https://github.com/unimorph/por. Ex Uno selects complete six-person finite paradigms, groups six tenses, corrects malformed core forms through `Scripts/portuguese_overrides.json`, and distributes the adapted table under CC BY-SA 4.0. It is bundled for offline use.
+- The European Portuguese vocabulary uses the upstream shared-plus-European list. Source examples are machine-generated; the grammar sentence corpus contains multiple Portuguese varieties. Common distinctly Brazilian words are filtered from exercises, but the corpus does not identify each sentence by region.
 
 ## Online services (called at runtime, nothing bundled)
 

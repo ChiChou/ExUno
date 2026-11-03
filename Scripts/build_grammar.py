@@ -95,6 +95,16 @@ def load_unimorph(path):
                 continue
             tags = set(re.split(r"[;.]", p[2]))
             out[unicodedata.normalize("NFC", p[0])].append((unicodedata.normalize("NFC", p[1]), tags))
+    if os.path.basename(path) == "por":
+        # The pinned por source concatenates alternative forms in a few core cells.
+        # Apply the same reviewed corrections to exercises and the reference tables.
+        corrections = json.load(open(os.path.join(ROOT, "Scripts", "portuguese_overrides.json"), encoding="utf-8"))
+        for lemma, tenses in corrections.items():
+            for tense, forms in tenses.items():
+                for person, form in zip(PERSONS, forms):
+                    tags = set(("V;" + tense + ";" + person).split(";"))
+                    out[lemma] = [(f, t) for f, t in out[lemma] if t != tags]
+                    out[lemma].insert(0, (form, tags))
     return out
 
 
@@ -238,7 +248,7 @@ def build_grids(unit, ctx):
         persons = lang["persons"]
         extra = src.get("extra", {})
         skip = set(src.get("exclude", []))
-        for lemma in [v for v in ctx["verbs"] if v not in skip][: src.get("max", 400)]:
+        for lemma in [v for v in ctx["verbs"] if v not in skip and ("only" not in src or v in src["only"])][: src.get("max", 400)]:
             def lookup(lm, tag):
                 if lm in extra and tag in extra[lm]:
                     return extra[lm][tag].split()
@@ -365,10 +375,14 @@ def make_items(unit, grids, sentences, ctx):
     verbal = "verbs" in unit or unit.get("verbForms", False)
     candidates = []
     for s, e in sentences:
+        if any(re.search(rf"\b{re.escape(w)}\b", s, re.I) for w in lang.get("excludeWords", [])):
+            continue
         toks = tokenize(s)
         if not (3 <= len(toks) <= 12) or len(s) > 90:
             continue
         keys = [key(t[0]) for t in toks]
+        if lang["code"] == "pt" and re.search(r"\b(?:estou|estás|está|estamos|estão|estava|estavam)\s+\w+(?:ando|endo|indo)\b", s, re.I):
+            continue  # Prefer European estar a + infinitive over Brazilian progressive examples.
         found = None
         for i in range(len(toks)):
             for n in range(min(maxlen, len(keys) - i), 0, -1):
@@ -378,6 +392,12 @@ def make_items(unit, grids, sentences, ctx):
                 if len({h[0].id for h in hits}) > 1:
                     break       # the same spelling belongs to two lexemes: ambiguous, skip
                 j = i + n       # index of the next token
+                if lang["code"] == "pt":
+                    # Hyphenated clitic pronouns (faça-o) are not articles or finite verbs.
+                    if (toks[i][1] > 0 and s[toks[i][1] - 1] == "-") or (toks[j - 1][2] < len(s) and s[toks[j - 1][2]] == "-"):
+                        break
+                    if unit.get("beforeNoun") and (j >= len(keys) or keys[j] not in ctx["nominal"]):
+                        break
                 if skip_after_elision and i > 0 and keys[i - 1].endswith("'"):
                     break
                 if cond == "participle":
@@ -555,6 +575,9 @@ def build(code, spec, a):
     ctx = {"lang": dict(lang, code=code), "key": key, "um": um, "known": known, "verbal": verbal, "nominal": nominal, "finite_aux": aux, "homographs": homographs,
            "verbs": list(dict.fromkeys(deck_verbs)), "nouns": [], "latin_verbs": {},
            "participles": participles(code, um, deck_verbs, lang.get("participles", []), lang.get("notParticiples", []))}
+    if code == "pt":
+        # UniMorph por contains verbs only; use vocabulary nouns/adjectives for article context.
+        nominal.update(key(e["w"]) for e in entries if e["p"] in ("noun", "adjective"))
     # A deck noun's or adjective's inflected forms can't be read as verbs, nor a deck verb's forms as nouns (vino, canes, regis).
     for e in entries:
         if e["p"] in ("noun", "adjective") and e["w"] in um:
@@ -591,7 +614,7 @@ def build(code, spec, a):
         print(f"  {u['id']:<28} {u['level']:<4} {len(grids):>4} grids {len(items):>3} items")
     levels = [l for l in lang["levels"] if any(u["level"] == l for u in units)]
     return {"code": code, "schema": 1, "license": "CC BY-SA 4.0",
-            "attribution": LATIN_ATTRIBUTION if code == "la" else ATTRIBUTION, "levels": levels, "units": units}
+            "attribution": LATIN_ATTRIBUTION if code == "la" else ATTRIBUTION.replace("from English Wiktionary", "Portuguese source: Wikipedia, as credited by UniMorph por") if code == "pt" else ATTRIBUTION, "levels": levels, "units": units}
 
 
 def main():
@@ -603,7 +626,7 @@ def main():
     ap.add_argument("--only", action="append", default=[], help="language code (repeatable)")
     ap.add_argument("--min-items", type=int, default=12)
     a = ap.parse_args()
-    for code in ["it", "es", "fr", "la"]:
+    for code in ["it", "es", "fr", "la", "pt"]:
         if a.only and code not in a.only:
             continue
         spec = json.load(open(os.path.join(a.specs, f"{code}.json"), encoding="utf-8"))

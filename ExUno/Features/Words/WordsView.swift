@@ -412,7 +412,7 @@ struct WiktionaryView: View {
     @State private var status: String? = "…"
 
     private var anchor: String {
-        switch progress.language { case .it: return "Italian"; case .es: return "Spanish"; case .fr: return "French"; case .la: return "Latin" }
+        switch progress.language { case .it: return "Italian"; case .es: return "Spanish"; case .fr: return "French"; case .la: return "Latin"; case .pt: return "Portuguese" }
     }
 
     /// Wiktionary titles Latin pages without macrons or diaeresis (nōn → non); the headword on the page keeps them.

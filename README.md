@@ -4,7 +4,7 @@
 
 *Out of one, many.*
 
-Learn a language the way you meet it: on receipts, clocks, train tickets and stone inscriptions. A native iOS app (SwiftUI, iOS 18+) for English speakers learning **Italian, Spanish, French or Latin**, with home-screen widgets and iCloud sync.
+Learn a language the way you meet it: on receipts, clocks, train tickets and stone inscriptions. A native iOS app (SwiftUI, iOS 18+) for English speakers learning **Italian, Spanish, French, Portuguese or Latin**, with home-screen widgets and iCloud sync.
 
 ## What's in it
 
@@ -12,7 +12,8 @@ Learn a language the way you meet it: on receipts, clocks, train tickets and sto
 - **Today**: the time and date said in the language (Latin: today's Roman date, *ante diem III Nōnās Novembrēs*), today's session, the next grammar lesson, a five-item listening challenge that's the same all day, and your streak and last two weeks.
 - **Cards**: *Roam* (a shuffled list of words with their meanings; swipe back and forth, nothing recorded), *Flow* (answer visible, swipe, mark hard ones) or *Recall* (tap to flip, flick sideways to move on, pull down to see it again soon). Undo restores the previous review and its schedule. Every fifth card is a real-life object: a receipt, a clock, a ticket, a deli tag; in Latin a carved inscription or a calendar stone. Level range is always contiguous.
 - **Grammar**: a short course per language (A1–B1; Latin I–III) with a rule, a table and fill-in-the-blank practice on real sentences, plus the verb conjugator. See [`docs/GRAMMAR.md`](docs/GRAMMAR.md).
-- **Tools**: a preview card for each converter, with examples in the selected language. Italian, Spanish and French: numbers (cardinal, ordinal, percent, degrees, floor), prices, time, dates, phone numbers, market quantities, years and centuries. Latin: numerals (words ↔ Roman), the Roman calendar, years *ab urbe conditā*. Hear each result with pronunciation playback; market quantities offer g, kg, ml, cl and L, plus Italian etti and French dl, with decimal input and quantity-preserving unit changes. Listening practice lives in Today's daily challenge.
+- **Tools**: a preview card for each converter, with examples in the selected language. Italian, Spanish, French and Portuguese: numbers (cardinal, ordinal, percent, degrees, floor), prices, time, dates, phone numbers, market quantities, years and centuries. Latin: numerals (words ↔ Roman), the Roman calendar, years *ab urbe conditā*. Hear each result with pronunciation playback; market quantities offer g, kg, ml, cl and L, plus Italian etti and French/Portuguese dl, with decimal input and quantity-preserving unit changes. Listening practice lives in Today's daily challenge.
+- **Portuguese (European)**: 8,470 vocabulary entries, 11 grammar units with 436 exercises, and 3,999 bundled verb paradigms. Speech uses `pt-PT`.
 - **Words**: search both directions, or browse my deck, all words, phrases and topics, sorted A–Z by the bare word with a letter index to slide along; Wiktionary definitions when you're online.
 - **Level range**: one range per language, set from Settings, the Cards options or the badge on Words. Cards, the Flashcard widget and the Words directories follow it; search, my deck and the grammar course show every level.
 - **Widgets**: *Clock* (time in the language, small/medium/lock screen) and *Flashcard* (a random word from your levels with its meaning, a new one every half hour; tap it to roam on from that word in Cards, nothing is recorded).
@@ -21,7 +22,7 @@ Learn a language the way you meet it: on receipts, clocks, train tickets and sto
 
 ## Roadmap
 
-- **Portuguese** is the next language. The same upstream deck has Brazilian and European Portuguese lists under MIT, so it can follow the Spanish and French pipeline; it needs a number, time and date engine and a conjugator.
+- Brazilian Portuguese may follow as a separate pack with its own voice and examples.
 - Romanian is not planned yet: there is no openly licensed, levelled vocabulary list comparable to the others.
 
 ## Build

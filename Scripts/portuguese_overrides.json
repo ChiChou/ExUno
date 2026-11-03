@@ -1,0 +1,9 @@
+{
+  "ir": {"IND;PRS": ["vou", "vais", "vai", "vamos", "ides", "vão"]},
+  "estar": {
+    "IND;PRS": ["estou", "estás", "está", "estamos", "estais", "estão"],
+    "IND;PST;IPFV": ["estava", "estavas", "estava", "estávamos", "estáveis", "estavam"],
+    "IND;FUT": ["estarei", "estarás", "estará", "estaremos", "estareis", "estarão"]
+  },
+  "haver": {"IND;PRS": ["hei", "hás", "há", "havemos", "haveis", "hão"]}
+}

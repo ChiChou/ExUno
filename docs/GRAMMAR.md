@@ -9,9 +9,10 @@ This page records whether Ex Uno could add interactive grammar courses for Itali
 | Italian | **Go** | 11 units, A1–B1, 440 items | 541k Tatoeba pairs; UniMorph covers most verbs; the core irregulars UniMorph lacks are written into the unit files. |
 | Spanish | **Go** | 11 units, A1–B1, 440 items | 229k Tatoeba pairs; the best UniMorph coverage of the four. |
 | French | **Go** | 10 units, A1–B1, 400 items | 296k Tatoeba pairs; UniMorph lacks être, faire, prendre and a few others, which are written in. |
+| Portuguese (European) | **Go** | 11 units, A1–B1, 436 items | Shared Portuguese Tatoeba corpus with regional filters; UniMorph por and reviewed core corrections, shared with the offline verb reference. |
 | Latin | **Go** | 11 units, levels I–III, 440 items | 28.6k Tatoeba pairs; UniMorph covers 94% of the DCC core nouns. Verb forms come from the same rules as `LatinConjugator`, not UniMorph, which has only 9% of the core verbs. |
 
-All four use the same pipeline. What made it viable is the split between two kinds of content. **Explanations** (unit notes, tables, the level each topic sits at) are written for Ex Uno, because no openly licensed grammar inventory exists. **Exercises** come from open data: real sentences with English translations, and the competing forms (*ho / sono / hai…*, *rosa / rosam / rosae…*) from open paradigms.
+All five use the same pipeline. What made it viable is the split between two kinds of content. **Explanations** (unit notes, tables, the level each topic sits at) are written for Ex Uno, because no openly licensed grammar inventory exists. **Exercises** come from open data: real sentences with English translations, and the competing forms (*ho / sono / hai…*, *rosa / rosam / rosae…*) from open paradigms.
 
 ## Source survey
 

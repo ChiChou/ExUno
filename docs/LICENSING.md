@@ -19,7 +19,7 @@ Code and data are separate works. The app reads the packs as data, so share-alik
 
 | Source | Its license | Used for | Compatible? |
 | --- | --- | --- | --- |
-| Language-Learning-decks (it, es, fr), © 2025 GENERAL NEURO | MIT | Words, translations, CEFR levels, examples, POS | Yes. Keep the MIT notice. |
+| Language-Learning-decks (it, es, fr, pt), © 2025 GENERAL NEURO | MIT | Words, translations, CEFR levels, examples, POS | Yes. Keep the MIT notice. |
 | wordfreq frequency data (the decks' `word_frequency`) | CC BY-SA 4.0 | Frequency order (`z`) | Yes. This is why the packs are CC BY-SA 4.0. The wordfreq code (Apache 2.0) is not used. |
 | Machine-generated translations and examples in the decks | Released by the deck authors under MIT | Translations, examples | Yes. |
 | DCC Latin Core Vocabulary | CC BY-SA (version not stated) | Latin pack | Yes. BY-SA lets adaptations use a later version, so the pack can be BY-SA 4.0. |
@@ -27,7 +27,7 @@ Code and data are separate works. The app reads the packs as data, so share-alik
 | MultiWordNet via OMW 2.0 | CC BY 3.0 | Topic tags | Yes (attribution). |
 | Princeton WordNet 3.0 via OMW 2.0 | WordNet 3.0 license (BSD-like) | Topic hierarchy | Yes. Keep the notice; Princeton's name may not be used in advertising. |
 | Tatoeba via OPUS (release v2026-07-08) | CC BY 2.0 FR | Grammar course sentences and translations | Yes. CC BY allows adaptation under other terms with attribution; credited as a group (see ATTRIBUTIONS.md). |
-| UniMorph ita, spa, fra, lat | CC BY-SA 3.0 | Paradigms for grammar exercises | Yes. BY-SA 3.0 §4(b) allows adaptations under a later version, so 4.0. |
+| UniMorph ita, spa, fra, lat, por | CC BY-SA 3.0 | Paradigms for grammar exercises and bundled Portuguese conjugation tables | Yes. BY-SA 3.0 §4(b) allows adaptations under a later version, so 4.0. |
 | Wiktionary REST API (runtime) | CC BY-SA 4.0 | Definitions shown with a link back | Yes. Nothing is bundled. |
 | Apple system voices, SF Symbols, system fonts | Apple SDK terms | Speech, icons, type | Yes, for apps on Apple platforms. Symbols are referenced by name; none are in the repository. |
 

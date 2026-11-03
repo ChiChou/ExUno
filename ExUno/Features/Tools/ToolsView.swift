@@ -103,7 +103,7 @@ private struct ToolPreview: Identifiable {
         case .date, .calendar: value = now.formatted(date: .numeric, time: .omitted)
         case .market: input.text = "250"; value = "250 g"
         case .phone:
-            input.text = engine.code == .fr ? "06 12 34 56 78" : engine.code == .es ? "612 345 678" : "333 1234567"
+            input.text = engine.code == .fr ? "06 12 34 56 78" : engine.code == .es ? "612 345 678" : engine.code == .pt ? "912 345 678" : "333 1234567"
             value = input.text
         case .years: input.text = "1485"; value = "1485"
         case .verbs: value = ""
@@ -284,7 +284,7 @@ struct ConverterTool: View {
         case .numbers: input.text = "1234"
         case .numerals: input.text = "MMXXVI"
         case .prices: input.text = "12,50"
-        case .phone: input.text = progress.language == .fr ? "06 12 34 56 78" : progress.language == .es ? "612 345 678" : "333 1234567"
+        case .phone: input.text = progress.language == .fr ? "06 12 34 56 78" : progress.language == .es ? "612 345 678" : progress.language == .pt ? "912 345 678" : "333 1234567"
         case .market:
             let unit = marketUnits.first ?? .gram
             input.text = unit.defaultText
@@ -405,7 +405,7 @@ struct VerbsTool: View {
     init(preset: String? = nil) { _input = State(initialValue: preset ?? "") }
 
     private var defaultVerb: String {
-        switch progress.language { case .it: return "andare"; case .es: return "tener"; case .fr: return "aller"; case .la: return "capiō" }
+        switch progress.language { case .it: return "andare"; case .es: return "tener"; case .fr: return "aller"; case .la: return "capiō"; case .pt: return "falar" }
     }
 
     var body: some View {

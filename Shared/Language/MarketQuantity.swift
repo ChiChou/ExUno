@@ -113,6 +113,15 @@ struct MarketQuantity {
             case .centilitre: noun = singular ? "centilitro" : "centilitros"
             default: noun = singular ? "litro" : "litros"
             }
+        case .pt:
+            number = try PortugueseNumbers.number(text)
+            switch unit {
+            case .etto: throw ConversionError("Italian etti are not a Portuguese unit name.")
+            case .kilogram: noun = singular ? "quilo" : "quilos"
+            case .centilitre: noun = singular ? "centilitro" : "centilitros"
+            case .decilitre: noun = singular ? "decilitro" : "decilitros"
+            default: noun = singular ? "litro" : "litros"
+            }
         case .la: return natural
         }
         let explicit = "\(number) \(noun)"
@@ -121,7 +130,7 @@ struct MarketQuantity {
             phrases.insert(explicit, at: 0)
         } else if unit == .etto, let index = phrases.firstIndex(where: { $0.contains("etto") || $0.contains("etti") }) {
             phrases.insert(phrases.remove(at: index), at: 0)
-        } else if unit == .kilogram, let index = phrases.firstIndex(where: { $0.contains("kilo") || $0.contains("chilo") || $0.contains("chili") }) {
+        } else if unit == .kilogram, let index = phrases.firstIndex(where: { $0.contains("kilo") || $0.contains("quilo") || $0.contains("chilo") || $0.contains("chili") }) {
             phrases.insert(phrases.remove(at: index), at: 0)
         }
         phrases.append(explicit)

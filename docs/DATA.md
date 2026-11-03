@@ -16,7 +16,7 @@ This fetches `exuno-packs.zip` from the repository's [`packs` release](https://g
 sh Scripts/prepare_data.sh
 ```
 
-This needs Python 3.9 or later (standard library only) and access to `raw.githubusercontent.com` and `github.com`. It downloads about 160 MB into `.cache/` (15 MB for the vocabulary, the rest for the grammar courses' UniMorph paradigms and Tatoeba sentences) and writes four packs and four grammar courses (70–80 kB each):
+This needs Python 3.9 or later (standard library only) and access to `raw.githubusercontent.com` and `github.com`. It downloads about 160 MB into `.cache/` (15 MB for the vocabulary, the rest for the grammar courses' UniMorph paradigms and Tatoeba sentences) and writes five packs, five grammar courses and Portuguese verb tables (70–80 kB each):
 
 | Pack | Entries | Size |
 | --- | --- | --- |
@@ -24,6 +24,7 @@ This needs Python 3.9 or later (standard library only) and access to `raw.github
 | `es.json` | 16,392 | 3.0 MB |
 | `fr.json` | 17,578 | 3.3 MB |
 | `la.json` | 997 | 0.1 MB |
+| `pt.json` (European Portuguese) | 8,470 | 1.5 MB |
 
 Run it again any time; verified downloads are reused. Delete `.cache/` to start from scratch.
 
@@ -33,12 +34,12 @@ Reads `Scripts/sources.json`. Every source has a URL pinned to a commit or relea
 
 | id | What | License |
 | --- | --- | --- |
-| `decks-italian`, `decks-spanish`, `decks-french` | Language-Learning-decks lists | MIT; wordfreq data CC BY-SA 4.0 |
+| `decks-italian`, `decks-spanish`, `decks-french`, `decks-portuguese` | Language-Learning-decks lists | MIT; wordfreq data CC BY-SA 4.0 |
 | `dcc-latin` | DCC Latin Core Vocabulary, CSV copy | CC BY-SA |
 | `omw-it` | Open Multilingual Wordnet 2.0, Italian (MultiWordNet) | CC BY 3.0 |
 | `omw-en` | Open Multilingual Wordnet 2.0, English (Princeton WordNet 3.0) | WordNet 3.0 license |
-| `tatoeba-it`, `-es`, `-fr`, `-la` | Tatoeba English sentence pairs, OPUS release v2026-07-08 (grammar courses) | CC BY 2.0 FR |
-| `unimorph-ita`, `-spa`, `-fra`, `-lat` | UniMorph paradigms (grammar courses) | CC BY-SA 3.0 |
+| `tatoeba-it`, `-es`, `-fr`, `-la`, `-pt` | Tatoeba English sentence pairs, OPUS release v2026-07-08 (grammar courses) | CC BY 2.0 FR |
+| `unimorph-ita`, `-spa`, `-fra`, `-lat`, `-por` | UniMorph paradigms (grammar courses) | CC BY-SA 3.0 |
 
 Options:
 
@@ -57,6 +58,7 @@ Tags Italian words with 17 learner topics (Animals, Food & Drink, Transport and 
 | Italian | Gender only when the deck's example shows a determiner before the noun, then the article from gender and spelling (*il, lo, la, l'*). Topics from step 2. |
 | Spanish | Gender and article only when the deck's example shows a determiner before the noun. Topics projected from Italian through the same English gloss and part of speech. |
 | French | Article and gender from `article_with_word`; for *l'*, gender from *un/une* in the example. Topics as for Spanish. |
+| Portuguese | The upstream shared-plus-European list, kept in its pinned order for stable ids. Article and gender only when an overt determiner appears before the noun in the source example. Topics projected through English gloss and part of speech. |
 | Latin | Lemma and principal parts split from the headword, gender from *m./f./n.*, four levels by frequency rank (I: 1–250 … IV: 751–1000), and 13 topic groups. |
 
 Every pack carries `"license": "CC BY-SA 4.0"` and an `"attribution"` string, so the notice travels with the file.
@@ -100,8 +102,16 @@ Ids come from the upstream order. When you bump a source, check that ids stay st
 3. Review the upstream diff and its license, paste the new `sha256`, and run `prepare_data.sh`.
 4. Update `ATTRIBUTIONS.md` if anything about the source changed.
 
-## Adding a language (Portuguese next)
+## Adding a language
 
 1. Add the deck to `sources.json`. Language-Learning-decks has `portuguese/brazilian_portuguese` and `portuguese/european_portuguese`, both MIT.
-2. Add a `decks(...)` call and topic names to `build_packs.py`.
+2. Add a `decks(...)` call, topic names, and reviewed article/gender handling to `build_packs.py`; add authored metadata to `pack_metadata.json`.
 3. Add a `LanguageCode` and a `LanguageEngine` (numbers, time, dates, conjugator) under `Shared/Language/`.
+
+## Portuguese details
+
+The first pack is European Portuguese (`pt`, speech locale `pt-PT`). The pinned upstream file combines 8,129 shared and 341 European entries; upstream translations and examples are machine-generated and can contain regional inconsistencies or errors. It is not a Brazilian course. Market units are authored in pack metadata (`g`, `kg`, `ml`, `cl`, `dl`, `l`).
+
+`build_portuguese_verbs.py` bundles 3,999 complete verb paradigms in `verbs-pt.json` from pinned UniMorph `por`, with six finite tenses. Incomplete tenses are omitted; unknown verbs return no conjugation rather than a guessed form. `portuguese_overrides.json` corrects malformed core cells in the source and is applied to both verb tables and grammar generation. Corrections were checked against [Infopédia estar](https://www.infopedia.pt/dicionarios/verbos-portugueses/estar), [ir](https://www.infopedia.pt/dicionarios/verbos-portugueses/ir), and [haver](https://www.infopedia.pt/dicionarios/verbos-portugueses/haver). The dictionary is a verification reference, not a scraped data source.
+
+The Portuguese grammar course uses the same pinned OPUS Tatoeba release as other courses. Tatoeba does not label each sentence by Portuguese variety. Generation excludes common distinctly Brazilian vocabulary and `estar` + gerund examples; this is a practical filter, not a guarantee that every sentence is exclusively European. Article/contraction gaps require a following known noun or adjective and exclude hyphenated clitics. Conjuntivo examples require `que` or `talvez`.

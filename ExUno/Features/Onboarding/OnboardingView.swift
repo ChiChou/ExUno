@@ -50,7 +50,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Ex Uno").font(Theme.display(44))
                 Text("Out of one, many.").font(Theme.display(22, weight: .medium)).foregroundStyle(Theme.amber)
-                Text("Latin gave the world Italian, Spanish and French. Learn them the way you meet them: on receipts, clocks, tickets and signs.")
+                Text("Latin gave the world Italian, Spanish, French and Portuguese. Learn them the way you meet them: on receipts, clocks, tickets and signs.")
                     .font(.title3).foregroundStyle(Theme.ink2).fixedSize(horizontal: false, vertical: true)
             }
             Text("Which language?").font(Theme.display(21)).padding(.top, 6)

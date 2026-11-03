@@ -3,10 +3,10 @@ import Foundation
 // MARK: - Languages
 
 enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
-    case it, es, fr, la
+    case it, es, fr, la, pt
     var id: String { rawValue }
 
-    /// Languages as shown in pickers: alphabetical by native name (Español, Français, Italiano, Latīna), so none comes first by design.
+    /// Languages as shown in pickers: alphabetical by native name (Español, Français, Italiano, Latīna, Português), so none comes first by design.
     /// Case order stays fixed because the daily challenge seeds on it.
     static var alphabetical: [LanguageCode] {
         allCases.sorted { $0.nativeName.compare($1.nativeName, options: [.diacriticInsensitive, .caseInsensitive]) == .orderedAscending }
@@ -18,6 +18,7 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         case .es: return "Spanish"
         case .fr: return "French"
         case .la: return "Latin"
+        case .pt: return "Portuguese (European)"
         }
     }
     var nativeName: String {
@@ -26,6 +27,7 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         case .es: return "Español"
         case .fr: return "Français"
         case .la: return "Latīna"
+        case .pt: return "Português"
         }
     }
     var hello: String {
@@ -34,6 +36,7 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         case .es: return "Hola"
         case .fr: return "Bonjour"
         case .la: return "Salvē"
+        case .pt: return "Olá"
         }
     }
     /// Voice used by AVSpeechSynthesizer. Latin has no system voice; an Italian voice gives an ecclesiastical-style reading.
@@ -42,6 +45,7 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         case .it, .la: return "it-IT"
         case .es: return "es-ES"
         case .fr: return "fr-FR"
+        case .pt: return "pt-PT"
         }
     }
     var engine: LanguageEngine {
@@ -50,6 +54,7 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         case .es: return SpanishEngine()
         case .fr: return FrenchEngine()
         case .la: return LatinEngine()
+        case .pt: return PortugueseEngine()
         }
     }
     var strings: UIStrings { UIStrings.for(self) }

@@ -24,6 +24,8 @@ ICONS = {"animals": "pawprint.fill", "body": "figure.arms.open", "clothing": "ts
          "nature-weather": "leaf.fill", "people-work": "person.2.fill", "places": "mappin.and.ellipse",
          "sports-games": "sportscourt.fill", "time": "clock.fill", "transport": "tram.fill"}
 NAMES = {
+ "pt": ["Animais", "Corpo", "Vestuário", "Cores e formas", "Comunicação", "Família", "Sentimentos", "Comida e bebidas", "Casa",
+        "Ideias e estudo", "Música", "Natureza e tempo", "Pessoas e trabalho", "Lugares", "Desporto e jogos", "Tempo e calendário", "Transportes"],
  "it": ["Animali", "Corpo", "Abbigliamento", "Colori e forme", "Comunicazione", "Famiglia", "Sentimenti", "Cibo e bevande", "Casa",
         "Idee e studio", "Musica", "Natura e meteo", "Persone e lavoro", "Luoghi", "Sport e giochi", "Tempo e calendario", "Trasporti"],
  "es": ["Animales", "Cuerpo", "Ropa", "Colores y formas", "Comunicación", "Familia", "Sentimientos", "Comida y bebida", "Casa",
@@ -121,6 +123,14 @@ def decks(path, code, it_topics, tags=None):
                     r["g"] = g
                     art = italian_article(r["w"], pos, g)
                     if art: r["a"] = art
+            elif code == "pt":
+                word = re.escape(r["w"].lower())
+                sentence = e["example_sentence_native"].lower()
+                # Require an overt determiner in the source; never guess gender from spelling.
+                if re.search(rf"\b(?:a|uma|da|na|esta|essa|aquela|minha|tua|sua|nossa)\s+{word}\b", sentence):
+                    r["g"], r["a"] = "f", "a"
+                elif re.search(rf"\b(?:o|um|do|no|este|esse|aquele|meu|teu|seu|nosso)\s+{word}\b", sentence):
+                    r["g"], r["a"] = "m", "o"
             else:
                 g = spanish_gender(r["w"], e["example_sentence_native"])
                 if g:
@@ -183,6 +193,7 @@ def latin(path):
     return out
 
 ATTRIBUTION = {
+    "pt": "European Portuguese vocabulary (shared and European entries): Language-Learning-decks (© 2025 GENERAL NEURO, MIT), wordfreq (CC BY-SA 4.0, Robyn Speer). Topics projected from MultiWordNet (CC BY 3.0) and Princeton WordNet 3.0.",
     "it": "Italian vocabulary: Language-Learning-decks (© 2025 GENERAL NEURO, MIT) with wordfreq data (CC BY-SA 4.0, Robyn Speer). Topics: MultiWordNet (CC BY 3.0) and Princeton WordNet 3.0 via Open Multilingual Wordnet 2.0.",
     "es": "Spanish vocabulary: Language-Learning-decks (© 2025 GENERAL NEURO, MIT) with wordfreq data (CC BY-SA 4.0, Robyn Speer). Topics projected from MultiWordNet (CC BY 3.0) and Princeton WordNet 3.0.",
     "fr": "French vocabulary: Language-Learning-decks (© 2025 GENERAL NEURO, MIT) with wordfreq data (CC BY-SA 4.0, Robyn Speer). Topics projected from MultiWordNet (CC BY 3.0) and Princeton WordNet 3.0.",
@@ -208,6 +219,7 @@ def main():
     write(os.path.join(a.out, "it.json"), pack("it", CEFR, ["A1", "A2"], topics_for("it"), it))
     write(os.path.join(a.out, "es.json"), pack("es", CEFR, ["A1", "A2"], topics_for("es"), decks(src("decks-spanish", "spanish.json"), "es", idx)))
     write(os.path.join(a.out, "fr.json"), pack("fr", CEFR, ["A1", "A2"], topics_for("fr"), decks(src("decks-french", "french.json"), "fr", idx)))
+    write(os.path.join(a.out, "pt.json"), pack("pt", CEFR, ["A1", "A2"], topics_for("pt"), decks(src("decks-portuguese", "portuguese_european_with_mixed_unsorted.json"), "pt", idx)))
     write(os.path.join(a.out, "la.json"), pack("la", ["I", "II", "III", "IV"], ["I"],
           [{"id": t, "name": n, "icon": i} for t, n, i, _ in LATIN_GROUPS], latin(src("dcc-latin", "dcc-latin-core-list.csv"))))
 
