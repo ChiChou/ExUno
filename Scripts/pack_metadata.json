@@ -1,0 +1,6 @@
+{
+  "it": { "marketUnits": ["g", "etto", "kg", "ml", "cl", "l"] },
+  "es": { "marketUnits": ["g", "kg", "ml", "cl", "l"] },
+  "fr": { "marketUnits": ["g", "kg", "ml", "cl", "dl", "l"] },
+  "la": { "marketUnits": [] }
+}

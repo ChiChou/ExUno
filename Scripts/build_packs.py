@@ -196,13 +196,15 @@ def main():
     ap.add_argument("--topics", default=os.path.join(root, ".cache", "topics-it.json"), help="output of build_topics.py")
     ap.add_argument("--out", default=os.path.join(root, "ExUno", "Resources", "Packs"))
     a = ap.parse_args()
+    metadata = json.load(open(os.path.join(root, "Scripts", "pack_metadata.json"), encoding="utf-8"))
     src = lambda sid, name: os.path.join(a.cache, sid, name)
     tags = json.load(open(a.topics, encoding="utf-8"))["tags"]
     it = decks(src("decks-italian", "italian.json"), "it", {}, tags)
     idx = topic_index(it)
     def pack(code, levels, default, topics, entries):
         return {"code": code, "schema": 2, "license": "CC BY-SA 4.0", "attribution": ATTRIBUTION[code],
-                "levels": levels, "defaultLevels": default, "topics": topics, "entries": entries}
+                "levels": levels, "defaultLevels": default, "topics": topics,
+                "marketUnits": metadata[code]["marketUnits"], "entries": entries}
     write(os.path.join(a.out, "it.json"), pack("it", CEFR, ["A1", "A2"], topics_for("it"), it))
     write(os.path.join(a.out, "es.json"), pack("es", CEFR, ["A1", "A2"], topics_for("es"), decks(src("decks-spanish", "spanish.json"), "es", idx)))
     write(os.path.join(a.out, "fr.json"), pack("fr", CEFR, ["A1", "A2"], topics_for("fr"), decks(src("decks-french", "french.json"), "fr", idx)))

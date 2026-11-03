@@ -76,9 +76,11 @@ struct ItalianEngine: LanguageEngine {
             return ToolOutput(label: "A gruppi", headline: p.grouped, sub: p.display, rows: [
                 Expr(label: "Cifra per cifra", text: p.single), Expr(label: "Il mio numero", text: "Il mio numero è \(p.grouped)")])
         case .market:
-            guard let q = Int(v.filter(\.isNumber)) else { throw ConversionError("Type a quantity.") }
-            let w = input.unit == "g" ? try ItalianEveryday.weight(grams: q) : try ItalianEveryday.volume(millilitres: q)
-            return ToolOutput(label: "Al banco", headline: "Vorrei \(w[0]), per favore", sub: "\(q) \(input.unit)",
+            let quantity = try MarketQuantity(input)
+            let q = quantity.baseValue
+            let natural = quantity.unit.isMass ? try ItalianEveryday.weight(grams: q) : try ItalianEveryday.volume(millilitres: q)
+            let w = try quantity.expressions(natural: natural, language: .it)
+            return ToolOutput(label: "Al banco", headline: "Vorrei \(w[0]), per favore", sub: quantity.display,
                               rows: w.dropFirst().map { Expr(label: "Oppure", text: $0) } + [Expr(label: "Risposta", text: "Basta così, grazie")])
         case .years:
             guard let y = Int(v.filter(\.isNumber)) else { throw ConversionError("Type a year.") }

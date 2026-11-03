@@ -139,10 +139,13 @@ struct Readout: View {
     let label: String
     let text: String
     var sub: String? = nil
+    var minimumTextLines = 1
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Eyebrow(text: label, color: Theme.onSlab.opacity(0.6))
-            Text(text).font(Theme.display(22, weight: .semibold)).foregroundStyle(Theme.onSlab).fixedSize(horizontal: false, vertical: true)
+            Text(text).font(Theme.display(22, weight: .semibold)).foregroundStyle(Theme.onSlab)
+                .lineLimit(minimumTextLines...)
+                .fixedSize(horizontal: false, vertical: true)
             if let sub { Text(sub).font(Theme.mono(13)).foregroundStyle(Theme.onSlab.opacity(0.65)) }
             HStack(spacing: 8) {
                 Spacer()

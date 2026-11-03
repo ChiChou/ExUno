@@ -65,6 +65,14 @@ struct LanguagePackFile: Codable {
     let defaultLevels: [String]
     let topics: [Topic]
     let entries: [Entry]
+    let marketUnits: [String]?
+
+    var availableMarketUnits: [MarketUnit] {
+        var seen = Set<MarketUnit>()
+        // Older packs retain the original universal g/ml selector.
+        return (marketUnits ?? ["g", "ml"]).compactMap(MarketUnit.init(rawValue:))
+            .filter { seen.insert($0).inserted }
+    }
 }
 
 /// A loaded pack plus its search index.
@@ -74,6 +82,7 @@ final class LoadedPack {
     let defaultLevels: [String]
     let topics: [Topic]
     let entries: [Entry]
+    let marketUnits: [MarketUnit]
     let byId: [Int: Entry]
     fileprivate let keys: [(word: String, translation: String)]
 
@@ -83,6 +92,7 @@ final class LoadedPack {
         defaultLevels = file.defaultLevels
         topics = file.topics
         entries = file.entries
+        marketUnits = file.availableMarketUnits
         var map: [Int: Entry] = [:]
         map.reserveCapacity(file.entries.count)
         for e in file.entries { map[e.i] = e }

@@ -256,9 +256,11 @@ struct FrenchEngine: LanguageEngine {
             let p = try Self.phone(v)
             return ToolOutput(label: "Par deux", headline: p.grouped, sub: p.display, rows: [Expr(label: "Chiffre par chiffre", text: p.single), Expr(label: "Mon numéro", text: "Mon numéro, c'est le \(p.grouped)")])
         case .market:
-            guard let q = Int(v.filter(\.isNumber)) else { throw ConversionError("Type a quantity.") }
-            let w = input.unit == "g" ? try Self.weight(grams: q) : try Self.volume(ml: q)
-            return ToolOutput(label: "Au marché", headline: "Je voudrais \(w[0]), s'il vous plaît", sub: "\(q) \(input.unit)",
+            let quantity = try MarketQuantity(input)
+            let q = quantity.baseValue
+            let natural = quantity.unit.isMass ? try Self.weight(grams: q) : try Self.volume(ml: q)
+            let w = try quantity.expressions(natural: natural, language: .fr)
+            return ToolOutput(label: "Au marché", headline: "Je voudrais \(w[0]), s'il vous plaît", sub: quantity.display,
                               rows: w.dropFirst().map { Expr(label: "Ou", text: $0) } + [Expr(label: "Le marchand", text: "Et avec ceci ?"), Expr(label: "Réponse", text: "Ce sera tout, merci")])
         case .years:
             guard let y = Int(v.filter(\.isNumber)), (1...2999).contains(y) else { throw ConversionError("Use a year from 1 to 2999.") }

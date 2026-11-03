@@ -18,4 +18,5 @@ actual=$(echo "$actual" | cut -d' ' -f1)
 unzip -q "$TMP/exuno-packs.zip" -d "$TMP"
 mkdir -p ExUno/Resources/Packs
 cp "$TMP"/exuno-packs/*.json ExUno/Resources/Packs/
+${PYTHON:-python3} Scripts/apply_pack_metadata.py
 echo "Installed packs (CC BY-SA 4.0, see ATTRIBUTIONS.md) into ExUno/Resources/Packs."

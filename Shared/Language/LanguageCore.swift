@@ -84,7 +84,6 @@ enum ToolKind: String, CaseIterable, Identifiable, Codable, Hashable {
         case .calendar: return "calendar.badge.clock"
         }
     }
-    var hasDrill: Bool { self != .verbs }
 }
 
 struct ToolInput {

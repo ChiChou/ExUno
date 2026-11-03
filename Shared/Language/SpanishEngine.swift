@@ -267,9 +267,11 @@ struct SpanishEngine: LanguageEngine {
             let p = try Self.phone(v)
             return ToolOutput(label: "En grupos", headline: p.grouped, sub: p.display, rows: [Expr(label: "Cifra a cifra", text: p.single), Expr(label: "Mi número", text: "Mi número es el \(p.grouped)")])
         case .market:
-            guard let q = Int(v.filter(\.isNumber)) else { throw ConversionError("Type a quantity.") }
-            let w = input.unit == "g" ? try Self.weight(grams: q) : try Self.volume(ml: q)
-            return ToolOutput(label: "En el mercado", headline: "Póngame \(w[0]), por favor", sub: "\(q) \(input.unit)",
+            let quantity = try MarketQuantity(input)
+            let q = quantity.baseValue
+            let natural = quantity.unit.isMass ? try Self.weight(grams: q) : try Self.volume(ml: q)
+            let w = try quantity.expressions(natural: natural, language: .es)
+            return ToolOutput(label: "En el mercado", headline: "Póngame \(w[0]), por favor", sub: quantity.display,
                               rows: w.dropFirst().map { Expr(label: "O bien", text: $0) } + [Expr(label: "El vendedor", text: "¿Algo más?"), Expr(label: "Respuesta", text: "Nada más, gracias")])
         case .years:
             guard let y = Int(v.filter(\.isNumber)), (1...2999).contains(y) else { throw ConversionError("Use a year from 1 to 2999.") }

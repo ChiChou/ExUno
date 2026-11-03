@@ -4,24 +4,57 @@ struct ToolsView: View {
     @Environment(StudyProgress.self) private var progress
     @Environment(Router.self) private var router
     @State private var path: [ToolKind] = []
+    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var previewDate = Date()
 
     var body: some View {
         let engine = progress.engine
-        let tools = engine.tools.filter { $0 != .verbs }   // the conjugator lives in the Grammar tab
+        let previews = engine.tools.filter { $0 != .verbs }.map { ToolPreview(tool: $0, engine: engine, now: previewDate) }
         NavigationStack(path: $path) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(progress.strings.tools).font(Theme.display(34))
-                    VStack(spacing: 0) {
-                        ForEach(tools) { tool in
-                            NavigationLink(value: tool) { ToolRow(tool: tool, title: engine.title(tool)) }.buttonStyle(.plain)
-                            if tool != tools.last { Divider().padding(.leading, 66) }
+            GeometryReader { geometry in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(progress.strings.tools)
+                                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                                Spacer(minLength: 8)
+                                Text(progress.language.rawValue.uppercased())
+                                    .font(.caption.weight(.bold))
+                                    .padding(.horizontal, 10).padding(.vertical, 7)
+                                    .background(Theme.surface2, in: Capsule())
+                                    .accessibilityLabel(progress.language.englishName)
+                            }
+                            Text("Numbers, dates and everyday language.")
+                                .font(.subheadline).foregroundStyle(Theme.ink2)
+                        }
+                        Spacer(minLength: 12)
+                        if let first = previews.first {
+                            NavigationLink(value: first.tool) {
+                                ToolTile(preview: first, featured: true)
+                            }.buttonStyle(.plain)
+                        }
+                        if previews.count > 1 {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("IN EVERYDAY LIFE")
+                                    .font(.caption.weight(.semibold)).tracking(1.2)
+                                    .foregroundStyle(Theme.ink2)
+                                LazyVGrid(columns: typeSize.isAccessibilitySize
+                                          ? [GridItem(.flexible())]
+                                          : [GridItem(.adaptive(minimum: 145), spacing: 12)], spacing: 12) {
+                                    ForEach(previews.dropFirst()) { preview in
+                                        NavigationLink(value: preview.tool) {
+                                            ToolTile(preview: preview)
+                                        }.buttonStyle(.plain)
+                                    }
+                                }
+                            }
                         }
                     }
-                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.rule, lineWidth: 1))
+                    .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 24)
+                    .frame(minHeight: geometry.size.height, alignment: .bottom)
                 }
-                .padding(.horizontal, 16).padding(.vertical, 12)
             }
             .pageBackground()
             .toolbar(.hidden, for: .navigationBar)
@@ -29,6 +62,18 @@ struct ToolsView: View {
         }
         .onAppear { consumeDeepLink() }
         .onChange(of: router.tool) { _, _ in consumeDeepLink() }
+        .task(id: scenePhase == .active && router.tab == .tools && path.isEmpty) {
+            guard scenePhase == .active, router.tab == .tools, path.isEmpty else { return }
+            previewDate = Date()
+            while !Task.isCancelled {
+                do { try await Task.sleep(for: .seconds(1)) }
+                catch { return }
+                let now = Date()
+                if !Calendar.current.isDate(now, equalTo: previewDate, toGranularity: .minute) {
+                    previewDate = now
+                }
+            }
+        }
     }
 
     private func consumeDeepLink() {
@@ -38,45 +83,104 @@ struct ToolsView: View {
     }
 }
 
-struct ToolRow: View {
+/// Examples use the same offline engines as the converters; time and date are live.
+private struct ToolPreview: Identifiable {
     let tool: ToolKind
     let title: String
-    var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: tool.icon)
-                .font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.onAccent)
-                .frame(width: 40, height: 40)
-                .background(Theme.accent, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
-            Text(title).font(.system(size: 17, weight: .semibold)).foregroundStyle(Theme.ink)
-            Spacer()
-            Image(systemName: "chevron.right").font(.caption.weight(.bold)).foregroundStyle(Theme.ink2)
+    let value: String
+    let phrase: String
+    var id: ToolKind { tool }
+
+    init(tool: ToolKind, engine: LanguageEngine, now: Date) {
+        self.tool = tool
+        title = engine.title(tool)
+        var input = ToolInput()
+        input.mode = "number"
+        input.hour = Calendar.current.component(.hour, from: now)
+        input.minute = Calendar.current.component(.minute, from: now)
+        input.date = now
+        switch tool {
+        case .numbers: input.text = "42"; value = "42"
+        case .numerals: input.text = "XLII"; value = "XLII → 42"
+        case .prices: input.text = "12,50"; value = "€12,50"
+        case .time: value = String(format: "%02d:%02d", input.hour, input.minute)
+        case .date, .calendar: value = now.formatted(date: .numeric, time: .omitted)
+        case .market: input.text = "250"; value = "250 g"
+        case .phone:
+            input.text = engine.code == .fr ? "06 12 34 56 78" : engine.code == .es ? "612 345 678" : "333 1234567"
+            value = input.text
+        case .years: input.text = "1485"; value = "1485"
+        case .verbs: value = ""
         }
-        .padding(.horizontal, 14).padding(.vertical, 12)
-        .contentShape(Rectangle())
+        let output = try? engine.run(tool, input)
+        phrase = (tool == .date ? output?.rows.first?.text : output?.headline) ?? title
+    }
+}
+
+private struct ToolTile: View {
+    let preview: ToolPreview
+    var featured = false
+    @Environment(\.dynamicTypeSize) private var typeSize
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 8) {
+                if !typeSize.isAccessibilitySize {
+                    Image(systemName: preview.tool.icon)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(featured ? Theme.onSlab : Theme.accent)
+                        .frame(width: 34, height: 34)
+                        .background(featured ? Theme.onSlab.opacity(0.12) : Theme.accentSoft,
+                                    in: RoundedRectangle(cornerRadius: 10))
+                        .accessibilityHidden(true)
+                }
+                Text(preview.title)
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(featured ? Theme.onSlab : Theme.ink)
+                    .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                Image(systemName: "arrow.up.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(featured ? Theme.onSlab.opacity(0.7) : Theme.ink2)
+                    .accessibilityHidden(true)
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                Text(preview.value)
+                    .font(.system(.title3, design: .monospaced, weight: .medium))
+                    .foregroundStyle(featured ? Theme.onSlab : Theme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                if featured {
+                    Text(preview.phrase)
+                        .font(.title3)
+                        .foregroundStyle(Theme.onSlab.opacity(0.8))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(featured ? 20 : 16)
+        .frame(maxWidth: .infinity, minHeight: featured ? nil : 110, alignment: .topLeading)
+        .background(featured ? Theme.slab : Theme.surface,
+                    in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .stroke(featured ? Color.clear : Theme.rule, lineWidth: 1))
+        .contentShape(RoundedRectangle(cornerRadius: 20))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(preview.title), \(preview.value), \(preview.phrase)")
     }
 }
 
 struct ToolPage: View {
     @Environment(StudyProgress.self) private var progress
     let tool: ToolKind
-    @State private var drill = false
 
     var body: some View {
-        let s = progress.strings
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                if tool.hasDrill {
-                    Picker("", selection: $drill) { Text(s.write).tag(false); Text(s.listen).tag(true) }.pickerStyle(.segmented)
+        Group {
+            if tool == .verbs {
+                ScrollView {
+                    VerbsTool().padding(.horizontal, 16).padding(.vertical, 12)
                 }
-                if drill && tool.hasDrill {
-                    DrillView(tool: tool)
-                } else if tool == .verbs {
-                    VerbsTool()
-                } else {
-                    ConverterTool(tool: tool)
-                }
+            } else {
+                ConverterTool(tool: tool)
             }
-            .padding(.horizontal, 16).padding(.vertical, 12)
         }
         .pageBackground()
         .scrollDismissesKeyboard(.interactively)
@@ -90,22 +194,93 @@ struct ToolPage: View {
 
 struct ConverterTool: View {
     @Environment(StudyProgress.self) private var progress
+    @Environment(Vocabulary.self) private var vocab
+    @Environment(Router.self) private var router
+    @Environment(\.scenePhase) private var scenePhase
     let tool: ToolKind
     @State private var input = ToolInput()
+    @State private var followsClock = true
+
+    private var marketUnits: [MarketUnit] {
+        guard let pack = vocab.current, pack.code == progress.language else { return [] }
+        return pack.marketUnits
+    }
+
+    private var isClockTool: Bool { tool == .time || tool == .date || tool == .calendar }
+    private var clockIsRunning: Bool {
+        isClockTool && followsClock && scenePhase == .active && router.tab == .tools
+    }
 
     var body: some View {
         let engine = progress.engine
-        VStack(alignment: .leading, spacing: 12) {
-            inputArea(engine)
-            output(engine)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                output(engine)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(alignment: .leading, spacing: 12) {
+                inputArea(engine)
+            }
+            .padding(16)
+            .background(Theme.surface2)
+            .overlay(alignment: .top) { Divider() }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button(progress.strings.done) {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            }
         }
         .onAppear(perform: setDefaults)
+        .task(id: clockIsRunning) {
+            guard clockIsRunning else { return }
+            syncClock()
+            // This timer is cancelled when the page leaves, the app backgrounds,
+            // or the learner selects a custom value. Only changed values redraw.
+            while !Task.isCancelled {
+                do { try await Task.sleep(for: .seconds(1)) }
+                catch { return }
+                syncClock()
+            }
+        }
+    }
+
+    private func syncClock() {
+        guard followsClock else { return }
+        let now = Date()
+        let calendar = Calendar.current
+        if tool == .time {
+            let hour = calendar.component(.hour, from: now)
+            let minute = calendar.component(.minute, from: now)
+            if input.hour != hour { input.hour = hour }
+            if input.minute != minute { input.minute = minute }
+        } else if tool == .date || tool == .calendar {
+            if !calendar.isDate(input.date, inSameDayAs: now) { input.date = now }
+        }
+    }
+
+    private func useCurrentValue() {
+        followsClock = true
+        syncClock()
+    }
+
+    private func selected<Value>(_ keyPath: WritableKeyPath<ToolInput, Value>) -> Binding<Value> {
+        Binding(get: { input[keyPath: keyPath] }, set: { value in
+            followsClock = false
+            input[keyPath: keyPath] = value
+        })
     }
 
     private func setDefaults() {
         let now = Date()
         input.hour = Calendar.current.component(.hour, from: now)
-        input.minute = Calendar.current.component(.minute, from: now) / 5 * 5
+        input.minute = Calendar.current.component(.minute, from: now)
         input.date = now
         input.mode = "number"
         input.form = progress.engine.ordinalForms.first?.id ?? ""
@@ -114,7 +289,10 @@ struct ConverterTool: View {
         case .numerals: input.text = "MMXXVI"
         case .prices: input.text = "12,50"
         case .phone: input.text = progress.language == .fr ? "06 12 34 56 78" : progress.language == .es ? "612 345 678" : "333 1234567"
-        case .market: input.text = "250"; input.unit = "g"
+        case .market:
+            let unit = marketUnits.first ?? .gram
+            input.text = unit.defaultText
+            input.unit = unit.rawValue
         case .years: input.text = progress.language == .la ? "753" : "1485"
         default: break
         }
@@ -134,27 +312,61 @@ struct ConverterTool: View {
         case .prices:
             BigField(text: $input.text, placeholder: "0,00", prefix: "€")
         case .time:
-            HStack(spacing: 8) {
-                Picker("Hour", selection: $input.hour) { ForEach(0..<24, id: \.self) { Text(String(format: "%02d", $0)).tag($0) } }
-                Text(":").font(Theme.mono(28))
-                Picker("Minutes", selection: $input.minute) { ForEach(0..<60, id: \.self) { Text(String(format: "%02d", $0)).tag($0) } }
+            HStack {
+                Text(followsClock ? "Current time" : "Selected time")
+                    .font(.subheadline).foregroundStyle(Theme.ink2)
+                Spacer()
+                Button("Now", action: useCurrentValue).disabled(followsClock)
             }
-            .pickerStyle(.wheel).frame(height: 120)
-            HStack { Spacer(); ClockFace(hour: input.hour, minute: input.minute).frame(width: 150, height: 150); Spacer() }
+            HStack(spacing: 12) {
+                InteractiveClock(hour: selected(\.hour), minute: selected(\.minute)) {
+                    followsClock = false
+                }
+                .frame(width: 100, height: 100)
+                HStack(spacing: 4) {
+                    Picker("Hour", selection: selected(\.hour)) {
+                        ForEach(0..<24, id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
+                    }
+                    Text(":").font(Theme.mono(28))
+                    Picker("Minutes", selection: selected(\.minute)) {
+                        ForEach(0..<60, id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
+                    }
+                }
+                .pickerStyle(.wheel).frame(height: 100)
+            }
         case .date, .calendar:
-            DatePicker("", selection: $input.date, displayedComponents: .date)
-                .datePickerStyle(.graphical).tint(Theme.accent).labelsHidden()
-                .padding(8).background(Theme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            HStack {
+                DatePicker("Date", selection: selected(\.date), displayedComponents: .date)
+                    .datePickerStyle(.compact).tint(Theme.accent)
+                    .font(.headline)
+                Button("Today", action: useCurrentValue).disabled(followsClock)
+            }.frame(minHeight: 44)
         case .phone:
             BigField(text: $input.text, placeholder: "06 12 34 56 78", keyboard: .phonePad)
         case .market:
-            Picker("", selection: $input.unit) { Text("g").tag("g"); Text("ml").tag("ml") }.pickerStyle(.segmented)
-                .onChange(of: input.unit) { _, u in input.text = u == "g" ? "250" : "500" }
-            BigField(text: $input.text, placeholder: "250", keyboard: .numberPad, suffix: input.unit)
+            HStack(spacing: 12) {
+                BigField(text: $input.text, placeholder: "250", keyboard: .decimalPad)
+                    .accessibilityLabel("Quantity")
+                Picker("Unit", selection: $input.unit) {
+                    ForEach(marketUnits) { unit in
+                        Text(unit.label).tag(unit.rawValue)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .frame(width: 88, height: 100)
+                .clipped()
+                .accessibilityLabel("Unit")
+                .onChange(of: input.unit) { previous, current in
+                    guard let old = MarketUnit(rawValue: previous), let next = MarketUnit(rawValue: current) else { return }
+                    input.text = old.converted(input.text, to: next)
+                }
+            }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(input.unit == "g" ? [100, 200, 250, 500, 750, 1000, 1500, 2000] : [250, 330, 500, 750, 1000, 1500], id: \.self) { q in
-                        Chip(text: RealiaFormat.quantity(q, input.unit), on: input.text == "\(q)") { input.text = "\(q)" }
+                    if let unit = MarketUnit(rawValue: input.unit) {
+                        ForEach(unit.presets, id: \.self) { quantity in
+                            Chip(text: unit.display(quantity), on: input.text == quantity) { input.text = quantity }
+                        }
                     }
                 }
             }
@@ -171,60 +383,20 @@ struct ConverterTool: View {
         if !needsText || !input.text.trimmingCharacters(in: .whitespaces).isEmpty {
             switch Result(catching: { try engine.run(tool, input) }) {
             case .success(let out):
-                Readout(label: out.label, text: out.headline, sub: out.sub)
-                ForEach(out.rows) { AltRow(label: $0.label, text: $0.text) }
+                Readout(label: out.label, text: out.headline, sub: isClockTool ? nil : out.sub,
+                        minimumTextLines: tool == .time ? 2 : 1)
+                if !out.rows.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Other ways to say it")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Theme.ink2)
+                        ForEach(out.rows) { AltRow(label: $0.label, text: $0.text) }
+                    }
+                }
             case .failure(let e):
                 ErrorReadout(message: e.localizedDescription)
             }
         }
-    }
-}
-
-// MARK: - Drill: hear the language, type the digits
-
-struct DrillView: View {
-    @Environment(StudyProgress.self) private var progress
-    @Environment(Speech.self) private var speech
-    let tool: ToolKind
-    @State private var item: DrillItem?
-    @State private var input = ""
-    @State private var answered = false
-    @State private var wasCorrect = false
-    @State private var showText = false
-
-    private var score: DrillScore { progress.pack.drills[tool.rawValue] ?? DrillScore() }
-
-    var body: some View {
-        let s = progress.strings
-        VStack(spacing: 14) {
-            if let item {
-                DrillPrompt(item: item, header: "\(score.correct) / \(score.total) · \(score.run) · \(score.best)", revealed: answered, showText: $showText)
-                AnswerField(placeholder: item.placeholder, text: $input, onSubmit: check)
-                if answered {
-                    Text(wasCorrect ? s.right : s.was(item.answer)).font(.headline).foregroundStyle(wasCorrect ? Theme.green : Theme.red)
-                }
-                Button(answered ? s.next : s.check, action: check).buttonStyle(Pill(style: .primary))
-            }
-        }
-        .onAppear { if item == nil { next() } }
-    }
-
-    private func next() {
-        let it = progress.engine.drill(tool)
-        item = it
-        input = ""; answered = false; showText = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { speech.speak(it.spoken, id: "speak:" + it.spoken) }
-    }
-
-    private func check() {
-        guard let item else { return }
-        if answered { next(); return }
-        wasCorrect = item.check(input)
-        answered = true
-        var sc = score
-        sc.total += 1
-        if wasCorrect { sc.correct += 1; sc.run += 1; sc.best = max(sc.best, sc.run) } else { sc.run = 0 }
-        progress.pack.drills[tool.rawValue] = sc
     }
 }
 

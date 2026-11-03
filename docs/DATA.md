@@ -61,6 +61,8 @@ Tags Italian words with 17 learner topics (Animals, Food & Drink, Transport and 
 
 Every pack carries `"license": "CC BY-SA 4.0"` and an `"attribution"` string, so the notice travels with the file.
 
+`Scripts/pack_metadata.json` supplies authored per-pack settings. Its ordered `marketUnits` list controls the Market unit wheel: shared metric units, Italian `etto`, and French `dl`. `build_packs.py` embeds this metadata, and `download_packs.sh` applies it to prebuilt packs through `apply_pack_metadata.py`. No runtime download is involved. The language engines still own pronunciation and grammatical forms; shared code handles exact decimal scaling. Older packs without this optional field keep the legacy g/ml choices; unknown future unit IDs are ignored.
+
 ### 4. Grammar courses: `Scripts/build_grammar.py`
 
 Reads the unit files in `Scripts/grammar/<code>.json` (notes, tables and which word forms compete in each unit, written for Ex Uno), the vocabulary packs from step 3, UniMorph and Tatoeba. Each unit gets up to 40 fill-in-the-blank items from real sentences, with English translations and wrong options from the same paradigm. The method, the filters and the format are described in [`GRAMMAR.md`](GRAMMAR.md).
@@ -71,6 +73,7 @@ Reads the unit files in `Scripts/grammar/<code>.json` (notes, tables and which w
 {
   "code": "it", "schema": 2, "license": "CC BY-SA 4.0", "attribution": "…",
   "levels": ["A1", "A2", "B1", "B2", "C1", "C2"], "defaultLevels": ["A1", "A2"],
+  "marketUnits": ["g", "etto", "kg", "ml", "cl", "l"],
   "topics": [{"id": "food-drink", "name": "Cibo e bevande", "icon": "fork.knife"}],
   "entries": [{"i": 19, "w": "anno", "t": "year", "l": "A1", "p": "noun", "x": "Buon anno!", "e": "Happy New Year!", "z": 6.18, "c": ["time"]}]
 }

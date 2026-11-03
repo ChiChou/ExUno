@@ -179,9 +179,27 @@ struct RealiaObject: View {
     }
 }
 
-struct ClockFace: View {
-    let hour: Int
-    let minute: Int
+struct ClockFace: View, Animatable {
+    var hourAngle: Double
+    var minuteAngle: Double
+    private var timeLabel: String
+
+    init(hour: Int, minute: Int) {
+        hourAngle = (Double(hour % 12) + Double(minute) / 60) * .pi / 6
+        minuteAngle = Double(minute) * .pi / 30
+        timeLabel = String(format: "%d:%02d", hour, minute)
+    }
+
+    init(hourAngle: Double, minuteAngle: Double) {
+        self.hourAngle = hourAngle
+        self.minuteAngle = minuteAngle
+        timeLabel = "Analog clock"
+    }
+
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(hourAngle, minuteAngle) }
+        set { hourAngle = newValue.first; minuteAngle = newValue.second }
+    }
     var body: some View {
         Canvas { ctx, size in
             let c = CGPoint(x: size.width / 2, y: size.height / 2)
@@ -196,14 +214,14 @@ struct ClockFace: View {
                 p.addLine(to: CGPoint(x: c.x + (r - 4) * sin(a), y: c.y - (r - 4) * cos(a)))
                 ctx.stroke(p, with: .color(ink), lineWidth: 2)
             }
-            let ha = (Double(hour % 12) + Double(minute) / 60) * .pi / 6
-            let ma = Double(minute) * .pi / 30
+            let ha = hourAngle
+            let ma = minuteAngle
             var hp = Path(); hp.move(to: c); hp.addLine(to: CGPoint(x: c.x + r * 0.5 * sin(ha), y: c.y - r * 0.5 * cos(ha)))
             ctx.stroke(hp, with: .color(ink), style: StrokeStyle(lineWidth: 5, lineCap: .round))
             var mp = Path(); mp.move(to: c); mp.addLine(to: CGPoint(x: c.x + r * 0.78 * sin(ma), y: c.y - r * 0.78 * cos(ma)))
             ctx.stroke(mp, with: .color(ink), style: StrokeStyle(lineWidth: 3, lineCap: .round))
             ctx.fill(Path(ellipseIn: CGRect(x: c.x - 4, y: c.y - 4, width: 8, height: 8)), with: .color(Theme.amber))
         }
-        .accessibilityLabel(String(format: "%d:%02d", hour, minute))
+        .accessibilityLabel(timeLabel)
     }
 }
