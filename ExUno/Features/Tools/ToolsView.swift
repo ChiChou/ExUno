@@ -381,7 +381,13 @@ struct ConverterTool: View {
                 }
             }
         case .years:
-            BigField(text: $input.text, placeholder: "1485", keyboard: progress.language == .la ? .asciiCapable : .numberPad)
+            HStack(spacing: 12) {
+                BigField(text: $input.text, placeholder: "1485", keyboard: progress.language == .la ? .asciiCapable : .numberPad)
+                YearDice {
+                    input.text = String(Int.random(in: 1...Calendar.current.component(.year, from: Date())))
+                }
+            }
+            .zIndex(1)
         case .verbs:
             EmptyView()
         }
