@@ -18,6 +18,8 @@ struct CardsView: View {
     @State private var trackingDrag = false
     @State private var dragBeganAtTop = true
     @State private var voiceOver = UIAccessibility.isVoiceOverRunning
+    @State private var motionClient = UUID()
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Per device and not synced: roaming is a way to look around, not part of study progress.
     /// It is the default; the last mode picked is kept here and in the synced study mode.
@@ -25,6 +27,9 @@ struct CardsView: View {
 
     private var settings: PackSettings { progress.settings }
     private var playfulRecall: Bool { !roaming && settings.mode == .recall }
+    private var motionEnabled: Bool {
+        router.tab == .cards && vocab.isReady && deck.current != nil && scenePhase == .active && !reduceMotion && !showOptions && !showSummary
+    }
 
     var body: some View {
         let s = progress.strings
@@ -57,7 +62,21 @@ struct CardsView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIAccessibility.voiceOverStatusDidChangeNotification)) { _ in
             voiceOver = UIAccessibility.isVoiceOverRunning
         }
-        .onDisappear { speech.stop() }
+        .onChange(of: motionEnabled, initial: true) { _, active in
+            if active { MotionFeedback.shared.acquire(motionClient) }
+            else { MotionFeedback.shared.release(motionClient) }
+        }
+        .onAppear { if motionEnabled { MotionFeedback.shared.acquire(motionClient) } }
+        .onChange(of: deck.revealed) { _, revealed in
+            if revealed && !deck.roaming { TouchFeedback.flip() }
+        }
+        .onChange(of: deck.index) { previous, current in
+            if deck.roaming && previous != current { TouchFeedback.tick() }
+        }
+        .onDisappear {
+            speech.stop()
+            MotionFeedback.shared.release(motionClient)
+        }
     }
 
     private func rebuild() {
@@ -145,6 +164,7 @@ struct CardsView: View {
                 ForEach(deck.queue.indices, id: \.self) { i in
                     if case .word(let id, _) = deck.queue[i], let e = vocab.entry(id) {
                         WordCardView(entry: e, showAnswer: true, reveal: {})
+                            .motionCard(active: motionEnabled)
                             .padding(.horizontal, 16)
                             .containerRelativeFrame([.horizontal, .vertical])
                             // Tilts away while sliding, like the thrown cards of the study modes; pivoting on the bottom keeps neighbours apart.
@@ -206,6 +226,7 @@ struct CardsView: View {
                 cardFace(card, shown: isShown(card))
             }
         }
+        .motionCard(active: motionEnabled && !transitioning && !trackingDrag)
         .overlay(alignment: .top) {
             if playfulRecall && deck.revealed && (abs(dragOffset) > 18 || dragY > 18) {
                 Label(dragY > abs(dragOffset) ? progress.strings.again : progress.strings.next,
@@ -286,6 +307,7 @@ struct CardsView: View {
 
     private func leave(_ grade: Grade, direction: CGFloat? = nil) {
         guard !transitioning else { return }
+        TouchFeedback.land()
         transitioning = true
         leaving = direction ?? (grade == .again ? -1 : 1)
         dragOffset = 0
@@ -298,6 +320,7 @@ struct CardsView: View {
 
     private func repeatCard() {
         guard !transitioning, deck.revealed else { return }
+        TouchFeedback.flip()
         transitioning = true
         let generation = deck.generation
         withAnimation(reduceMotion ? nil : .spring(duration: 0.18)) {
@@ -316,6 +339,7 @@ struct CardsView: View {
     private var undoButton: some View {
         Button {
             guard !transitioning, deck.undo(progress: progress) else { return }
+            TouchFeedback.tick()
             resetDrag()
             cardKey += 1
             speech.stop()

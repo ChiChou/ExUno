@@ -361,7 +361,10 @@ struct ConverterTool: View {
                 HStack(spacing: 8) {
                     if let unit = MarketUnit(rawValue: input.unit) {
                         ForEach(unit.presets, id: \.self) { quantity in
-                            Chip(text: unit.display(quantity), on: input.text == quantity) { input.text = quantity }
+                            Chip(text: unit.display(quantity), on: input.text == quantity) {
+                                input.text = quantity
+                                TouchFeedback.tick()
+                            }
                         }
                     }
                 }

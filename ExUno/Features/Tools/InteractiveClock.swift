@@ -59,6 +59,8 @@ struct InteractiveClock: View {
                             onEditingStarted()
                         }
                         if let time = dial.move(to: value.location, in: geometry.size) {
+                            if hour != time.hour { TouchFeedback.land() }
+                            else if minute != time.minute { TouchFeedback.tick() }
                             if hour != time.hour { hour = time.hour }
                             if minute != time.minute { minute = time.minute }
                         }
@@ -72,6 +74,7 @@ struct InteractiveClock: View {
                     onEditingStarted()
                     let step = direction == .increment ? 1 : -1
                     let total = (hour * 60 + minute + step + 1440) % 1440
+                    TouchFeedback.tick()
                     hour = total / 60
                     minute = total % 60
                 }
