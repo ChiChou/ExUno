@@ -13,8 +13,7 @@ struct WordsView: View {
     @Environment(Vocabulary.self) private var vocab
     @Environment(StudyProgress.self) private var progress
     @State private var query = ""
-    @State private var selected: Entry?
-    @State private var browsingEntries: [Entry] = []
+    @State private var selected: WordDetailSelection?
     @State private var wiktionaryTerm: String?
     @State private var counts = Counts()
 
@@ -50,8 +49,7 @@ struct WordsView: View {
                         }.frame(maxWidth: .infinity).padding(30)
                     } else {
                         EntryList(entries: list) {
-                            browsingEntries = list
-                            selected = $0
+                            selected = WordDetailSelection(entries: list, entry: $0)
                         }
                         HStack { Spacer(); Button("Wiktionary") { wiktionaryTerm = query.trimmingCharacters(in: .whitespaces) }.buttonStyle(Pill(style: .ghost, compact: true)); Spacer() }
                     }
@@ -63,8 +61,8 @@ struct WordsView: View {
         .scrollDismissesKeyboard(.immediately)
         .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: WordFilter.self) { WordListScreen(filter: $0) }
-        .sheet(item: $selected) { e in
-            WordDetailPager(entries: browsingEntries, selected: e).presentationDetents([.large])
+        .fullScreenCover(item: $selected) { selection in
+            WordDetailPager(entries: selection.entries, selected: selection.entry)
         }
         .sheet(item: Binding(get: { wiktionaryTerm.map { WiktionaryTerm(term: $0) } }, set: { wiktionaryTerm = $0?.term })) { t in
             WiktionaryView(term: t.term).presentationDetents([.medium, .large])
@@ -161,8 +159,7 @@ struct WordListScreen: View {
     @Environment(StudyProgress.self) private var progress
     let filter: WordFilter
     @State private var query = ""
-    @State private var selected: Entry?
-    @State private var browsingEntries: [Entry] = []
+    @State private var selected: WordDetailSelection?
 
     private var title: String {
         let s = progress.strings
@@ -217,8 +214,7 @@ struct WordListScreen: View {
                                     EntryRow(entry: e) {
                                         // Keep the visible order stable while the detail sheet is open,
                                         // including when a word is removed from the deck.
-                                        browsingEntries = list.flatMap(\.entries)
-                                        selected = e
+                                        selected = WordDetailSelection(entries: list.flatMap(\.entries), entry: e)
                                     }
                                     if e.id != section.entries.last?.id { Divider() }
                                 }
@@ -247,14 +243,22 @@ struct WordListScreen: View {
         .scrollDismissesKeyboard(.immediately)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $selected) { e in
-            WordDetailPager(entries: browsingEntries, selected: e).presentationDetents([.large])
+        .fullScreenCover(item: $selected) { selection in
+            WordDetailPager(entries: selection.entries, selected: selection.entry)
         }
     }
 }
 
+/// Keep the selection and its paging snapshot in one presentation value.
+private struct WordDetailSelection: Identifiable {
+    let entries: [Entry]
+    let entry: Entry
+    var id: Int { entry.id }
+}
+
 /// Swipe through a snapshot of the directory or search results in their displayed order.
 struct WordDetailPager: View {
+    @Environment(\.dismiss) private var dismiss
     let entries: [Entry]
     @State private var index: Int
 
@@ -264,52 +268,70 @@ struct WordDetailPager: View {
     }
 
     var body: some View {
-        if entries.count == 1 {
-            WordDetailView(entry: entries[0])
-        } else {
-            VStack(spacing: 0) {
-                GeometryReader { geometry in
-                    ScrollView(.horizontal) {
-                        LazyHStack(spacing: 0) {
-                            ForEach(entries.indices, id: \.self) { i in
-                                WordDetailView(entry: entries[i])
-                                    .frame(width: geometry.size.width, height: geometry.size.height)
-                                    .id(i)
+        Group {
+            if entries.count == 1 {
+                WordDetailView(entry: entries[0])
+            } else {
+                VStack(spacing: 0) {
+                    GeometryReader { geometry in
+                        ScrollView(.horizontal) {
+                            LazyHStack(spacing: 0) {
+                                ForEach(entries.indices, id: \.self) { i in
+                                    WordDetailView(entry: entries[i])
+                                        .frame(width: geometry.size.width, height: geometry.size.height)
+                                        .id(i)
+                                }
                             }
+                            .scrollTargetLayout()
                         }
-                        .scrollTargetLayout()
+                        .scrollTargetBehavior(.paging)
+                        .scrollIndicators(.hidden)
+                        .scrollPosition(id: Binding<Int?>(
+                            get: { index },
+                            set: { if let newIndex = $0 { index = newIndex } }
+                        ))
                     }
-                    .scrollTargetBehavior(.paging)
-                    .scrollIndicators(.hidden)
-                    .scrollPosition(id: Binding<Int?>(
-                        get: { index },
-                        set: { if let newIndex = $0 { index = newIndex } }
-                    ))
-                }
 
-                HStack {
-                    Button { move(by: -1) } label: {
-                        Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                    HStack {
+                        Button { move(by: -1) } label: {
+                            Image(systemName: "chevron.left").frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel("Previous word")
+                        .disabled(index == 0)
+                        Spacer()
+                        Text("\(index + 1) / \(entries.count)")
+                            .font(.footnote.monospacedDigit())
+                            .foregroundStyle(Theme.ink2)
+                            .accessibilityLabel("Word \(index + 1) of \(entries.count)")
+                        Spacer()
+                        Button { move(by: 1) } label: {
+                            Image(systemName: "chevron.right").frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel("Next word")
+                        .disabled(index == entries.count - 1)
                     }
-                    .accessibilityLabel("Previous word")
-                    .disabled(index == 0)
-                    Spacer()
-                    Text("\(index + 1) / \(entries.count)")
-                        .font(.footnote.monospacedDigit())
-                        .foregroundStyle(Theme.ink2)
-                        .accessibilityLabel("Word \(index + 1) of \(entries.count)")
-                    Spacer()
-                    Button { move(by: 1) } label: {
-                        Image(systemName: "chevron.right").frame(width: 44, height: 44)
-                    }
-                    .accessibilityLabel("Next word")
-                    .disabled(index == entries.count - 1)
+                    .tint(Theme.accent)
+                    .padding(.horizontal, 20)
                 }
-                .tint(Theme.accent)
-                .padding(.horizontal, 20)
+                .pageBackground()
             }
-            .pageBackground()
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HStack {
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark").font(.body.weight(.semibold))
+                        .foregroundStyle(Theme.ink2)
+                        .frame(width: 44, height: 44)
+                        .background(Theme.surface2, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Close word details")
+            }
+            .padding(.horizontal, 20).padding(.vertical, 4)
+            .background(Theme.bg)
+        }
+        .pageBackground()
     }
 
     private func move(by offset: Int) {

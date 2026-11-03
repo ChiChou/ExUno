@@ -502,15 +502,35 @@ struct VerbsTool: View {
     var body: some View {
         let q = input.trimmingCharacters(in: .whitespaces).lowercased()
         let entry = vocab.find(lemma: q)
+        let conjugation = progress.engine.conjugate(q, hint: entry?.verbHint)
         VStack(alignment: .leading, spacing: 12) {
             SearchField(text: $input, placeholder: defaultVerb)
             let suggestions = vocab.verbs(matching: q)
-            if !q.isEmpty && !suggestions.contains(where: { $0.word.lowercased() == q }) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) { ForEach(suggestions) { e in Chip(text: "\(e.word) · \(e.translation.split(separator: ",").first.map(String.init) ?? "")", on: false) { input = e.word } } }
+            if !q.isEmpty && !suggestions.isEmpty && (conjugation == nil || !suggestions.contains(where: { $0.word.lowercased() == q })) {
+                VStack(spacing: 0) {
+                    ForEach(suggestions) { suggestion in
+                        Button {
+                            input = suggestion.word
+                            TouchFeedback.tick()
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(suggestion.word).font(.body.weight(.semibold)).foregroundStyle(Theme.ink)
+                                Text(suggestion.translation).font(.subheadline).foregroundStyle(Theme.ink2)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                            .padding(.horizontal, 14).padding(.vertical, 8)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        if suggestion.id != suggestions.last?.id { Divider().padding(.horizontal, 14) }
+                    }
                 }
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.rule, lineWidth: 1))
             }
-            if let c = progress.engine.conjugate(q, hint: entry?.verbHint) {
+            if let c = conjugation {
                 VStack(alignment: .leading, spacing: 8) {
                     Eyebrow(text: c.kind, color: Theme.onSlab.opacity(0.6))
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -536,8 +556,8 @@ struct VerbsTool: View {
                         }
                     }
                 }
-            } else if !q.isEmpty {
-                ErrorReadout(message: "Type a verb in its dictionary form.")
+            } else if !q.isEmpty && suggestions.isEmpty {
+                Text(progress.strings.nothingHere).font(.subheadline).foregroundStyle(Theme.ink2)
             }
         }
         .onAppear { if input.isEmpty { input = defaultVerb } }
