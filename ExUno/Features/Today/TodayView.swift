@@ -197,13 +197,13 @@ struct GoalRing: View {
     }
 }
 
-/// Five items read aloud, answered with digits. Same items all day.
+/// Five daily questions, mixing bundled vocabulary, grammar and listening.
 struct DailyChallengeView: View {
     @Environment(StudyProgress.self) private var progress
+    @Environment(Vocabulary.self) private var vocab
+    @Environment(GrammarCourses.self) private var courses
     @Environment(Speech.self) private var speech
     @State private var input = ""
-    @State private var answered = false
-    @State private var wasCorrect = false
     @State private var showText = false
 
     private var items: [DrillItem] { progress.engine.dailyChallenge(day: StudyProgress.today()) }
@@ -211,10 +211,19 @@ struct DailyChallengeView: View {
         let d = StudyProgress.today()
         return progress.pack.challenge.day == d ? progress.pack.challenge : Challenge(day: d)
     }
+    private var ready: Bool {
+        vocab.isReady && vocab.current?.code == progress.language
+            && (courses.current?.code == progress.language.rawValue || courses.missing)
+    }
+    private var preparationKey: String {
+        "\(StudyProgress.today())|\(progress.language.rawValue)|\(ready)|\(progress.levels(in: vocab).joined(separator: ","))"
+    }
+    private var answerKey: String { "\(StudyProgress.today())|\(progress.language.rawValue)|\(state.index)" }
 
     var body: some View {
         let s = progress.strings
         let st = state
+        let answered = st.answerWasCorrect != nil
         Card {
             VStack(spacing: 14) {
                 if st.done {
@@ -223,34 +232,161 @@ struct DailyChallengeView: View {
                         Text(s.correctCount(st.correct, items.count)).font(Theme.display(20))
                         Hint(text: s.comeBack)
                     }.frame(maxWidth: .infinity)
+                } else if st.practice == nil {
+                    ProgressView(vocab.error ?? "").frame(maxWidth: .infinity).padding()
                 } else {
-                    let item = items[min(st.index, items.count - 1)]
-                    DrillPrompt(item: item, header: "\(st.index + 1) / \(items.count) · \(s.correctCount(st.correct, items.count))", revealed: answered, showText: $showText)
-                    AnswerField(placeholder: item.placeholder, text: $input, onSubmit: check)
-                    if answered {
-                        Text(wasCorrect ? s.right : s.was(item.answer)).font(.headline).foregroundStyle(wasCorrect ? Theme.green : Theme.red)
+                    let index = min(st.index, items.count - 1)
+                    let choice = st.practice?[index]
+                    Text("\(index + 1) / \(items.count) · \(s.correctCount(st.correct, items.count))")
+                        .font(.footnote).foregroundStyle(Theme.ink2)
+                    if let choice {
+                        DailyChoicePrompt(question: choice, language: progress.language,
+                                          revealed: answered, showText: $showText)
+                        VStack(spacing: 8) {
+                            ForEach(choice.options, id: \.self) { option in
+                                Button { record(option, correct: option == choice.answer) } label: {
+                                    HStack {
+                                        Text(option).multilineTextAlignment(.leading)
+                                        Spacer(minLength: 8)
+                                        if answered && option == choice.answer {
+                                            Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.green)
+                                        } else if answered && option == st.chosenAnswer {
+                                            Image(systemName: "xmark.circle.fill").foregroundStyle(Theme.red)
+                                        }
+                                    }
+                                    .font(.body.weight(.medium)).foregroundStyle(Theme.ink)
+                                    .padding(12).frame(maxWidth: .infinity, minHeight: 48)
+                                    .background(Theme.surface2.opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
+                                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(
+                                        answered && option == choice.answer ? Theme.green :
+                                            answered && option == st.chosenAnswer ? Theme.red : Theme.rule,
+                                        lineWidth: answered && (option == choice.answer || option == st.chosenAnswer) ? 2 : 1))
+                                }
+                                .buttonStyle(.plain).disabled(answered)
+                            }
+                        }
+                    } else {
+                        let item = items[index]
+                        DrillPrompt(item: item, header: s.listen, revealed: answered, showText: $showText)
+                        AnswerField(placeholder: item.placeholder, text: $input, onSubmit: check)
+                            .disabled(answered)
                     }
-                    Button(answered ? (st.index + 1 >= items.count ? s.finish : s.next) : s.check, action: check).buttonStyle(Pill(style: .primary))
+                    if let correct = st.answerWasCorrect {
+                        Text(correct ? s.right : s.was(choice?.answer ?? items[index].answer))
+                            .font(.headline).foregroundStyle(correct ? Theme.green : Theme.red)
+                            .accessibilityAddTraits(.updatesFrequently)
+                    }
+                    if answered || choice == nil {
+                        Button(answered ? (index + 1 >= items.count ? s.finish : s.next) : s.check, action: check)
+                            .buttonStyle(Pill(style: .primary))
+                            .disabled(!answered && input.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
                 }
             }
         }
+        .task(id: preparationKey) { prepare() }
+        .onChange(of: answerKey, initial: true) { _, _ in
+            input = state.chosenAnswer ?? ""
+            showText = false
+            speech.stop()
+        }
+    }
+
+    private func prepare() {
+        guard ready, state.practice == nil, !state.done else { return }
+        var st = state
+        st.practice = DailyChallengeChoices.make(entries: vocab.entries, units: courses.units,
+                                                levels: progress.levels(in: vocab), day: st.day,
+                                                language: progress.language)
+        progress.pack.challenge = st
+    }
+
+    private func record(_ answer: String, correct: Bool) {
+        var st = state
+        guard !st.done, st.answerWasCorrect == nil else { return }
+        st.chosenAnswer = answer
+        st.answerWasCorrect = correct
+        if correct { st.correct += 1 }
+        progress.pack.challenge = st
+        TouchFeedback.land()
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
     private func check() {
         var st = state
-        let item = items[min(st.index, items.count - 1)]
-        if answered {
+        guard !st.done else { return }
+        if st.answerWasCorrect != nil {
             st.index += 1
-            if st.index >= items.count { st.done = true }
+            st.done = st.index >= items.count
+            st.chosenAnswer = nil
+            st.answerWasCorrect = nil
             progress.pack.challenge = st
-            input = ""; answered = false; showText = false
-            if !st.done { let next = items[st.index].spoken; speech.speak(next, id: "speak:" + next) }
+            input = ""; showText = false
+            speech.stop()
             return
         }
-        wasCorrect = item.check(input)
-        if wasCorrect { st.correct += 1 }
-        answered = true
-        progress.pack.challenge = st
+        guard st.practice?[st.index] == nil else { return }
+        let item = items[min(st.index, items.count - 1)]
+        record(input, correct: item.check(input))
+    }
+}
+
+private struct DailyChoicePrompt: View {
+    let question: DailyChoiceQuestion
+    let language: LanguageCode
+    let revealed: Bool
+    @Binding var showText: Bool
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Eyebrow(text: instruction)
+            if question.kind == .listening {
+                HStack {
+                    SpeakButton(text: question.spoken)
+                    Button { showText.toggle() } label: {
+                        Image(systemName: showText ? "eye.slash" : "eye")
+                    }
+                    .buttonStyle(Pill(style: .ghost, compact: true))
+                    .accessibilityLabel(UIStrings.for(language).showText)
+                }
+                if showText || revealed { prompt(question.prompt) }
+            } else {
+                prompt(question.kind == .gap && revealed
+                       ? question.prompt.replacingOccurrences(of: GrammarItem.gap, with: question.answer)
+                       : question.prompt)
+                if question.kind == .meaning || ((question.kind == .gap || question.kind == .word) && revealed) {
+                    SpeakButton(text: question.spoken, small: true)
+                }
+            }
+            if let explanation = question.explanation, question.kind == .gap || revealed {
+                Text(explanation).font(.subheadline).foregroundStyle(Theme.ink2)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity).padding(14)
+        .background(Theme.surface2.opacity(0.5), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func prompt(_ text: String) -> some View {
+        Text(text).font(Theme.display(21, weight: .semibold)).multilineTextAlignment(.center)
+    }
+
+    private var instruction: String {
+        let labels: [String]
+        switch language {
+        case .it: labels = ["Scegli il significato", "Scegli la parola", "Completa la frase", "Ascolta e scegli"]
+        case .es, .esLatAm: labels = ["Elige el significado", "Elige la palabra", "Completa la frase", "Escucha y elige"]
+        case .fr: labels = ["Choisis le sens", "Choisis le mot", "Complète la phrase", "Écoute et choisis"]
+        case .pt: labels = ["Escolhe o significado", "Escolhe a palavra", "Completa a frase", "Ouve e escolhe"]
+        case .ptBR: labels = ["Escolha o significado", "Escolha a palavra", "Complete a frase", "Ouça e escolha"]
+        case .la: labels = ["Significātiōnem ēlige", "Verbum ēlige", "Sententiam complē", "Audī et ēlige"]
+        }
+        switch question.kind {
+        case .meaning: return labels[0]
+        case .word: return labels[1]
+        case .gap: return labels[2]
+        case .listening: return labels[3]
+        }
     }
 }
 

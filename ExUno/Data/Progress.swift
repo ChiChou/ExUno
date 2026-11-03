@@ -52,6 +52,10 @@ struct Challenge: Codable, Equatable {
     var index = 0
     var correct = 0
     var done = false
+    /// Freeze today's questions even if the learner changes level range later.
+    var practice: [Int: DailyChoiceQuestion]?
+    var chosenAnswer: String?
+    var answerWasCorrect: Bool?
 }
 
 struct PackProgress: Codable, Equatable {
@@ -92,8 +96,12 @@ struct PackProgress: Codable, Equatable {
             out.drills[k] = theirs.total > mine.total ? DrillScore(correct: theirs.correct, total: theirs.total, run: theirs.run, best: max(mine.best, theirs.best))
                                                       : DrillScore(correct: mine.correct, total: mine.total, run: mine.run, best: max(mine.best, theirs.best))
         }
-        if other.challenge.day > out.challenge.day || (other.challenge.day == out.challenge.day && other.challenge.index > out.challenge.index) {
+        let sameQuestion = other.challenge.day == out.challenge.day && other.challenge.index == out.challenge.index
+        if other.challenge.day > out.challenge.day || (other.challenge.day == out.challenge.day && other.challenge.index > out.challenge.index)
+            || (sameQuestion && other.challenge.answerWasCorrect != nil && out.challenge.answerWasCorrect == nil) {
             out.challenge = other.challenge
+        } else if sameQuestion && out.challenge.practice == nil {
+            out.challenge.practice = other.challenge.practice
         }
         if other.settingsModified > out.settingsModified { out.settings = other.settings; out.settingsModified = other.settingsModified }
         if let theirs = other.grammar {
