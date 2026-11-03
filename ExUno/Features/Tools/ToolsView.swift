@@ -305,7 +305,9 @@ struct ConverterTool: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) { ForEach(engine.numberModes) { m in Chip(text: m.label, on: input.mode == m.id) { input.mode = m.id } } }
             }
-            BigField(text: $input.text, placeholder: tool == .numerals ? "2026 · MMXXVI" : "123", keyboard: tool == .numerals ? .asciiCapable : .numbersAndPunctuation)
+            BigField(text: $input.text, placeholder: tool == .numerals ? "2026 · MMXXVI" : "123",
+                     keyboard: tool == .numerals ? .asciiCapable : .numbersAndPunctuation,
+                     suffix: NumberInputSuffix.text(for: input.text, mode: input.mode, romanInput: tool == .numerals))
             if input.mode == "ordinal" {
                 Picker("", selection: $input.form) { ForEach(engine.ordinalForms) { Text($0.label).tag($0.id) } }.pickerStyle(.segmented)
             }

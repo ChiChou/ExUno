@@ -221,16 +221,31 @@ struct BigField: View {
     var body: some View {
         HStack(spacing: 10) {
             if let prefix { Text(prefix).font(Theme.mono(24)).foregroundStyle(Theme.ink2) }
-            TextField(placeholder, text: $text)
-                .font(Theme.mono(26))
-                .keyboardType(keyboard)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-            if let suffix { Text(suffix).font(Theme.mono(14)).foregroundStyle(Theme.ink2) }
+            if let suffix {
+                GeometryReader { geometry in
+                    let numberWidth = ((text.isEmpty ? placeholder : text) as NSString).size(withAttributes: [.font: UIFont.monospacedSystemFont(ofSize: 26, weight: .medium)]).width
+                    let suffixWidth = (suffix as NSString).size(withAttributes: [.font: UIFont.monospacedSystemFont(ofSize: 18, weight: .medium)]).width
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        field.frame(width: min(numberWidth + 3, max(44, geometry.size.width - suffixWidth)))
+                        Text(suffix).font(Theme.mono(18)).foregroundStyle(Theme.ink2.opacity(0.7))
+                            .fixedSize().allowsHitTesting(false)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxHeight: .infinity)
+                }.frame(height: 62)
+            } else { field }
         }
         .padding(.horizontal, 16).frame(minHeight: 62)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.rule, lineWidth: 1))
+    }
+
+    private var field: some View {
+        TextField(placeholder, text: $text)
+            .font(Theme.mono(26))
+            .keyboardType(keyboard)
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
     }
 }
 
