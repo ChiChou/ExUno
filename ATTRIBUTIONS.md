@@ -11,12 +11,12 @@ This inventory is a practical compliance record, not legal advice.
 | Material | Where | License |
 | --- | --- | --- |
 | App, widget, tests and data scripts | `ExUno/`, `Shared/`, `ExUnoWidgets/`, `ExUnoTests/`, `Scripts/` | MIT |
-| Number, time, date, calendar, quantity, year and verb rules for all five languages (Portuguese verb forms from UniMorph, below) | `Shared/Language/` | MIT (original code) |
+| Number, time, date, calendar, quantity, year and verb rules for all language editions (Portuguese verb forms from UniMorph, below) | `Shared/Language/` | MIT (original code) |
 | App icon and UI | `ExUno/Assets.xcassets`, `ExUno/Support`, `Shared/Palette.swift` | MIT (original) |
-| Italian, Spanish, French and Portuguese packs | `ExUno/Resources/Packs/{it,es,fr,pt}.json` (generated) | MIT (Language-Learning-decks) + CC BY-SA 4.0 (wordfreq data) → CC BY-SA 4.0 |
+| Italian, Spanish, French and Portuguese packs | `ExUno/Resources/Packs/{it,es,es-419,fr,pt,pt-BR}.json` (generated) | MIT (Language-Learning-decks) + CC BY-SA 4.0 (wordfreq data) → CC BY-SA 4.0 |
 | Latin pack | `ExUno/Resources/Packs/la.json` (generated) | CC BY-SA (DCC Latin Core Vocabulary) → CC BY-SA 4.0 |
-| Topic tags (it, es, fr, pt) | `c` field of the packs | CC BY 3.0 (MultiWordNet) + WordNet 3.0 license (Princeton) |
-| Grammar courses | `ExUno/Resources/Packs/grammar-{it,es,fr,la,pt}.json` (generated) | CC BY 2.0 FR (Tatoeba) + CC BY-SA 3.0 (UniMorph) → CC BY-SA 4.0 |
+| Topic tags (it, es, es-419, fr, pt, pt-BR) | `c` field of the packs | CC BY 3.0 (MultiWordNet) + WordNet 3.0 license (Princeton) |
+| Grammar courses | `ExUno/Resources/Packs/grammar-{it,es,es-419,fr,la,pt,pt-BR}.json` (generated) | CC BY 2.0 FR (Tatoeba) + CC BY-SA 3.0 (UniMorph) → CC BY-SA 4.0 |
 | Portuguese conjugation tables | `ExUno/Resources/Packs/verbs-pt.json` (generated) | CC BY-SA 3.0 (UniMorph por) → CC BY-SA 4.0 |
 | Grammar unit notes, tables and word sets | `Scripts/grammar/` | MIT (original) |
 
@@ -59,6 +59,12 @@ This inventory is a practical compliance record, not legal advice.
 - Inflection tables for Italian, Spanish, French and Latin, extracted from English Wiktionary by the UniMorph project, https://unimorph.github.io and https://github.com/unimorph. License: CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/). Wiktionary text is by the Wiktionary contributors.
 - Cite: A. D. McCarthy et al., *UniMorph 3.0: Universal Morphology*, Proceedings of LREC 2020; K. Batsuren et al., *UniMorph 4.0: Universal Morphology*, Proceedings of LREC 2022.
 - Use in Ex Uno: the forms that compete in a gap (for example the six present forms of a verb, or the cases of a Latin noun). Latin verb forms are not taken from UniMorph; they come from Ex Uno's own rules with DCC principal parts.
+
+## Regional editions
+
+- Brazilian Portuguese uses the pinned shared-plus-Brazilian Language-Learning-decks list under the same MIT and wordfreq CC BY-SA notices.
+- Broad Latin American Spanish adapts the pinned Spanish deck with authored vocabulary/example overrides in `Scripts/regional_overrides.json`; base entry ids are retained in its own pack. These overrides are original Ex Uno text.
+- Regional grammar notes, pronoun selection and spelling are adapted in `Scripts/grammar/es-419.json` and `pt-BR.json` from the existing course. Exercises still come from the pinned, mixed-region Tatoeba corpus, not a region-certified corpus.
 
 ## Portuguese conjugation tables
 

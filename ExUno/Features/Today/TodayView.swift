@@ -19,7 +19,7 @@ struct TodayView: View {
                     Text(s.greeting(hour: Calendar.current.component(.hour, from: now))).font(Theme.display(34)).foregroundStyle(Theme.ink)
                     Spacer()
                     Button { showLanguages = true } label: {
-                        Text(progress.language.rawValue.uppercased())
+                        Text(progress.language.badge)
                             .font(.system(size: 13, weight: .heavy, design: .rounded)).tracking(1)
                             .foregroundStyle(Theme.ink)
                             .frame(width: 40, height: 32)
@@ -63,7 +63,7 @@ struct TodayView: View {
         .pageBackground()
         .toolbar(.hidden, for: .navigationBar)
         .onReceive(timer) { now = $0 }
-        .sheet(isPresented: $showLanguages) { LanguagePicker().presentationDetents([.height(460), .large]) }
+        .sheet(isPresented: $showLanguages) { LanguagePicker().presentationDetents([.height(680), .large]) }
         .sheet(isPresented: $showSettings) { SettingsView() }
     }
 
@@ -149,14 +149,17 @@ struct LanguagePicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Language").font(Theme.display(24)).padding(.bottom, 4)
-            ForEach(LanguageCode.alphabetical) { code in
-                Button {
-                    if code != progress.language { progress.switchTo(code) }
-                    dismiss()
-                } label: { LanguageRow(code: code, selected: code == progress.language, compact: true) }
-                .buttonStyle(.plain)
+            ScrollView {
+                VStack(spacing: 12) {
+                    ForEach(LanguageCode.alphabetical) { code in
+                        Button {
+                            if code != progress.language { progress.switchTo(code) }
+                            dismiss()
+                        } label: { LanguageRow(code: code, selected: code == progress.language, compact: true) }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
-            Spacer(minLength: 0)
         }
         .padding(20)
         .pageBackground()

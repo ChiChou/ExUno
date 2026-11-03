@@ -123,7 +123,7 @@ def decks(path, code, it_topics, tags=None):
                     r["g"] = g
                     art = italian_article(r["w"], pos, g)
                     if art: r["a"] = art
-            elif code == "pt":
+            elif code.startswith("pt"):
                 word = re.escape(r["w"].lower())
                 sentence = e["example_sentence_native"].lower()
                 # Require an overt determiner in the source; never guess gender from spelling.
@@ -207,6 +207,12 @@ def main():
     ap.add_argument("--topics", default=os.path.join(root, ".cache", "topics-it.json"), help="output of build_topics.py")
     ap.add_argument("--out", default=os.path.join(root, "ExUno", "Resources", "Packs"))
     a = ap.parse_args()
+    NAMES["es-419"] = NAMES["es"]
+    NAMES["pt-BR"] = list(NAMES["pt"])
+    NAMES["pt-BR"][2] = "Roupas"
+    NAMES["pt-BR"][14] = "Esportes e jogos"
+    ATTRIBUTION["es-419"] = ATTRIBUTION["es"] + " Broad Latin American adaptation: reviewed vocabulary and example overrides by Ex Uno; source ids retained."
+    ATTRIBUTION["pt-BR"] = ATTRIBUTION["pt"].replace("European", "Brazilian")
     metadata = json.load(open(os.path.join(root, "Scripts", "pack_metadata.json"), encoding="utf-8"))
     src = lambda sid, name: os.path.join(a.cache, sid, name)
     tags = json.load(open(a.topics, encoding="utf-8"))["tags"]
@@ -220,6 +226,13 @@ def main():
     write(os.path.join(a.out, "es.json"), pack("es", CEFR, ["A1", "A2"], topics_for("es"), decks(src("decks-spanish", "spanish.json"), "es", idx)))
     write(os.path.join(a.out, "fr.json"), pack("fr", CEFR, ["A1", "A2"], topics_for("fr"), decks(src("decks-french", "french.json"), "fr", idx)))
     write(os.path.join(a.out, "pt.json"), pack("pt", CEFR, ["A1", "A2"], topics_for("pt"), decks(src("decks-portuguese", "portuguese_european_with_mixed_unsorted.json"), "pt", idx)))
+    spanish_america = decks(src("decks-spanish", "spanish.json"), "es", idx)
+    overrides = json.load(open(os.path.join(root, "Scripts", "regional_overrides.json"), encoding="utf-8"))["es-419"]
+    for entry in spanish_america:
+        if entry["p"] == "noun" and entry["w"] in overrides:
+            entry.update(overrides[entry["w"]])
+    write(os.path.join(a.out, "es-419.json"), pack("es-419", CEFR, ["A1", "A2"], topics_for("es-419"), spanish_america))
+    write(os.path.join(a.out, "pt-BR.json"), pack("pt-BR", CEFR, ["A1", "A2"], topics_for("pt-BR"), decks(src("decks-portuguese-br", "portuguese_brazilian_with_mixed.json"), "pt-BR", idx)))
     write(os.path.join(a.out, "la.json"), pack("la", ["I", "II", "III", "IV"], ["I"],
           [{"id": t, "name": n, "icon": i} for t, n, i, _ in LATIN_GROUPS], latin(src("dcc-latin", "dcc-latin-core-list.csv"))))
 

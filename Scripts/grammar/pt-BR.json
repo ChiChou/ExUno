@@ -1,0 +1,634 @@
+{
+  "comment": "Original Ex Uno European Portuguese notes and tables (MIT); exercises from pinned Tatoeba and UniMorph sources.",
+  "language": {
+    "unimorph": "por",
+    "levels": [
+      "A1",
+      "A2",
+      "B1"
+    ],
+    "persons": [
+      "eu",
+      "você",
+      "ele/ela",
+      "nós",
+      "vocês",
+      "eles/elas"
+    ],
+    "you": [
+      1,
+      2,
+      4,
+      5
+    ],
+    "negation": [
+      "não"
+    ],
+    "auxiliaries": [
+      "tenho",
+      "tens",
+      "tem",
+      "temos",
+      "tendes",
+      "têm",
+      "tinha",
+      "tinhas",
+      "tínhamos",
+      "tinham"
+    ],
+    "preverbal": [
+      "não",
+      "me",
+      "te",
+      "se",
+      "nos",
+      "vos",
+      "o",
+      "a",
+      "os",
+      "as",
+      "lhe",
+      "lhes",
+      "já",
+      "nunca",
+      "também",
+      "sempre",
+      "só"
+    ],
+    "adverbs": [],
+    "participles": [
+      "feito",
+      "dito",
+      "visto",
+      "posto",
+      "escrito",
+      "aberto",
+      "sido",
+      "tido",
+      "ido",
+      "vindo"
+    ],
+    "excludeWords": [
+      "telemóvel",
+      "comboio",
+      "autocarro",
+      "pequeno-almoço",
+      "vós",
+      "sois",
+      "estais",
+      "tendes",
+      "vosso",
+      "vossa"
+    ],
+    "corpus": "pt",
+    "personIndices": [
+      0,
+      2,
+      2,
+      3,
+      5,
+      5
+    ],
+    "foldOptions": true
+  },
+  "units": [
+    {
+      "id": "pt-BR-artigos",
+      "level": "A1",
+      "title": "Artigos",
+      "en": "Definite and indefinite articles",
+      "note": "Articles agree with nouns: o livro, a casa, os livros, as casas; um, uma, uns, umas. Articles before possessives and personal names vary by region and context in Brazil: meu livro and o meu livro can both occur. Learn nouns with their gender.",
+      "table": {
+        "cols": [
+          "",
+          "masc. singular",
+          "fem. singular",
+          "masc. plural",
+          "fem. plural"
+        ],
+        "rows": [
+          [
+            "definido",
+            "o",
+            "a",
+            "os",
+            "as"
+          ],
+          [
+            "indefinido",
+            "um",
+            "uma",
+            "uns",
+            "umas"
+          ]
+        ]
+      },
+      "grids": [
+        {
+          "cols": [
+            "masc. singular",
+            "fem. singular",
+            "masc. plural",
+            "fem. plural"
+          ],
+          "rows": [
+            [
+              "def",
+              "definido",
+              [
+                "o",
+                "a",
+                "os",
+                "as"
+              ]
+            ],
+            [
+              "indef",
+              "indefinido",
+              [
+                "um",
+                "uma",
+                "uns",
+                "umas"
+              ]
+            ]
+          ]
+        }
+      ],
+      "notBeforeVerb": true,
+      "beforeNoun": true
+    },
+    {
+      "id": "pt-BR-presente",
+      "level": "A1",
+      "title": "Presente",
+      "en": "Regular verbs in the present",
+      "note": "This introductory Brazilian course uses eu, você, ele/ela, nós, vocês, eles/elas. Você uses third-person singular forms and vocês uses third-person plural forms: você fala, vocês falam. Tu is also used in many Brazilian regions, with regional variation in agreement. Nós falamos is the present; a gente fala is also common. Actions in progress commonly use estar + gerund: Estou falando.",
+      "verbs": {
+        "rows": [
+          [
+            "presente",
+            "Presente",
+            "IND;PRS"
+          ]
+        ],
+        "max": 400,
+        "notAlso": [
+          "IND;PST;PFV"
+        ]
+      },
+      "table": {
+        "lemmas": [
+          "falar",
+          "vender",
+          "dividir"
+        ]
+      }
+    },
+    {
+      "id": "pt-BR-ser-estar",
+      "level": "A1",
+      "title": "Ser e estar",
+      "en": "Two ways to say be",
+      "note": "Ser identifies or classifies: Sou estudante; Lisboa é uma cidade. Estar describes a current state or location: Estou cansado; O livro está na mesa. This is not simply permanent versus temporary: an event location uses ser (A festa é aqui). Ser: sou, és, é, somos, sois, são. Estar: estou, estás, está, estamos, estais, estão.",
+      "verbs": {
+        "rows": [
+          [
+            "ser-estar",
+            "Ser e estar",
+            "IND;PRS"
+          ]
+        ],
+        "max": 400,
+        "extra": {
+          "ser": {
+            "IND;PRS": "sou és é somos sois são"
+          },
+          "estar": {
+            "IND;PRS": "estou estás está estamos estais estão"
+          }
+        },
+        "only": [
+          "ser",
+          "estar"
+        ]
+      },
+      "table": {
+        "lemmas": [
+          "ser",
+          "estar"
+        ]
+      }
+    },
+    {
+      "id": "pt-BR-demonstrativos",
+      "level": "A1",
+      "title": "Demonstrativos",
+      "en": "This, that and agreement",
+      "note": "Este/esta/estes/estas point to something near the speaker; esse/essa/esses/essas often relate to the listener or something already mentioned; aquele/aquela/aqueles/aquelas point farther away. Each agrees with its noun. Isto, isso and aquilo stand alone and do not vary. In these exercises choose the form that agrees with the noun; the English translation supplies the intended distance.",
+      "table": {
+        "cols": [
+          "",
+          "masc. singular",
+          "fem. singular",
+          "masc. plural",
+          "fem. plural"
+        ],
+        "rows": [
+          [
+            "perto de mim",
+            "este",
+            "esta",
+            "estes",
+            "estas"
+          ],
+          [
+            "perto de ti",
+            "esse",
+            "essa",
+            "esses",
+            "essas"
+          ],
+          [
+            "mais longe",
+            "aquele",
+            "aquela",
+            "aqueles",
+            "aquelas"
+          ]
+        ]
+      },
+      "grids": [
+        {
+          "cols": [
+            "masc. singular",
+            "fem. singular",
+            "masc. plural",
+            "fem. plural"
+          ],
+          "rows": [
+            [
+              "este",
+              "perto de mim",
+              [
+                "este",
+                "esta",
+                "estes",
+                "estas"
+              ]
+            ],
+            [
+              "esse",
+              "perto de ti",
+              [
+                "esse",
+                "essa",
+                "esses",
+                "essas"
+              ]
+            ],
+            [
+              "aquele",
+              "mais longe",
+              [
+                "aquele",
+                "aquela",
+                "aqueles",
+                "aquelas"
+              ]
+            ]
+          ]
+        }
+      ],
+      "agreeFirst": true
+    },
+    {
+      "id": "pt-BR-possessivos",
+      "level": "A2",
+      "title": "Possessivos",
+      "en": "Possessives and agreement",
+      "note": "Possessives agree with what is owned: meu livro, minha casa, meus livros, minhas casas. Seu/sua can refer to você as well as ele/ela; dele/dela often clarifies his or her. Articles before possessives are optional in many Brazilian contexts. Nosso/nossa refers to nós; a gente uses third-person verb agreement.",
+      "table": {
+        "cols": [
+          "",
+          "masc. singular",
+          "fem. singular",
+          "masc. plural",
+          "fem. plural"
+        ],
+        "rows": [
+          [
+            "eu",
+            "meu",
+            "minha",
+            "meus",
+            "minhas"
+          ],
+          [
+            "tu",
+            "teu",
+            "tua",
+            "teus",
+            "tuas"
+          ],
+          [
+            "ele/ela",
+            "seu",
+            "sua",
+            "seus",
+            "suas"
+          ],
+          [
+            "nós",
+            "nosso",
+            "nossa",
+            "nossos",
+            "nossas"
+          ]
+        ]
+      },
+      "grids": [
+        {
+          "cols": [
+            "masc. singular",
+            "fem. singular",
+            "masc. plural",
+            "fem. plural"
+          ],
+          "rows": [
+            [
+              "meu",
+              "eu",
+              [
+                "meu",
+                "minha",
+                "meus",
+                "minhas"
+              ]
+            ],
+            [
+              "teu",
+              "tu",
+              [
+                "teu",
+                "tua",
+                "teus",
+                "tuas"
+              ]
+            ],
+            [
+              "seu",
+              "ele/ela",
+              [
+                "seu",
+                "sua",
+                "seus",
+                "suas"
+              ]
+            ],
+            [
+              "nosso",
+              "nós",
+              [
+                "nosso",
+                "nossa",
+                "nossos",
+                "nossas"
+              ]
+            ]
+          ]
+        }
+      ],
+      "agreeFirst": true
+    },
+    {
+      "id": "pt-BR-perfeito",
+      "level": "A2",
+      "title": "Pretérito perfeito",
+      "en": "Completed actions in the past",
+      "note": "The simple pretérito perfeito describes a completed event: Ontem falei com a Ana. Regular -ar forms include falei, falou, falamos, falaram; unlike European falámos, Brazilian falamos has no accent. Regular -er: comi, comeu, comemos, comeram; -ir: parti, partiu, partimos, partiram. Common irregulars include fui, tive, fiz and disse.",
+      "verbs": {
+        "rows": [
+          [
+            "perfeito",
+            "Pretérito perfeito",
+            "IND;PST;PFV"
+          ]
+        ],
+        "max": 400,
+        "notAlso": [
+          "IND;PRS"
+        ]
+      },
+      "table": {
+        "lemmas": [
+          "falar",
+          "vender",
+          "dividir"
+        ]
+      }
+    },
+    {
+      "id": "pt-BR-imperfeito",
+      "level": "A2",
+      "title": "Imperfeito",
+      "en": "Past habits and background",
+      "note": "The simple pretérito perfeito describes a completed event: Ontem falei com a Ana. Regular -ar forms include falei, falou, falamos, falaram; unlike European falámos, Brazilian falamos has no accent. Regular -er: comi, comeu, comemos, comeram; -ir: parti, partiu, partimos, partiram. Common irregulars include fui, tive, fiz and disse.",
+      "verbs": {
+        "rows": [
+          [
+            "imperfeito",
+            "Imperfeito",
+            "IND;PST;IPFV"
+          ]
+        ],
+        "max": 400
+      },
+      "table": {
+        "lemmas": [
+          "falar",
+          "vender",
+          "dividir"
+        ]
+      }
+    },
+    {
+      "id": "pt-BR-contracoes",
+      "level": "A2",
+      "title": "Contrações",
+      "en": "Prepositions joined to articles",
+      "note": "De, em, a and por combine with definite articles: de + o = do; em + a = na; a + a = à; por + os = pelos. The contraction agrees with the following noun. These combinations are written as one word; à and às have a grave accent. Compare Vou à escola with Estou na escola.",
+      "table": {
+        "cols": [
+          "",
+          "masc. singular",
+          "fem. singular",
+          "masc. plural",
+          "fem. plural"
+        ],
+        "rows": [
+          [
+            "de + artigo",
+            "do",
+            "da",
+            "dos",
+            "das"
+          ],
+          [
+            "em + artigo",
+            "no",
+            "na",
+            "nos",
+            "nas"
+          ],
+          [
+            "a + artigo",
+            "ao",
+            "à",
+            "aos",
+            "às"
+          ],
+          [
+            "por + artigo",
+            "pelo",
+            "pela",
+            "pelos",
+            "pelas"
+          ]
+        ]
+      },
+      "grids": [
+        {
+          "cols": [
+            "masc. singular",
+            "fem. singular",
+            "masc. plural",
+            "fem. plural"
+          ],
+          "rows": [
+            [
+              "de",
+              "de + artigo",
+              [
+                "do",
+                "da",
+                "dos",
+                "das"
+              ]
+            ],
+            [
+              "em",
+              "em + artigo",
+              [
+                "no",
+                "na",
+                "nos",
+                "nas"
+              ]
+            ],
+            [
+              "a",
+              "a + artigo",
+              [
+                "ao",
+                "à",
+                "aos",
+                "às"
+              ]
+            ],
+            [
+              "por",
+              "por + artigo",
+              [
+                "pelo",
+                "pela",
+                "pelos",
+                "pelas"
+              ]
+            ]
+          ]
+        }
+      ],
+      "notBeforeVerb": true,
+      "beforeNoun": true
+    },
+    {
+      "id": "pt-BR-futuro",
+      "level": "B1",
+      "title": "Futuro",
+      "en": "The simple future",
+      "note": "Add -ei, -ás, -á, -emos, -eis, -ão to the infinitive: falarei, comerás, partirão. Dizer, fazer and trazer use the shortened stems dir-, far- and trar-. The simple future is common in writing and predictions. Everyday plans often use ir in the present plus infinitive: Vou falar com ela amanhã.",
+      "verbs": {
+        "rows": [
+          [
+            "futuro",
+            "Futuro",
+            "IND;FUT"
+          ]
+        ],
+        "max": 400
+      },
+      "table": {
+        "lemmas": [
+          "falar",
+          "vender",
+          "dividir"
+        ]
+      }
+    },
+    {
+      "id": "pt-BR-condicional",
+      "level": "B1",
+      "title": "Futuro do pretérito",
+      "en": "Would and polite requests",
+      "note": "This tense expresses a hypothetical result, polite request, or a future viewed from the past: eu falaria, você comeria, nós partiríamos. Dizer, fazer and trazer use dir-, far- and trar-. It is also called the conditional. Gostaria de um café is a polite request.",
+      "verbs": {
+        "rows": [
+          [
+            "condicional",
+            "Condicional",
+            "COND"
+          ]
+        ],
+        "max": 400
+      },
+      "table": {
+        "lemmas": [
+          "falar",
+          "vender",
+          "dividir"
+        ]
+      }
+    },
+    {
+      "id": "pt-BR-conjuntivo",
+      "level": "B1",
+      "title": "Presente do subjuntivo",
+      "en": "Wishes, doubt and necessity",
+      "note": "The subjuntivo is used after expressions of wishes, doubt or necessity: Quero que você venha; É importante que estudem. Regular -ar verbs use e/es/e/emos/eis/em in the traditional six-person paradigm; -er/-ir use a/as/a/amos/ais/am. This course selects você/vocês forms. Common irregulars include seja, esteja, tenha and vá.",
+      "verbs": {
+        "rows": [
+          [
+            "conjuntivo",
+            "Presente do conjuntivo",
+            "SBJV;PRS"
+          ]
+        ],
+        "max": 400
+      },
+      "rowNeeds": {
+        "conjuntivo": [
+          "que",
+          "talvez"
+        ]
+      },
+      "table": {
+        "lemmas": [
+          "falar",
+          "vender",
+          "dividir"
+        ]
+      }
+    }
+  ]
+}

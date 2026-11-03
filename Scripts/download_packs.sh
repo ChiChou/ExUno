@@ -16,9 +16,9 @@ actual=$(echo "$actual" | cut -d' ' -f1)
 [ "$expected" = "$actual" ] || { echo "checksum mismatch" >&2; exit 1; }
 
 unzip -q "$TMP/exuno-packs.zip" -d "$TMP"
-for file in pt.json grammar-pt.json verbs-pt.json; do
+for file in pt.json grammar-pt.json verbs-pt.json es-419.json grammar-es-419.json pt-BR.json grammar-pt-BR.json; do
     [ -f "$TMP/exuno-packs/$file" ] || {
-        echo "The packs release predates Portuguese support. Run sh Scripts/prepare_data.sh or use an updated packs release." >&2
+        echo "The packs release predates the regional language packs. Run sh Scripts/prepare_data.sh or use an updated packs release." >&2
         exit 1
     }
 done

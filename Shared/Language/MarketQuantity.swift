@@ -104,7 +104,7 @@ struct MarketQuantity {
             case .decilitre: noun = singular ? "décilitre" : "décilitres"
             default: noun = singular ? "litre" : "litres"
             }
-        case .es:
+        case .es, .esLatAm:
             number = SpanishNumbers.apocope(try SpanishNumbers.number(text))
             switch unit {
             case .etto: throw ConversionError("Italian etti are not a Spanish unit name.")
@@ -113,8 +113,8 @@ struct MarketQuantity {
             case .centilitre: noun = singular ? "centilitro" : "centilitros"
             default: noun = singular ? "litro" : "litros"
             }
-        case .pt:
-            number = try PortugueseNumbers.number(text)
+        case .pt, .ptBR:
+            number = try PortugueseNumbers.number(text, brazilian: language == .ptBR)
             switch unit {
             case .etto: throw ConversionError("Italian etti are not a Portuguese unit name.")
             case .kilogram: noun = singular ? "quilo" : "quilos"

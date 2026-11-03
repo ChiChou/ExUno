@@ -16,7 +16,7 @@ This fetches `exuno-packs.zip` from the repository's [`packs` release](https://g
 sh Scripts/prepare_data.sh
 ```
 
-This needs Python 3.9 or later (standard library only) and access to `raw.githubusercontent.com` and `github.com`. It downloads about 160 MB into `.cache/` (15 MB for the vocabulary, the rest for the grammar courses' UniMorph paradigms and Tatoeba sentences) and writes five packs, five grammar courses and Portuguese verb tables (70–80 kB each):
+This needs Python 3.9 or later (standard library only) and access to `raw.githubusercontent.com` and `github.com`. It downloads about 160 MB into `.cache/` (15 MB for the vocabulary, the rest for the grammar courses' UniMorph paradigms and Tatoeba sentences) and writes seven packs, seven grammar courses and Portuguese verb tables (70–80 kB each):
 
 | Pack | Entries | Size |
 | --- | --- | --- |
@@ -25,6 +25,8 @@ This needs Python 3.9 or later (standard library only) and access to `raw.github
 | `fr.json` | 17,578 | 3.3 MB |
 | `la.json` | 997 | 0.1 MB |
 | `pt.json` (European Portuguese) | 8,470 | 1.5 MB |
+| `es-419.json` (broad Latin American Spanish) | 16,392 | 3.0 MB |
+| `pt-BR.json` (Brazilian Portuguese) | 15,250 | 2.8 MB |
 
 Run it again any time; verified downloads are reused. Delete `.cache/` to start from scratch.
 
@@ -115,3 +117,9 @@ The first pack is European Portuguese (`pt`, speech locale `pt-PT`). The pinned 
 `build_portuguese_verbs.py` bundles 3,999 complete verb paradigms in `verbs-pt.json` from pinned UniMorph `por`, with six finite tenses. Incomplete tenses are omitted; unknown verbs return no conjugation rather than a guessed form. `portuguese_overrides.json` corrects malformed core cells in the source and is applied to both verb tables and grammar generation. Corrections were checked against [Infopédia estar](https://www.infopedia.pt/dicionarios/verbos-portugueses/estar), [ir](https://www.infopedia.pt/dicionarios/verbos-portugueses/ir), and [haver](https://www.infopedia.pt/dicionarios/verbos-portugueses/haver). The dictionary is a verification reference, not a scraped data source.
 
 The Portuguese grammar course uses the same pinned OPUS Tatoeba release as other courses. Tatoeba does not label each sentence by Portuguese variety. Generation excludes common distinctly Brazilian vocabulary and `estar` + gerund examples; this is a practical filter, not a guarantee that every sentence is exclusively European. Article/contraction gaps require a following known noun or adjective and exclude hyphenated clitics. Conjuntivo examples require `que` or `talvez`.
+
+## Regional packs and stable progress
+
+The original ids `es` and `pt` retain their Spain and European behavior, files and daily-challenge seed positions. New ids `es-419` and `pt-BR` are appended to `LanguageCode`; they keep separate progress files and speech preferences. The Latin American Spanish vocabulary retains base Spanish entry ids, with reviewed noun/example overrides in `regional_overrides.json`. It uses broadly shared vocabulary and tú/usted/ustedes rather than country slang or a claim to cover every local voseo paradigm. Its default `es-MX` speech voice is identified in Settings; users may choose another installed Spanish voice. Brazilian Portuguese uses its own pinned shared-plus-Brazilian list and `pt-BR` voice.
+
+Grammar specs use `corpus` to reuse pinned es/pt sentence pairs and `personIndices` to select regional agreement forms, including clitics and option tables. Brazilian first-person-plural past -ámos is adapted to -amos. Verb reference tables and exercises apply the same person mappings. The shared Tatoeba corpus is not certified by region. Prices deliberately remain euro lessons in every edition; a language variety does not select a local currency.

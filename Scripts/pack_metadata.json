@@ -3,5 +3,7 @@
   "es": {"marketUnits": ["g", "kg", "ml", "cl", "l"]},
   "fr": {"marketUnits": ["g", "kg", "ml", "cl", "dl", "l"]},
   "la": {"marketUnits": []},
-  "pt": {"marketUnits": ["g", "kg", "ml", "cl", "dl", "l"]}
+  "pt": {"marketUnits": ["g", "kg", "ml", "cl", "dl", "l"]},
+  "pt-BR": {"marketUnits": ["g", "kg", "ml", "l"]},
+  "es-419": {"marketUnits": ["g", "kg", "ml", "cl", "l"]}
 }

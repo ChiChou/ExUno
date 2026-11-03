@@ -145,7 +145,7 @@ struct LanguageRow: View {
     var compact = false
     var body: some View {
         HStack(spacing: 14) {
-            Text(code.rawValue.uppercased())
+            Text(code.badge)
                 .font(.system(size: 15, weight: .heavy, design: .rounded)).tracking(1)
                 .foregroundStyle(Theme.ink)
                 .frame(width: compact ? 40 : 48, height: compact ? 40 : 48)

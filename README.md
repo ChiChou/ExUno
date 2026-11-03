@@ -13,6 +13,7 @@ Learn a language the way you meet it: on receipts, clocks, train tickets and sto
 - **Cards**: *Roam* (a shuffled list of words with their meanings; swipe back and forth, nothing recorded), *Flow* (answer visible, swipe, mark hard ones) or *Recall* (tap to flip, flick sideways to move on, pull down to see it again soon). Undo restores the previous review and its schedule. Every fifth card is a real-life object: a receipt, a clock, a ticket, a deli tag; in Latin a carved inscription or a calendar stone. Level range is always contiguous.
 - **Grammar**: a short course per language (A1–B1; Latin I–III) with a rule, a table and fill-in-the-blank practice on real sentences, plus the verb conjugator. See [`docs/GRAMMAR.md`](docs/GRAMMAR.md).
 - **Tools**: a preview card for each converter, with examples in the selected language. Italian, Spanish, French and Portuguese: numbers (cardinal, ordinal, percent, degrees, floor), prices, time, dates, phone numbers, market quantities, years and centuries. Latin: numerals (words ↔ Roman), the Roman calendar, years *ab urbe conditā*. Hear each result with pronunciation playback; market quantities offer g, kg, ml, cl and L, plus Italian etti and French/Portuguese dl, with decimal input and quantity-preserving unit changes. Listening practice lives in Today's daily challenge.
+- **Regional editions**: Spain Spanish, broad Latin American Spanish, European Portuguese, and Brazilian Portuguese have separate progress and voices. Latin American Spanish teaches tú/usted/ustedes; its default voice is Mexican Spanish, with other installed Spanish voices selectable in Settings. Prices currently teach euros across all editions.
 - **Portuguese (European)**: 8,470 vocabulary entries, 11 grammar units with 436 exercises, and 3,999 bundled verb paradigms. Speech uses `pt-PT`.
 - **Words**: search both directions, or browse my deck, all words, phrases and topics, sorted A–Z by the bare word with a letter index to slide along; Wiktionary definitions when you're online.
 - **Level range**: one range per language, set from Settings, the Cards options or the badge on Words. Cards, the Flashcard widget and the Words directories follow it; search, my deck and the grammar course show every level.
@@ -22,7 +23,6 @@ Learn a language the way you meet it: on receipts, clocks, train tickets and sto
 
 ## Roadmap
 
-- Brazilian Portuguese may follow as a separate pack with its own voice and examples.
 - Romanian is not planned yet: there is no openly licensed, levelled vocabulary list comparable to the others.
 
 ## Build
@@ -49,7 +49,7 @@ Folders are Xcode 16 synchronized groups:
 | `ExUno/` | app |
 | `Shared/` (language engines, widget bridge, palette) | app + widget |
 | `ExUnoWidgets/` | widget extension |
-| `ExUnoTests/` | unit tests (number, time, date, calendar and verb rules for all four languages) |
+| `ExUnoTests/` | unit tests (number, time, date, calendar and verb rules for all language editions) |
 
 ## Data
 

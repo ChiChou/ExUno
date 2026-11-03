@@ -236,6 +236,15 @@ def person_rows(spec_rows, lookup, lemma):
     return rows
 
 
+def regional_forms(forms, tag, lang):
+    if not forms:
+        return forms
+    selected = [forms[i] for i in lang.get("personIndices", range(len(forms)))]
+    if lang["code"] == "pt-BR" and "PFV" in tag:
+        selected = [f[:-4] + "amos" if f and f.endswith("ámos") else f for f in selected]
+    return selected
+
+
 def build_grids(unit, ctx):
     lang = ctx["lang"]
     grids = []
@@ -251,7 +260,7 @@ def build_grids(unit, ctx):
         for lemma in [v for v in ctx["verbs"] if v not in skip and ("only" not in src or v in src["only"])][: src.get("max", 400)]:
             def lookup(lm, tag):
                 if lm in extra and tag in extra[lm]:
-                    return extra[lm][tag].split()
+                    return regional_forms(extra[lm][tag].split(), tag, lang)
                 if lang["code"] == "la":
                     v = ctx["latin_verbs"].get(lm)
                     return v.get(tag) if v else None
@@ -261,7 +270,7 @@ def build_grids(unit, ctx):
                 forms = [um_form(para, f"V;{tag};{p}") for p in PERSONS]
                 if any(f and " " in f for f in forms):
                     return None     # pronominal verbs ("mi ami"): the clitic belongs to the sentence, not the slot
-                return forms
+                return regional_forms(forms, tag, lang)
             rows = person_rows(rows_spec, lookup, lemma)
             if rows:
                 g = Grid(f"{unit['id']}:{lemma}", rows, persons, lemma, lang["you"], corpus=lemma not in extra)
@@ -270,7 +279,7 @@ def build_grids(unit, ctx):
                 grids.append(g)
         for lemma in extra:
             if lemma not in ctx["verbs"]:
-                rows = [(rid, label, extra[lemma][tag].split()) for rid, label, tag in rows_spec if tag in extra[lemma]]
+                rows = [(rid, label, regional_forms(extra[lemma][tag].split(), tag, lang)) for rid, label, tag in rows_spec if tag in extra[lemma]]
                 if len(rows) == len(rows_spec):
                     grids.append(Grid(f"{unit['id']}:{lemma}", rows, persons, lemma, lang["you"]))
     src = unit.get("nouns")
@@ -307,7 +316,7 @@ def match_case(model, form):
     return form
 
 
-def pick_options(grid, r, c, english, answer_key, key, plain, agree_first=False):
+def pick_options(grid, r, c, english, answer_key, key, plain, agree_first=False, fold_options=False):
     """Up to three wrong options from the answer's grid. By default the same column in other rows comes
     first (essere vs avere, ser vs estar, indicative vs subjunctive), then the same row; agree_first
     reverses that for agreement units (il/lo/la, mio/mia)."""
@@ -317,7 +326,7 @@ def pick_options(grid, r, c, english, answer_key, key, plain, agree_first=False)
     same_row = [(r, cc) for cc in range(len(grid.cols)) if cc != c]
     cands = same_row + other_rows if agree_first else other_rows + same_row
     cands += [(rr, cc) for rr in range(len(grid.rows)) for cc in range(len(grid.cols)) if rr != r and cc != c]
-    out, seen = [], {answer_key}
+    out, seen = [], {fold(answer_key) if fold_options else answer_key}
     for rr, cc in cands:
         f = grid.rows[rr][2][cc] if cc < len(grid.rows[rr][2]) else None
         if not f:
@@ -325,6 +334,8 @@ def pick_options(grid, r, c, english, answer_key, key, plain, agree_first=False)
         if (you and c in grid.you and cc in grid.you) or (your and r in grid.you_rows and rr in grid.you_rows):
             continue    # "you" can't tell tu/Lei/voi (or tú/usted, tu/vous) apart
         k = " ".join(key(w) for w in f.split())
+        if fold_options:
+            k = fold(k)
         if k in seen:
             continue
         seen.add(k)
@@ -392,7 +403,7 @@ def make_items(unit, grids, sentences, ctx):
                 if len({h[0].id for h in hits}) > 1:
                     break       # the same spelling belongs to two lexemes: ambiguous, skip
                 j = i + n       # index of the next token
-                if lang["code"] == "pt":
+                if lang["code"].startswith("pt"):
                     # Hyphenated clitic pronouns (faça-o) are not articles or finite verbs.
                     if (toks[i][1] > 0 and s[toks[i][1] - 1] == "-") or (toks[j - 1][2] < len(s) and s[toks[j - 1][2]] == "-"):
                         break
@@ -440,7 +451,7 @@ def make_items(unit, grids, sentences, ctx):
         akey = " ".join(key(w) for w in answer.split())
         # Options follow the sentence's spelling: no macrons unless the sentence uses them.
         plain = (lambda f: f) if not latin or any(ch in s for ch in "āēīōūȳĀĒĪŌŪ") else fold
-        opts = pick_options(grid, r, c, e, akey, key, plain, unit.get("agreeFirst", False))
+        opts = pick_options(grid, r, c, e, akey, key, plain, unit.get("agreeFirst", False), lang.get("foldOptions", False))
         if len(opts) < 2:
             continue
         if contrast:
@@ -543,7 +554,8 @@ def build(code, spec, a):
     pack = json.load(open(os.path.join(a.packs, f"{code}.json"), encoding="utf-8"))
     entries = pack["entries"]
     um = load_unimorph(src(f"unimorph-{lang['unimorph']}", lang["unimorph"]))
-    sentences = load_tatoeba(src(f"tatoeba-{code}", f"en-{code}.txt.zip"), code)
+    corpus = lang.get("corpus", code)
+    sentences = load_tatoeba(src(f"tatoeba-{corpus}", f"en-{corpus}.txt.zip"), corpus)
     key = keyer(code)
     known = {key(e["w"]) for e in entries}
     verbal, nominal = set(), set()
@@ -575,7 +587,7 @@ def build(code, spec, a):
     ctx = {"lang": dict(lang, code=code), "key": key, "um": um, "known": known, "verbal": verbal, "nominal": nominal, "finite_aux": aux, "homographs": homographs,
            "verbs": list(dict.fromkeys(deck_verbs)), "nouns": [], "latin_verbs": {},
            "participles": participles(code, um, deck_verbs, lang.get("participles", []), lang.get("notParticiples", []))}
-    if code == "pt":
+    if code.startswith("pt"):
         # UniMorph por contains verbs only; use vocabulary nouns/adjectives for article context.
         nominal.update(key(e["w"]) for e in entries if e["p"] in ("noun", "adjective"))
     # A deck noun's or adjective's inflected forms can't be read as verbs, nor a deck verb's forms as nouns (vino, canes, regis).
@@ -614,7 +626,7 @@ def build(code, spec, a):
         print(f"  {u['id']:<28} {u['level']:<4} {len(grids):>4} grids {len(items):>3} items")
     levels = [l for l in lang["levels"] if any(u["level"] == l for u in units)]
     return {"code": code, "schema": 1, "license": "CC BY-SA 4.0",
-            "attribution": LATIN_ATTRIBUTION if code == "la" else ATTRIBUTION.replace("from English Wiktionary", "Portuguese source: Wikipedia, as credited by UniMorph por") if code == "pt" else ATTRIBUTION, "levels": levels, "units": units}
+            "attribution": LATIN_ATTRIBUTION if code == "la" else ATTRIBUTION.replace("from English Wiktionary", "Portuguese source: Wikipedia, as credited by UniMorph por") if code.startswith("pt") else ATTRIBUTION, "levels": levels, "units": units}
 
 
 def main():
@@ -626,7 +638,7 @@ def main():
     ap.add_argument("--only", action="append", default=[], help="language code (repeatable)")
     ap.add_argument("--min-items", type=int, default=12)
     a = ap.parse_args()
-    for code in ["it", "es", "fr", "la", "pt"]:
+    for code in ["it", "es", "fr", "la", "pt", "es-419", "pt-BR"]:
         if a.only and code not in a.only:
             continue
         spec = json.load(open(os.path.join(a.specs, f"{code}.json"), encoding="utf-8"))

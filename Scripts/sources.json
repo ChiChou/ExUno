@@ -160,6 +160,15 @@
       "sha256": "90b673f477dc654e5d31824478b8a3af8f2f67fc7638fe130413dcb2bf7bf09b",
       "license": "CC BY 2.0 FR (Tatoeba contributors)",
       "homepage": "https://opus.nlpl.eu/Tatoeba/corpus/version/Tatoeba"
+    },
+    {
+      "id": "decks-portuguese-br",
+      "name": "Brazilian Portuguese vocabulary (shared and Brazilian entries)",
+      "file": "portuguese_brazilian_with_mixed.json",
+      "url": "https://raw.githubusercontent.com/vbvss199/Language-Learning-decks/efd235e692efd47eda026d0a1cbd703ce23d7692/portuguese/brazilian_portuguese/portuguese_brazilian_with_mixed.json",
+      "sha256": "4624800b4828fa523ffa1f663c635e0f72e4c02ebfb5b4d08c92dcaec5e7ccf4",
+      "license": "MIT (© 2025 GENERAL NEURO); wordfreq CC BY-SA 4.0",
+      "homepage": "https://github.com/vbvss199/Language-Learning-decks"
     }
   ]
 }

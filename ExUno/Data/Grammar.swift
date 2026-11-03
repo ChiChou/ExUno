@@ -157,11 +157,11 @@ struct GrammarStrings {
         switch code {
         case .it: return GrammarStrings(grammar: "Grammatica", course: "Corso di grammatica", practice: "Esercitati", rule: "La regola", again: "Ancora",
                                         passed: "Superata", lessons: { "\($0) di \($1) lezioni" })
-        case .es: return GrammarStrings(grammar: "Gramática", course: "Curso de gramática", practice: "Practicar", rule: "La regla", again: "Otra vez",
+        case .es, .esLatAm: return GrammarStrings(grammar: "Gramática", course: "Curso de gramática", practice: "Practicar", rule: "La regla", again: "Otra vez",
                                         passed: "Superada", lessons: { "\($0) de \($1) lecciones" })
         case .fr: return GrammarStrings(grammar: "Grammaire", course: "Cours de grammaire", practice: "S'entraîner", rule: "La règle", again: "Encore",
                                         passed: "Réussie", lessons: { "\($0) leçons sur \($1)" })
-        case .pt: return GrammarStrings(grammar: "Gramática", course: "Curso de gramática", practice: "Praticar", rule: "A regra", again: "Outra vez",
+        case .pt, .ptBR: return GrammarStrings(grammar: "Gramática", course: "Curso de gramática", practice: "Praticar", rule: "A regra", again: "Outra vez",
                                         passed: "Concluída", lessons: { "\($0) de \($1) lições" })
         case .la: return GrammarStrings(grammar: "Grammatica", course: "Cursus grammaticus", practice: "Exercē", rule: "Rēgula", again: "Iterum",
                                         passed: "Perfecta", lessons: { "\($0) ex \($1) lēctiōnibus" })

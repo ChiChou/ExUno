@@ -19,7 +19,7 @@ Code and data are separate works. The app reads the packs as data, so share-alik
 
 | Source | Its license | Used for | Compatible? |
 | --- | --- | --- | --- |
-| Language-Learning-decks (it, es, fr, pt), © 2025 GENERAL NEURO | MIT | Words, translations, CEFR levels, examples, POS | Yes. Keep the MIT notice. |
+| Language-Learning-decks (it, es, fr, pt, pt-BR), © 2025 GENERAL NEURO | MIT | Words, translations, CEFR levels, examples, POS | Yes. Keep the MIT notice. |
 | wordfreq frequency data (the decks' `word_frequency`) | CC BY-SA 4.0 | Frequency order (`z`) | Yes. This is why the packs are CC BY-SA 4.0. The wordfreq code (Apache 2.0) is not used. |
 | Machine-generated translations and examples in the decks | Released by the deck authors under MIT | Translations, examples | Yes. |
 | DCC Latin Core Vocabulary | CC BY-SA (version not stated) | Latin pack | Yes. BY-SA lets adaptations use a later version, so the pack can be BY-SA 4.0. |

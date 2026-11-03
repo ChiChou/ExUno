@@ -131,7 +131,7 @@ struct LicensesScreen: View {
                     ("MultiWordNet", "https://multiwordnet.fbk.eu/"),
                     ("Princeton WordNet", "https://wordnet.princeton.edu/"),
                 ])
-                section("Spanish, French and Portuguese", "Language-Learning-decks Spanish, French and European Portuguese decks (© 2025 GENERAL NEURO, MIT) with wordfreq frequencies (CC BY-SA 4.0, Robyn Speer). Articles come from the decks' own example sentences; topics are projected from the Italian tags through shared English glosses.", [
+                section("Spanish, French and Portuguese", "Language-Learning-decks Spanish, French, European Portuguese and Brazilian Portuguese decks (© 2025 GENERAL NEURO, MIT) with wordfreq frequencies (CC BY-SA 4.0, Robyn Speer). Articles come from the decks' own example sentences; topics are projected from the Italian tags through shared English glosses.", [
                     ("Language-Learning-decks", "https://github.com/vbvss199/Language-Learning-decks"),
                     ("wordfreq", "https://github.com/rspeer/wordfreq"),
                 ])

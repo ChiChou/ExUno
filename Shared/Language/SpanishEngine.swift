@@ -140,9 +140,10 @@ enum SpanishTime {
 }
 
 struct SpanishEngine: LanguageEngine {
-    let code = LanguageCode.es
+    var code = LanguageCode.es
+    private var latinAmerican: Bool { code == .esLatAm }
     let tools: [ToolKind] = [.numbers, .prices, .time, .date, .phone, .market, .years, .verbs]
-    let pronouns = ["yo", "tú", "él / ella", "nosotros", "vosotros", "ellos / ellas"]
+    var pronouns: [String] { latinAmerican ? ["yo", "tú", "él / ella / usted", "nosotros", "ustedes", "ellos / ellas"] : ["yo", "tú", "él / ella", "nosotros", "vosotros", "ellos / ellas"] }
 
     func title(_ tool: ToolKind) -> String {
         switch tool {
@@ -182,7 +183,9 @@ struct SpanishEngine: LanguageEngine {
     static func phone(_ input: String) throws -> (grouped: String, single: String, display: String) {
         let digits = input.filter(\.isNumber)
         guard digits.count >= 3 else { throw ConversionError("Type at least three digits.") }
-        let groups = NumberParsing.groupedDigits(digits, firstGroup: 0, size: 3)
+        let groups = digits.count == 10
+            ? [String(digits.prefix(3)), String(digits.dropFirst(3).prefix(3)), String(digits.suffix(4))]
+            : NumberParsing.groupedDigits(digits, firstGroup: 0, size: 3)
         let words = groups.map { g -> String in
             if g.hasPrefix("0") || g.count == 1 { return g.compactMap(\.wholeNumberValue).map { SpanishNumbers.units[$0] }.joined(separator: " ") }
             return SpanishNumbers.integer(Int(g) ?? 0)
@@ -270,7 +273,7 @@ struct SpanishEngine: LanguageEngine {
             let quantity = try MarketQuantity(input)
             let q = quantity.baseValue
             let natural = quantity.unit.isMass ? try Self.weight(grams: q) : try Self.volume(ml: q)
-            let w = try quantity.expressions(natural: natural, language: .es)
+            let w = try quantity.expressions(natural: natural, language: code)
             return ToolOutput(label: "En el mercado", headline: "Póngame \(w[0]), por favor", sub: quantity.display,
                               rows: w.dropFirst().map { Expr(label: "O bien", text: $0) } + [Expr(label: "El vendedor", text: "¿Algo más?"), Expr(label: "Respuesta", text: "Nada más, gracias")])
         case .years:
@@ -286,7 +289,14 @@ struct SpanishEngine: LanguageEngine {
         }
     }
 
-    func conjugate(_ verb: String, hint: VerbHint?) -> Conjugation? { SpanishConjugator.conjugate(verb, pronouns: pronouns) }
+    func conjugate(_ verb: String, hint: VerbHint?) -> Conjugation? {
+        guard let conjugation = SpanishConjugator.conjugate(verb, pronouns: pronouns) else { return nil }
+        guard latinAmerican else { return conjugation }
+        return Conjugation(lemma: conjugation.lemma, kind: conjugation.kind, pronouns: pronouns,
+                           tenses: conjugation.tenses.map { tense in
+            ConjugationTense(name: tense.name, forms: [0, 1, 2, 3, 5, 5].map { tense.forms[$0] }, note: tense.note)
+        })
+    }
 
     func drill<R: RandomNumberGenerator>(_ tool: ToolKind, using r: inout R) -> DrillItem {
         switch tool {
@@ -326,7 +336,7 @@ struct SpanishEngine: LanguageEngine {
     func realia<R: RandomNumberGenerator>(using r: inout R) -> Realia {
         switch r.int(0...7) {
         case 0, 1:
-            let items = Array(Self.bar.shuffled(using: &r).prefix(r.int(1...3)))
+            let items = Array(Self.bar.shuffled(using: &r).prefix(r.int(1...3))).map { (latinAmerican ? $0.0.replacingOccurrences(of: "Billete", with: "Boleto").replacingOccurrences(of: "Bocadillo", with: "Sándwich") : $0.0, $0.1) }
             let total = items.reduce(0) { $0 + $1.1 }
             let p = try! Self.price(String(format: "%.2f", total).replacingOccurrences(of: ".", with: ","))
             var x = Realia(kind: .receipt, question: "¿Cuánto es?", answer: p.spoken, alternative: p.formal, speech: "\(p.formal). \(p.spoken).")
@@ -341,9 +351,9 @@ struct SpanishEngine: LanguageEngine {
         case 3:
             let d = Calendar.current.date(from: DateComponents(year: 2026, month: r.int(1...12), day: r.int(1...28))) ?? Date()
             let w = SpanishTime.date(d)
-            let route = r.pick(Self.routes)
+            let route = latinAmerican ? r.pick([("Ciudad de México", "Puebla"), ("Buenos Aires", "Rosario"), ("Santiago", "Valparaíso")]) : r.pick(Self.routes)
             var x = Realia(kind: .ticket, question: "¿Qué día sale el tren?", answer: w.full, alternative: w.short, speech: w.full)
-            x.title = "\(route.0) → \(route.1)"; x.lines = [("FECHA", w.numeric), ("SALIDA", String(format: "%02d:%02d", r.int(6...20), r.pick([5, 15, 30, 45])))]; x.subtitle = "BILLETE · TURISTA"
+            x.title = "\(route.0) → \(route.1)"; x.lines = [("FECHA", w.numeric), ("SALIDA", String(format: "%02d:%02d", r.int(6...20), r.pick([5, 15, 30, 45])))]; x.subtitle = latinAmerican ? "BOLETO · TURISTA" : "BILLETE · TURISTA"
             return x
         case 4:
             let (name, g) = r.pick([("Jamón serrano", 250), ("Queso manchego", 500), ("Tomates", 1000), ("Aceitunas", 250), ("Naranjas", 2000), ("Chorizo", 300)])
@@ -355,7 +365,7 @@ struct SpanishEngine: LanguageEngine {
             let digits = "6\(r.int(0...9))\(r.int(0...9))" + String(format: "%06d", r.int(0...999_999))
             let p = try! Self.phone(digits)
             var x = Realia(kind: .contact, question: "¿Cuál es el número?", answer: p.grouped, alternative: p.single, speech: p.grouped)
-            x.title = r.pick(["Farmacia Sol", "Hostal Miramar", "Taxi Madrid", "Dra. García"]); x.big = p.display; x.subtitle = "Contacto"
+            x.title = r.pick(latinAmerican ? ["Farmacia Sol", "Hotel Miramar", "Servicio de taxi", "Dra. García"] : ["Farmacia Sol", "Hostal Miramar", "Taxi Madrid", "Dra. García"]); x.big = p.display; x.subtitle = "Contacto"
             return x
         case 6:
             let (a, w, y) = r.pick(Self.works)

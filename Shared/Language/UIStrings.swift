@@ -38,7 +38,7 @@ struct UIStrings {
                              myDeck: "Il mio mazzo", phrases: "Frasi", levels: "Livelli", topics: "Temi", all: "Tutti", entries: { $0 == 1 ? "1 voce" : "\($0) voci" },
                              nothingHere: "Niente qui.", filter: "Filtra…", session: "Sessione", toReview: "Da rivedere",
                              streak: "giorni di fila", seen: "parole viste", solid: "in memoria")
-        case .es:
+        case .es, .esLatAm:
             return UIStrings(today: "Hoy", cards: "Tarjetas", tools: "Herramientas", words: "Palabras",
                              morning: "Buenos días", afternoon: "Buenas tardes", evening: "Buenas noches",
                              reviewToday: "Repaso de hoy", due: { "\($0) por repasar" }, goalReached: "Objetivo cumplido", readyForNew: "Listo para palabras nuevas",
@@ -64,7 +64,7 @@ struct UIStrings {
                              myDeck: "Mon paquet", phrases: "Expressions", levels: "Niveaux", topics: "Thèmes", all: "Tous", entries: { $0 == 1 ? "1 entrée" : "\($0) entrées" },
                              nothingHere: "Rien ici.", filter: "Filtrer…", session: "Séance", toReview: "À revoir",
                              streak: "jours d'affilée", seen: "mots vus", solid: "mémorisés")
-        case .pt:
+        case .pt, .ptBR:
             return UIStrings(today: "Hoje", cards: "Cartões", tools: "Ferramentas", words: "Palavras",
                              morning: "Bom dia", afternoon: "Boa tarde", evening: "Boa noite",
                              reviewToday: "Revisão de hoje", due: { "\($0) para rever" }, goalReached: "Objetivo alcançado", readyForNew: "Pronto para palavras novas",

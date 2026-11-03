@@ -4,6 +4,8 @@ import Foundation
 
 enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
     case it, es, fr, la, pt
+    case esLatAm = "es-419"
+    case ptBR = "pt-BR"
     var id: String { rawValue }
 
     /// Languages as shown in pickers: alphabetical by native name (Español, Français, Italiano, Latīna, Português), so none comes first by design.
@@ -15,28 +17,32 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
     var englishName: String {
         switch self {
         case .it: return "Italian"
-        case .es: return "Spanish"
+        case .es: return "Spanish (Spain)"
+        case .esLatAm: return "Spanish (Latin America)"
         case .fr: return "French"
         case .la: return "Latin"
         case .pt: return "Portuguese (European)"
+        case .ptBR: return "Portuguese (Brazilian)"
         }
     }
     var nativeName: String {
         switch self {
         case .it: return "Italiano"
-        case .es: return "Español"
+        case .es: return "Español (España)"
+        case .esLatAm: return "Español (América Latina)"
         case .fr: return "Français"
         case .la: return "Latīna"
-        case .pt: return "Português"
+        case .pt: return "Português (Portugal)"
+        case .ptBR: return "Português (Brasil)"
         }
     }
     var hello: String {
         switch self {
         case .it: return "Ciao"
-        case .es: return "Hola"
+        case .es, .esLatAm: return "Hola"
         case .fr: return "Bonjour"
         case .la: return "Salvē"
-        case .pt: return "Olá"
+        case .pt, .ptBR: return "Olá"
         }
     }
     /// Voice used by AVSpeechSynthesizer. Latin has no system voice; an Italian voice gives an ecclesiastical-style reading.
@@ -44,17 +50,29 @@ enum LanguageCode: String, CaseIterable, Codable, Identifiable, Hashable {
         switch self {
         case .it, .la: return "it-IT"
         case .es: return "es-ES"
+        case .esLatAm: return "es-MX"
         case .fr: return "fr-FR"
         case .pt: return "pt-PT"
+        case .ptBR: return "pt-BR"
         }
     }
     var engine: LanguageEngine {
         switch self {
         case .it: return ItalianEngine()
         case .es: return SpanishEngine()
+        case .esLatAm: return SpanishEngine(code: .esLatAm)
         case .fr: return FrenchEngine()
         case .la: return LatinEngine()
         case .pt: return PortugueseEngine()
+        case .ptBR: return PortugueseEngine(code: .ptBR)
+        }
+    }
+    /// Regional pack ids remain separate for persistence; badges stay compact.
+    var badge: String {
+        switch self {
+        case .es, .esLatAm: return "ES"
+        case .pt, .ptBR: return "PT"
+        default: return rawValue.uppercased()
         }
     }
     var strings: UIStrings { UIStrings.for(self) }

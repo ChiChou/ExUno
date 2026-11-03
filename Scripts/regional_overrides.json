@@ -1,0 +1,12 @@
+{
+  "es-419": {
+    "ordenador": {"w": "computadora", "t": "computer", "g": "f", "a": "la", "x": "La computadora está sobre la mesa.", "e": "The computer is on the table."},
+    "móvil": {"w": "celular", "t": "mobile phone, cellphone", "g": "m", "a": "el", "x": "Olvidé mi celular en casa.", "e": "I forgot my cellphone at home."},
+    "coche": {"w": "auto", "t": "car", "g": "m", "a": "el", "x": "Mi auto está en la calle.", "e": "My car is in the street."},
+    "zumo": {"w": "jugo", "t": "juice", "g": "m", "a": "el", "x": "Quiero un jugo de naranja.", "e": "I want an orange juice."},
+    "patata": {"w": "papa", "t": "potato", "g": "f", "a": "la", "x": "Necesito una papa para la sopa.", "e": "I need a potato for the soup."},
+    "melocotón": {"w": "durazno", "t": "peach", "g": "m", "a": "el", "x": "Este durazno está maduro.", "e": "This peach is ripe."},
+    "gafas": {"w": "lentes", "t": "glasses", "g": "m", "a": "los", "x": "Necesito mis lentes para leer.", "e": "I need my glasses to read."},
+    "billete": {"w": "boleto", "t": "ticket", "g": "m", "a": "el", "x": "Compré un boleto para el tren.", "e": "I bought a ticket for the train."}
+  }
+}

@@ -143,6 +143,8 @@ final class GrammarCourseDataTests: XCTestCase {
             .it: ["prs": "Presente", "ipfv": "Imperfetto", "fut": "Futuro semplice"],
             .es: ["prs": "Presente", "pfv": "Pretérito indefinido", "ipfv": "Imperfecto", "fut": "Futuro"],
             .fr: ["prs": "Présent", "ipfv": "Imparfait", "fut": "Futur simple"],
+            .esLatAm: ["prs": "Presente", "pfv": "Pretérito indefinido", "ipfv": "Imperfecto", "fut": "Futuro"],
+            .ptBR: ["presente": "Presente", "perfeito": "Pretérito perfeito", "imperfeito": "Imperfeito", "futuro": "Futuro", "condicional": "Condicional", "conjuntivo": "Presente do subjuntivo"],
             .pt: ["presente": "Presente", "perfeito": "Pretérito perfeito", "imperfeito": "Imperfeito", "futuro": "Futuro", "condicional": "Condicional", "conjuntivo": "Presente do conjuntivo"],
         ]
         for (code, names) in tenses {

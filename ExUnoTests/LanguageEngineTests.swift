@@ -138,8 +138,8 @@ final class DrillTests: XCTestCase {
 
 final class LanguageOrderTests: XCTestCase {
     func testPickersListLanguagesAlphabetically() {
-        XCTAssertEqual(LanguageCode.alphabetical, [.es, .fr, .it, .la, .pt])
-        XCTAssertEqual(LanguageCode.allCases, [.it, .es, .fr, .la, .pt], "case order seeds the daily challenge; don't reorder it")
+        XCTAssertEqual(LanguageCode.alphabetical, [.esLatAm, .es, .fr, .it, .la, .ptBR, .pt])
+        XCTAssertEqual(LanguageCode.allCases, [.it, .es, .fr, .la, .pt, .esLatAm, .ptBR], "case order seeds the daily challenge; don't reorder it")
     }
 }
 
