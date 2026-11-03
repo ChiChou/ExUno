@@ -4,7 +4,7 @@ import XCTest
 final class ConversationTopicTests: XCTestCase {
     func testCatalogHasDistinctUsableTopicsAndAvoidsImmediateRepeat() {
         let topics = ConversationTopic.all
-        XCTAssertGreaterThan(topics.count, 1)
+        XCTAssertGreaterThanOrEqual(topics.count, 20)
         XCTAssertEqual(Set(topics.map(\.id)).count, topics.count)
         for topic in topics {
             XCTAssertFalse(topic.situation.isEmpty)
