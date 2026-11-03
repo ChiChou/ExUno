@@ -12,49 +12,45 @@ struct ToolsView: View {
         let engine = progress.engine
         let previews = engine.tools.filter { $0 != .verbs }.map { ToolPreview(tool: $0, engine: engine, now: previewDate) }
         NavigationStack(path: $path) {
-            GeometryReader { geometry in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack(alignment: .firstTextBaseline) {
-                                Text(progress.strings.tools)
-                                    .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                                Spacer(minLength: 8)
-                                Text(progress.language.rawValue.uppercased())
-                                    .font(.caption.weight(.bold))
-                                    .padding(.horizontal, 10).padding(.vertical, 7)
-                                    .background(Theme.surface2, in: Capsule())
-                                    .accessibilityLabel(progress.language.englishName)
-                            }
-                            Text("Numbers, dates and everyday language.")
-                                .font(.subheadline).foregroundStyle(Theme.ink2)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(progress.strings.tools)
+                                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                            Spacer(minLength: 8)
+                            Text(progress.language.rawValue.uppercased())
+                                .font(.caption.weight(.bold))
+                                .padding(.horizontal, 10).padding(.vertical, 7)
+                                .background(Theme.surface2, in: Capsule())
+                                .accessibilityLabel(progress.language.englishName)
                         }
-                        Spacer(minLength: 12)
-                        if let first = previews.first {
-                            NavigationLink(value: first.tool) {
-                                ToolTile(preview: first, featured: true)
-                            }.buttonStyle(.plain)
-                        }
-                        if previews.count > 1 {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("IN EVERYDAY LIFE")
-                                    .font(.caption.weight(.semibold)).tracking(1.2)
-                                    .foregroundStyle(Theme.ink2)
-                                LazyVGrid(columns: typeSize.isAccessibilitySize
-                                          ? [GridItem(.flexible())]
-                                          : [GridItem(.adaptive(minimum: 145), spacing: 12)], spacing: 12) {
-                                    ForEach(previews.dropFirst()) { preview in
-                                        NavigationLink(value: preview.tool) {
-                                            ToolTile(preview: preview)
-                                        }.buttonStyle(.plain)
-                                    }
+                        Text("Numbers, dates and everyday language.")
+                            .font(.subheadline).foregroundStyle(Theme.ink2)
+                    }
+                    if let first = previews.first {
+                        NavigationLink(value: first.tool) {
+                            ToolTile(preview: first, featured: true)
+                        }.buttonStyle(.plain)
+                    }
+                    if previews.count > 1 {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("IN EVERYDAY LIFE")
+                                .font(.caption.weight(.semibold)).tracking(1.2)
+                                .foregroundStyle(Theme.ink2)
+                            LazyVGrid(columns: typeSize.isAccessibilitySize
+                                      ? [GridItem(.flexible())]
+                                      : [GridItem(.adaptive(minimum: 145), spacing: 12)], spacing: 12) {
+                                ForEach(previews.dropFirst()) { preview in
+                                    NavigationLink(value: preview.tool) {
+                                        ToolTile(preview: preview)
+                                    }.buttonStyle(.plain)
                                 }
                             }
                         }
                     }
-                    .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 24)
-                    .frame(minHeight: geometry.size.height, alignment: .bottom)
                 }
+                .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 24)
             }
             .pageBackground()
             .toolbar(.hidden, for: .navigationBar)

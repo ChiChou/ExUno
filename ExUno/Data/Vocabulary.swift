@@ -111,6 +111,11 @@ final class Vocabulary {
     private(set) var error: String?
     @ObservationIgnored private var cache: [LanguageCode: LoadedPack] = [:]
 
+    init(pack: LoadedPack? = nil) {
+        current = pack
+        if let pack { cache[pack.code] = pack }
+    }
+
     var isReady: Bool { current != nil && !loading }
     var entries: [Entry] { current?.entries ?? [] }
     var levels: [String] { current?.levels ?? [] }

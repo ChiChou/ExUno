@@ -5,6 +5,7 @@ struct RealiaCardView: View {
     let realia: Realia
     let showAnswer: Bool
     let reveal: () -> Void
+    var onScrollTopChange: (Bool) -> Void = { _ in }
 
     var body: some View {
         let s = progress.strings
@@ -33,6 +34,9 @@ struct RealiaCardView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollBounceBehavior(.basedOnSize)
+        .onScrollGeometryChange(for: Bool.self) { geometry in geometry.contentOffset.y <= 1 } action: { _, top in
+            onScrollTopChange(top)
+        }
         .background(Theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.rule, lineWidth: 1))

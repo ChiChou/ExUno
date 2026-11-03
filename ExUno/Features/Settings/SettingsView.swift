@@ -7,9 +7,11 @@ struct SettingsView: View {
     @Environment(Speech.self) private var speech
     @Environment(\.dismiss) private var dismiss
     @State private var confirmReset = false
+    @State private var voiceRefresh = 0
 
     var body: some View {
         @Bindable var progress = progress
+        let _ = voiceRefresh
         let voices = Speech.voices(for: progress.language)
         NavigationStack {
             ScrollView {
@@ -31,6 +33,23 @@ struct SettingsView: View {
                                     Text("Automatic").tag("")
                                     ForEach(voices, id: \.identifier) { Text(voiceName($0)).tag($0.identifier) }
                                 }
+                            }
+                            if let voice = speech.selectedVoice {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Using \(voiceName(voice)) · \(voice.language)")
+                                        .font(.footnote).foregroundStyle(Theme.ink2)
+                                    if voice.quality == .default {
+                                        Text("For clearer speech, download an Enhanced or Premium voice for this language in iPhone Accessibility settings. Installed voices work offline.")
+                                            .font(.footnote).foregroundStyle(Theme.ink2)
+                                    }
+                                    Button {
+                                        let sample = progress.engine.clockCard(Date())
+                                        speech.speak(sample.headline + ". " + sample.line)
+                                    } label: { Label("Test pronunciation", systemImage: "speaker.wave.2") }
+                                        .font(.subheadline.weight(.medium)).tint(Theme.accent)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 12).padding(.bottom, 12)
                             }
                             Divider()
                             settingRow("Speech rate") {
@@ -71,6 +90,9 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.fontWeight(.semibold) } }
         }
+        .onReceive(NotificationCenter.default.publisher(for: AVSpeechSynthesizer.availableVoicesDidChangeNotification)) { _ in
+            voiceRefresh += 1
+        }
     }
 
     private func linkRow(_ title: String) -> some View {
@@ -83,7 +105,7 @@ struct SettingsView: View {
     }
 
     private func voiceName(_ v: AVSpeechSynthesisVoice) -> String {
-        let q = v.quality == .premium ? " (Premium)" : v.quality == .enhanced ? " (Enhanced)" : ""
+        let q = v.quality == .premium ? " (Premium)" : v.quality == .enhanced ? " (Enhanced)" : " (Standard)"
         return v.name.replacingOccurrences(of: "\\(.*?\\)", with: "", options: .regularExpression).trimmingCharacters(in: .whitespaces) + q
     }
 

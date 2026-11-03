@@ -63,6 +63,17 @@ struct PackProgress: Codable, Equatable {
     var settingsModified = Date.distantPast
     /// Grammar lesson results by unit id. Optional so progress files written before the grammar course still decode.
     var grammar: [String: LessonScore]?
+    /// Revision markers let explicit corrections (including Undo deletions) survive iCloud merges.
+    var reviewModified: [String: Date]?
+
+    mutating func markReview(cardID: Int?, day: Int) {
+        var revisions = reviewModified ?? [:]
+        let keys = ["day:\(day)"] + (cardID.map { ["card:\($0)"] } ?? [])
+        let previous = keys.compactMap { revisions[$0] }.max() ?? .distantPast
+        let stamp = max(Date(), previous.addingTimeInterval(0.001))
+        for key in keys { revisions[key] = stamp }
+        reviewModified = revisions
+    }
 
     /// Combine two devices' histories without losing reviews from either.
     func merged(with other: PackProgress) -> PackProgress {
@@ -90,6 +101,16 @@ struct PackProgress: Codable, Equatable {
             for (id, s) in theirs { g[id] = g[id].map { $0.merged(with: s) } ?? s }
             out.grammar = g
         }
+        let mine = reviewModified ?? [:], theirs = other.reviewModified ?? [:]
+        for key in Set(mine.keys).union(theirs.keys) {
+            let useOther = (theirs[key] ?? .distantPast) > (mine[key] ?? .distantPast)
+            let source = useOther ? other : self
+            if key.hasPrefix("card:"), let id = Int(key.dropFirst(5)) { out.cards[id] = source.cards[id] }
+            if key.hasPrefix("day:"), let day = Int(key.dropFirst(4)) { out.log[day] = source.log[day] }
+        }
+        if !mine.isEmpty || !theirs.isEmpty {
+            out.reviewModified = mine.merging(theirs) { max($0, $1) }
+        }
         return out
     }
 }
@@ -108,6 +129,7 @@ final class StudyProgress {
     @ObservationIgnored let cloud = CloudSync()
     @ObservationIgnored private var saveTask: Task<Void, Never>?
     @ObservationIgnored var onPackChange: (() -> Void)?
+    @ObservationIgnored private let inMemory: Bool
 
     static func today() -> Int {
         let tz = TimeZone.current.secondsFromGMT()
@@ -122,7 +144,9 @@ final class StudyProgress {
     private static func packURL(_ code: LanguageCode) -> URL { directory.appendingPathComponent("progress-\(code.rawValue).json") }
     private static var appURL: URL { directory.appendingPathComponent("settings.json") }
 
-    init() {
+    init(inMemory: Bool = false) {
+        self.inMemory = inMemory
+        if inMemory { return }
         migrateV1()
         quiet = true
         if let d = try? Data(contentsOf: Self.appURL), let a = try? JSONDecoder().decode(AppSettings.self, from: d) { app = a }
@@ -151,6 +175,7 @@ final class StudyProgress {
     }
 
     private func saveApp() {
+        guard !inMemory else { return }
         quiet = true
         app.modified = Date()
         quiet = false
@@ -160,7 +185,7 @@ final class StudyProgress {
     }
 
     private func savePack() {
-        guard let code = loadedCode else { return }
+        guard !inMemory, let code = loadedCode else { return }
         onPackChange?()
         saveTask?.cancel()
         let snapshot = pack
@@ -173,7 +198,7 @@ final class StudyProgress {
     }
 
     private func flushPack() {
-        guard let code = loadedCode else { return }
+        guard !inMemory, let code = loadedCode else { return }
         saveTask?.cancel()
         if let d = try? JSONEncoder().encode(pack) { try? d.write(to: Self.packURL(code), options: .atomic) }
         cloud.savePack(pack, for: code)
@@ -247,6 +272,7 @@ final class StudyProgress {
         if g == .again { l.again += 1 } else { l.good += 1 }
         if isNew { l.new += 1 }
         p.log[d] = l
+        p.markReview(cardID: id, day: d)
         pack = p
     }
 
@@ -255,7 +281,10 @@ final class StudyProgress {
         var l = pack.log[d] ?? DayLog()
         l.reviews += 1
         if correct { l.good += 1 } else { l.again += 1 }
-        pack.log[d] = l
+        var p = pack
+        p.log[d] = l
+        p.markReview(cardID: nil, day: d)
+        pack = p
     }
 
     func nextInterval(_ id: Int, _ g: Grade, strings: UIStrings) -> String {

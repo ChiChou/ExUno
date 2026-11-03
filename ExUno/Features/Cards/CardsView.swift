@@ -11,19 +11,25 @@ struct CardsView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var leaving: CGFloat = 0
     @State private var cardKey = 0
+    @State private var dragY: CGFloat = 0
+    @State private var returning = false
+    @State private var transitioning = false
+    @State private var contentAtTop = true
+    @State private var trackingDrag = false
+    @State private var dragBeganAtTop = true
+    @State private var voiceOver = UIAccessibility.isVoiceOverRunning
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Per device and not synced: roaming is a way to look around, not part of study progress.
     /// It is the default; the last mode picked is kept here and in the synced study mode.
     @AppStorage("cards.roaming") private var roaming = true
 
     private var settings: PackSettings { progress.settings }
+    private var playfulRecall: Bool { !roaming && settings.mode == .recall }
 
     var body: some View {
         let s = progress.strings
         VStack(spacing: 14) {
             topBar
-            if !roaming {
-                ProgressView(value: min(1, Double(progress.todayLog().reviews) / Double(max(1, progress.app.goal)))).tint(Theme.accent)
-            }
             if !vocab.isReady {
                 Spacer()
                 if let error = vocab.error { Text(error).foregroundStyle(Theme.ink2).multilineTextAlignment(.center).padding() } else { ProgressView() }
@@ -48,6 +54,9 @@ struct CardsView: View {
             DeckOptionsView(deck: deck).presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showSummary) { SessionSummaryView().presentationDetents([.medium, .large]) }
+        .onReceive(NotificationCenter.default.publisher(for: UIAccessibility.voiceOverStatusDidChangeNotification)) { _ in
+            voiceOver = UIAccessibility.isVoiceOverRunning
+        }
         .onDisappear { speech.stop() }
     }
 
@@ -71,23 +80,47 @@ struct CardsView: View {
     /// Flow and Recall are the synced study modes; Roam is a local, untracked browse.
     private enum ModeChoice: Hashable { case study(StudyMode), roam }
 
-    private var topBar: some View {
-        HStack {
-            Picker("Mode", selection: Binding<ModeChoice>(get: { roaming ? .roam : .study(settings.mode) }, set: { choice in
-                let wasRoaming = roaming
-                switch choice {
-                case .roam: roaming = true
-                case .study(let m): roaming = false; progress.settings.mode = m
+    private func selectMode(_ choice: ModeChoice) {
+        let wasRoaming = roaming
+        switch choice {
+        case .roam: roaming = true
+        case .study(let mode): roaming = false; progress.settings.mode = mode
+        }
+        if roaming != wasRoaming { rebuild() } else { deck.revealed = false }
+        resetDrag()
+        speech.stop()
+    }
+
+    private func modeTab(_ title: String, choice: ModeChoice) -> some View {
+        let selected = choice == (roaming ? .roam : .study(settings.mode))
+        return Button { selectMode(choice) } label: {
+            Text(title)
+                .font(.system(.headline, design: .rounded).weight(selected ? .bold : .medium))
+                .foregroundStyle(selected ? Theme.ink : Theme.ink2)
+                .padding(.horizontal, 8)
+                .frame(minHeight: 44)
+                .overlay(alignment: .bottom) {
+                    Capsule().fill(Theme.accent).frame(width: 20, height: 3)
+                        .opacity(selected ? 1 : 0)
                 }
-                if roaming != wasRoaming { rebuild() } else { deck.revealed = false }
-            })) {
-                Text("Roam").tag(ModeChoice.roam)
-                Text("Flow").tag(ModeChoice.study(.flow))
-                Text("Recall").tag(ModeChoice.study(.recall))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(transitioning)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityHint(choice == .roam ? "Browse without recording progress" : choice == .study(.flow) ? "Study with meanings visible" : "Remember the meaning before revealing it")
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 2) {
+                modeTab("Roam", choice: .roam)
+                modeTab("Flow", choice: .study(.flow))
+                modeTab("Recall", choice: .study(.recall))
             }
-            .pickerStyle(.segmented)
-            .frame(width: 230)
-            Spacer()
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Study mode")
+            Spacer(minLength: 0)
             if !roaming {
                 Text("\(progress.todayLog().reviews) / \(progress.app.goal)").font(.footnote.monospacedDigit()).foregroundStyle(Theme.ink2)
             }
@@ -143,108 +176,196 @@ struct CardsView: View {
     }
 
     @ViewBuilder
+    private func cardFace(_ card: DeckCard, shown: Bool) -> some View {
+        switch card {
+        case .word(let id, let again):
+            if let entry = vocab.entry(id) {
+                WordCardView(entry: entry, again: again, showAnswer: shown,
+                             reveal: { deck.revealed = true },
+                             onScrollTopChange: { if !playfulRecall || deck.revealed == shown { contentAtTop = $0 } })
+            } else {
+                Color.clear.onAppear { deck.advance(.good, vocab: vocab, progress: progress) }
+            }
+        case .realia(let realia):
+            RealiaCardView(realia: realia, showAnswer: shown, reveal: { deck.revealed = true },
+                           onScrollTopChange: { if !playfulRecall || deck.revealed == shown { contentAtTop = $0 } })
+        }
+    }
+
     private func stage(_ card: DeckCard) -> some View {
         ZStack {
-            switch card {
-            case .word(let id, let again):
-                if let e = vocab.entry(id) {
-                    WordCardView(entry: e, again: again, showAnswer: isShown(card), reveal: { deck.revealed = true })
-                } else {
-                    Color.clear.onAppear { deck.advance(.good, vocab: vocab, progress: progress) }
+            if playfulRecall {
+                RoundedRectangle(cornerRadius: 26).fill(Theme.surface2)
+                    .scaleEffect(x: 0.94, y: 0.97).offset(y: 10).accessibilityHidden(true)
+                RecallFlip(revealed: deck.revealed) {
+                    cardFace(card, shown: false)
+                } back: {
+                    cardFace(card, shown: true)
                 }
-            case .realia(let r):
-                RealiaCardView(realia: r, showAnswer: deck.revealed, reveal: { deck.revealed = true })
+            } else {
+                cardFace(card, shown: isShown(card))
+            }
+        }
+        .overlay(alignment: .top) {
+            if playfulRecall && deck.revealed && (abs(dragOffset) > 18 || dragY > 18) {
+                Label(dragY > abs(dragOffset) ? progress.strings.again : progress.strings.next,
+                      systemImage: dragY > abs(dragOffset) ? "arrow.down" : "arrow.right")
+                    .font(.headline).foregroundStyle(Theme.ink)
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .background(Theme.surface2, in: Capsule())
+                    .padding(.top, 16).allowsHitTesting(false).accessibilityHidden(true)
             }
         }
         .id(cardKey)
-        .offset(x: dragOffset + leaving * 600)
-        .rotationEffect(.degrees(Double(dragOffset + leaving * 600) / 30))
+        .offset(x: reduceMotion ? 0 : dragOffset + leaving * 600, y: reduceMotion ? 0 : dragY)
+        .rotationEffect(.degrees(reduceMotion ? 0 : Double(dragOffset + leaving * 600) / 30))
+        .scaleEffect(returning && !reduceMotion ? 0.95 : 1)
         .opacity(leaving == 0 ? 1 : 0)
-        .animation(.spring(duration: 0.28), value: leaving)
+        .animation(reduceMotion ? .easeOut(duration: 0.12) : .spring(duration: 0.28), value: leaving)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .gesture(
+        .simultaneousGesture(
             DragGesture(minimumDistance: 14)
-                .onChanged { v in if abs(v.translation.width) > abs(v.translation.height) { dragOffset = v.translation.width } }
-                .onEnded { v in
-                    let dx = v.translation.width
-                    if abs(dx) > 90 {
-                        if case .word = card, !roaming, settings.mode == .recall, !deck.revealed { withAnimation { dragOffset = 0 }; deck.revealed = true }
-                        else { leave(dx > 0 ? .good : .again) }
-                    } else { withAnimation(.spring(duration: 0.25)) { dragOffset = 0 } }
+                .onChanged { value in
+                    guard !transitioning else { return }
+                    if !trackingDrag { trackingDrag = true; dragBeganAtTop = contentAtTop }
+                    if abs(value.translation.width) > abs(value.translation.height) {
+                        dragOffset = value.translation.width
+                        dragY = 0
+                    } else if playfulRecall && dragBeganAtTop && value.translation.height > 0 {
+                        dragY = min(125, value.translation.height * 0.55)
+                        dragOffset = 0
+                    }
+                }
+                .onEnded { value in
+                    trackingDrag = false
+                    guard !transitioning else { return }
+                    if playfulRecall {
+                        let action = RecallSwipe.action(translation: value.translation, predicted: value.predictedEndTranslation)
+                        if !deck.revealed && action != nil {
+                            resetDrag()
+                            deck.revealed = true
+                        } else if action == .repeatSoon && dragBeganAtTop {
+                            repeatCard()
+                        } else if action == .moveOn {
+                            leave(.good, direction: value.translation.width < 0 ? -1 : 1)
+                        } else { resetDrag() }
+                    } else if abs(value.translation.width) > 90 && abs(value.translation.width) > abs(value.translation.height) {
+                        if !isShown(card) { resetDrag(); deck.revealed = true }
+                        else { leave(value.translation.width > 0 ? .good : .again) }
+                    } else { resetDrag() }
                 }
         )
-        .onTapGesture { if !deck.revealed { deck.revealed = true } }
+        .onTapGesture { if !deck.revealed && !transitioning { deck.revealed = true } }
+        .onChange(of: cardKey) { _, _ in contentAtTop = true; trackingDrag = false }
+        .accessibilityActions {
+            if playfulRecall {
+                if deck.revealed {
+                    Button(progress.strings.next) { leave(.good) }
+                    Button(progress.strings.again) { repeatCard() }
+                } else {
+                    Button(progress.strings.showAnswer) { deck.revealed = true }
+                }
+            }
+        }
     }
 
-    private func leave(_ g: Grade) {
-        leaving = g == .again ? -1 : 1
+    private func resetDrag() {
+        withAnimation(reduceMotion ? nil : .spring(duration: 0.25)) { dragOffset = 0; dragY = 0 }
+    }
+
+    private func finishAdvance(_ grade: Grade, generation: Int) {
+        if deck.generation == generation && !deck.roaming { deck.advance(grade, vocab: vocab, progress: progress) }
+        leaving = 0
         dragOffset = 0
+        dragY = 0
+        returning = false
+        transitioning = false
+        cardKey += 1
+        speech.stop()
+    }
+
+    private func leave(_ grade: Grade, direction: CGFloat? = nil) {
+        guard !transitioning else { return }
+        transitioning = true
+        leaving = direction ?? (grade == .again ? -1 : 1)
+        dragOffset = 0
+        dragY = 0
         let generation = deck.generation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
-            // The deck may have been rebuilt meanwhile (e.g. switching from Roam to Recall); a roaming tap must never grade a study card.
-            if deck.generation == generation { deck.advance(g, vocab: vocab, progress: progress) }
-            leaving = 0
+        DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0.12 : 0.22)) {
+            finishAdvance(grade, generation: generation)
+        }
+    }
+
+    private func repeatCard() {
+        guard !transitioning, deck.revealed else { return }
+        transitioning = true
+        let generation = deck.generation
+        withAnimation(reduceMotion ? nil : .spring(duration: 0.18)) {
+            dragOffset = 0
+            dragY = 70
+            returning = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.14) {
+            withAnimation(reduceMotion ? nil : .spring(duration: 0.22)) { dragY = 0 }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0.15 : 0.35)) {
+            finishAdvance(.again, generation: generation)
+        }
+    }
+
+    private var undoButton: some View {
+        Button {
+            guard !transitioning, deck.undo(progress: progress) else { return }
+            resetDrag()
             cardKey += 1
             speech.stop()
+        } label: {
+            Label("Undo", systemImage: "arrow.uturn.backward")
+                .font(.subheadline.weight(.medium)).frame(minHeight: 44)
         }
+        .buttonStyle(.plain).foregroundStyle(Theme.ink2)
+        .disabled(transitioning || !deck.canUndo(progress: progress))
     }
 
     @ViewBuilder
     private func controls(_ card: DeckCard, _ s: UIStrings) -> some View {
-        HStack(spacing: 8) {
-            Button { if deck.roaming { roamStep(-1) } else { deck.back(); cardKey += 1 } } label: {
-                Image(systemName: "chevron.left").font(.system(size: 15, weight: .semibold))
-                    .frame(width: 32, height: 44).foregroundStyle(Theme.ink2).contentShape(Rectangle())
-            }.buttonStyle(.plain).disabled(!deck.canGoBack).opacity(deck.canGoBack ? 1 : 0.4).accessibilityLabel("Previous card")
-            switch card {
-            case .realia where !deck.revealed:
-                Button(s.howToSay) { deck.revealed = true }.buttonStyle(Pill(style: .primary))
-            case .word where deck.roaming:
-                Button { roamStep(1) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }.buttonStyle(Pill(style: .neutral))
-            case .realia:
-                Button(s.didntKnow) { leave(.again) }.buttonStyle(Pill(style: .bad))
-                Button(s.knew) { leave(.good) }.buttonStyle(Pill(style: .good))
-            case .word where settings.mode == .flow:
-                Button(s.hard) { leave(.again) }.buttonStyle(Pill(style: .amber))
-                Button { leave(.good) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }.buttonStyle(Pill(style: .primary))
-            case .word where !deck.revealed:
-                Button(s.showAnswer) { deck.revealed = true }.buttonStyle(Pill(style: .primary))
-            case .word(let id, _):
-                GradeButton(title: s.again, sub: s.todayShort, color: Theme.red) { leave(.again) }
-                GradeButton(title: s.good, sub: progress.nextInterval(id, .good, strings: s), color: Theme.green) { leave(.good) }
-                GradeButton(title: s.easy, sub: progress.nextInterval(id, .easy, strings: s), color: Theme.accent) { leave(.easy) }
+        HStack(spacing: 12) {
+            if deck.roaming {
+                Button { roamStep(-1) } label: {
+                    Image(systemName: "chevron.left").font(.system(size: 15, weight: .semibold))
+                        .frame(width: 32, height: 44).foregroundStyle(Theme.ink2).contentShape(Rectangle())
+                }.buttonStyle(.plain).disabled(!deck.canGoBack).opacity(deck.canGoBack ? 1 : 0.4).accessibilityLabel("Previous card")
+                Button { roamStep(1) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }
+                    .buttonStyle(Pill(style: .neutral))
+            } else if playfulRecall {
+                if deck.canUndo(progress: progress) { undoButton }
+                if voiceOver {
+                    if deck.revealed {
+                        Button(s.again, action: repeatCard).buttonStyle(Pill(style: .neutral))
+                        Button(s.next) { leave(.good) }.buttonStyle(Pill(style: .primary))
+                    } else {
+                        Button(s.showAnswer) { deck.revealed = true }.buttonStyle(Pill(style: .neutral))
+                    }
+                } else {
+                    Text(deck.revealed ? "Flick to move on · Pull down for another look" : "Tap the card to reveal")
+                        .font(.footnote).foregroundStyle(Theme.ink2).multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+            } else {
+                if deck.canUndo(progress: progress) { undoButton }
+                switch card {
+                case .realia where !deck.revealed:
+                    Button(s.howToSay) { deck.revealed = true }.buttonStyle(Pill(style: .primary))
+                case .realia:
+                    Button(s.didntKnow) { leave(.again) }.buttonStyle(Pill(style: .bad))
+                    Button(s.knew) { leave(.good) }.buttonStyle(Pill(style: .good))
+                case .word:
+                    Button(s.hard) { leave(.again) }.buttonStyle(Pill(style: .amber))
+                    Button { leave(.good) } label: { HStack { Text(s.next); Image(systemName: "chevron.right") } }
+                        .buttonStyle(Pill(style: .primary))
+                }
             }
         }
-    }
-}
-
-/// A quiet, single-line grade choice: colored label on the card surface, interval underneath.
-struct GradeButton: View {
-    let title: String
-    let sub: String
-    let color: Color
-    let action: () -> Void
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 0) {
-                Text(title).font(.system(size: 15, weight: .semibold)).foregroundStyle(color)
-                Text(sub).font(.system(size: 11, weight: .medium)).foregroundStyle(Theme.ink2)
-            }
-            .lineLimit(1).minimumScaleFactor(0.75)
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .padding(.horizontal, 6)
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Theme.rule, lineWidth: 1))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(PressFade())
-    }
-}
-
-/// Dims a plain button while it is pressed.
-struct PressFade: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label.opacity(configuration.isPressed ? 0.6 : 1).animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -256,6 +377,7 @@ struct WordCardView: View {
     var again = false
     let showAnswer: Bool
     let reveal: () -> Void
+    var onScrollTopChange: (Bool) -> Void = { _ in }
 
     var body: some View {
         let s = progress.strings
@@ -298,6 +420,9 @@ struct WordCardView: View {
             .frame(maxWidth: .infinity)
         }
         .scrollBounceBehavior(.basedOnSize)
+        .onScrollGeometryChange(for: Bool.self) { geometry in geometry.contentOffset.y <= 1 } action: { _, top in
+            onScrollTopChange(top)
+        }
         .background(Theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.rule, lineWidth: 1))

@@ -16,7 +16,7 @@ enum DeckCard: Identifiable {
 final class DeckEngine {
     private(set) var queue: [DeckCard] = []
     private(set) var index = 0
-    private var history: [Int] = []
+    private var lastReview: ReviewUndo?
     var revealed = false
     private(set) var built = false
     /// Roaming: random words from the deck filters, answers shown, nothing graded or logged.
@@ -28,7 +28,47 @@ final class DeckEngine {
     func invalidate() { built = false }
 
     var current: DeckCard? { index < queue.count ? queue[index] : nil }
-    var canGoBack: Bool { roaming ? index > 0 : !history.isEmpty }
+    var canGoBack: Bool { roaming && index > 0 }
+
+    private struct ReviewUndo {
+        let language: LanguageCode
+        let queue: [DeckCard]
+        let index: Int
+        let revealed: Bool
+        let summaryDue: Bool
+        let wordID: Int?
+        let beforeCard: CardState?
+        let afterCard: CardState?
+        let day: Int
+        let beforeLog: DayLog?
+        let afterLog: DayLog?
+
+        func matches(_ progress: StudyProgress) -> Bool {
+            guard progress.language == language, progress.pack.log[day] == afterLog else { return false }
+            return wordID.map { progress.pack.cards[$0] == afterCard } ?? true
+        }
+    }
+
+    func canUndo(progress: StudyProgress) -> Bool {
+        !roaming && (lastReview?.matches(progress) ?? false)
+    }
+
+    @discardableResult
+    func undo(progress: StudyProgress) -> Bool {
+        guard !roaming, let snapshot = lastReview, snapshot.matches(progress) else { lastReview = nil; return false }
+        var pack = progress.pack
+        if let id = snapshot.wordID { pack.cards[id] = snapshot.beforeCard }
+        pack.log[snapshot.day] = snapshot.beforeLog
+        pack.markReview(cardID: snapshot.wordID, day: snapshot.day)
+        progress.pack = pack
+        queue = snapshot.queue
+        index = snapshot.index
+        revealed = snapshot.revealed
+        summaryDue = snapshot.summaryDue
+        lastReview = nil
+        generation += 1
+        return true
+    }
 
     private func levels(_ vocab: Vocabulary, _ s: PackSettings) -> [String] {
         s.levels.isEmpty ? (vocab.current?.defaultLevels ?? []) : s.levels
@@ -70,7 +110,7 @@ final class DeckEngine {
             for (i, c) in q.enumerated() { out.append(c); if (i + 1) % 5 == 0 { out.append(.realia(engine.realia())) } }
             q = out
         }
-        queue = q; index = 0; history = []; revealed = false; built = true; roaming = false; summaryDue = false; generation += 1
+        queue = q; index = 0; lastReview = nil; revealed = false; built = true; roaming = false; summaryDue = false; generation += 1
     }
 
     /// `first` puts a word at the front, such as the one tapped on the Flashcard widget.
@@ -80,7 +120,7 @@ final class DeckEngine {
             batch.removeAll { $0.id == DeckCard.word(first, again: false).id }
             batch.insert(.word(first, again: false), at: 0)
         }
-        queue = batch; index = 0; history = []; revealed = true; built = true; roaming = true; summaryDue = false; generation += 1
+        queue = batch; index = 0; lastReview = nil; revealed = true; built = true; roaming = true; summaryDue = false; generation += 1
     }
 
     /// The whole filtered pool, shuffled up front, so roaming pages back and forth through a fixed list.
@@ -98,6 +138,12 @@ final class DeckEngine {
     func advance(_ g: Grade, vocab: Vocabulary, progress: StudyProgress) {
         guard let c = current else { return }
         if roaming { return roam(to: index + 1, vocab: vocab, settings: progress.settings) }
+        let previousQueue = queue, previousIndex = index, previousReveal = revealed, previousSummary = summaryDue
+        let day = StudyProgress.today()
+        let wordID: Int?
+        if case .word(let id, _) = c { wordID = id } else { wordID = nil }
+        let beforeCard = wordID.flatMap { progress.pack.cards[$0] }
+        let beforeLog = progress.pack.log[day]
         switch c {
         case .word(let id, _):
             progress.grade(id, g)
@@ -106,8 +152,12 @@ final class DeckEngine {
             if n > 0 && n % progress.app.goal == 0 { summaryDue = true }
         case .realia:
             progress.logRealia(correct: g != .again)
+            if g == .again { queue.insert(c, at: min(queue.count, index + 4)) }
         }
-        history.append(index)
+        lastReview = ReviewUndo(language: progress.language, queue: previousQueue, index: previousIndex,
+                                revealed: previousReveal, summaryDue: previousSummary, wordID: wordID,
+                                beforeCard: beforeCard, afterCard: wordID.flatMap { progress.pack.cards[$0] },
+                                day: day, beforeLog: beforeLog, afterLog: progress.pack.log[day])
         index += 1
         revealed = false
         if index >= queue.count { refill(vocab: vocab, progress: progress) }
@@ -123,10 +173,4 @@ final class DeckEngine {
         queue.append(contentsOf: more)
     }
 
-    func back() {
-        if roaming { index = max(0, index - 1); return }
-        guard let i = history.popLast() else { return }
-        index = i
-        revealed = true
-    }
 }
