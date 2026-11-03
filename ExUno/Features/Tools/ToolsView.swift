@@ -13,7 +13,7 @@ struct ToolsView: View {
         let previews = engine.tools.filter { $0 != .verbs }.map { ToolPreview(tool: $0, engine: engine, now: previewDate) }
         NavigationStack(path: $path) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(alignment: .firstTextBaseline) {
                             Text(progress.strings.tools)
@@ -25,8 +25,6 @@ struct ToolsView: View {
                                 .background(Theme.surface2, in: Capsule())
                                 .accessibilityLabel(progress.language.englishName)
                         }
-                        Text("Numbers, dates and everyday language.")
-                            .font(.subheadline).foregroundStyle(Theme.ink2)
                     }
                     if let first = previews.first {
                         NavigationLink(value: first.tool) {
@@ -34,24 +32,20 @@ struct ToolsView: View {
                         }.buttonStyle(.plain)
                     }
                     if previews.count > 1 {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("IN EVERYDAY LIFE")
-                                .font(.caption.weight(.semibold)).tracking(1.2)
-                                .foregroundStyle(Theme.ink2)
-                            LazyVGrid(columns: typeSize.isAccessibilitySize
-                                      ? [GridItem(.flexible())]
-                                      : [GridItem(.adaptive(minimum: 145), spacing: 12)], spacing: 12) {
-                                ForEach(previews.dropFirst()) { preview in
-                                    NavigationLink(value: preview.tool) {
-                                        ToolTile(preview: preview)
-                                    }.buttonStyle(.plain)
-                                }
+                        LazyVGrid(columns: typeSize.isAccessibilitySize
+                                  ? [GridItem(.flexible())]
+                                  : [GridItem(.adaptive(minimum: 145), spacing: 10)], spacing: 10) {
+                            ForEach(previews.dropFirst()) { preview in
+                                NavigationLink(value: preview.tool) {
+                                    ToolTile(preview: preview)
+                                }.buttonStyle(.plain)
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 24)
+                .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 12)
             }
+            .scrollBounceBehavior(.basedOnSize)
             .pageBackground()
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: ToolKind.self) { ToolPage(tool: $0) }
@@ -118,6 +112,61 @@ private struct ToolTile: View {
     var featured = false
     @Environment(\.dynamicTypeSize) private var typeSize
     var body: some View {
+        Group {
+            if featured { featuredTile }
+            else { shortcutTile }
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 20))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(preview.title), \(preview.value), \(preview.phrase)")
+    }
+
+    private var shortcutTile: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
+                Image(systemName: preview.tool.icon)
+                    .font(.system(size: 25, weight: .semibold))
+                Spacer(minLength: 8)
+            }
+            .frame(minHeight: 28, alignment: .top)
+            .accessibilityHidden(true)
+            Spacer(minLength: 10)
+            VStack(alignment: .leading, spacing: 5) {
+                Text(preview.title)
+                    .font(.system(.headline, design: .rounded))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(preview.value)
+                    .font(.system(.subheadline, design: .monospaced, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .foregroundStyle(.white)
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 116, alignment: .leading)
+        .background(tileGradient, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+    }
+
+    private var tileGradient: LinearGradient {
+        let colors: (UInt32, UInt32)
+        switch preview.tool {
+        case .prices: colors = (0xC95344, 0xA7392C)
+        case .time: colors = (0x416CB9, 0x2C4E96)
+        case .date, .calendar: colors = (0x8260BB, 0x62409E)
+        case .phone: colors = (0x21858B, 0x12696F)
+        case .market: colors = (0x608559, 0x3F683F)
+        case .years: colors = (0xA7733C, 0x86562A)
+        default: colors = (0x54504A, 0x302D28)
+        }
+        func color(_ hex: UInt32) -> Color {
+            Color(red: Double((hex >> 16) & 255) / 255,
+                  green: Double((hex >> 8) & 255) / 255,
+                  blue: Double(hex & 255) / 255)
+        }
+        return LinearGradient(colors: [color(colors.0), color(colors.1)], startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    private var featuredTile: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 8) {
                 if !typeSize.isAccessibilitySize {
@@ -158,9 +207,6 @@ private struct ToolTile: View {
                     in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
             .stroke(featured ? Color.clear : Theme.rule, lineWidth: 1))
-        .contentShape(RoundedRectangle(cornerRadius: 20))
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(preview.title), \(preview.value), \(preview.phrase)")
     }
 }
 
