@@ -159,6 +159,6 @@ struct LanguageRow: View {
         }
         .padding(compact ? 10 : 14)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(selected ? Theme.accent : Theme.rule, lineWidth: selected ? 2 : 1))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(selected ? Theme.accent : Theme.rule, lineWidth: selected ? 2 : 1))
     }
 }

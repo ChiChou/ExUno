@@ -50,7 +50,7 @@ struct TodayView: View {
         .pageBackground()
         .toolbar(.hidden, for: .navigationBar)
         .onReceive(timer) { now = $0 }
-        .sheet(isPresented: $showLanguages) { LanguagePicker().presentationDetents([.height(680), .large]) }
+        .sheet(isPresented: $showLanguages) { LanguagePicker() }
         .sheet(isPresented: $showSettings) { SettingsView() }
     }
 
@@ -133,23 +133,31 @@ struct TodayView: View {
 struct LanguagePicker: View {
     @Environment(StudyProgress.self) private var progress
     @Environment(\.dismiss) private var dismiss
+    @State private var contentHeight: CGFloat = 580
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Language").font(Theme.display(24)).padding(.bottom, 4)
-            ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(LanguageCode.alphabetical) { code in
-                        Button {
-                            if code != progress.language { progress.switchTo(code) }
-                            dismiss()
-                        } label: { LanguageRow(code: code, selected: code == progress.language, compact: true) }
-                        .buttonStyle(.plain)
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Language").font(Theme.display(24)).padding(.bottom, 4)
+                ForEach(LanguageCode.alphabetical) { code in
+                    Button {
+                        if code != progress.language { progress.switchTo(code) }
+                        dismiss()
+                    } label: { LanguageRow(code: code, selected: code == progress.language, compact: true) }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(20)
+            .onGeometryChange(for: CGFloat.self) { geometry in
+                geometry.size.height.rounded(.up)
+            } action: { height in
+                if height > 0 { contentHeight = height }
+            }
         }
-        .padding(20)
+        .scrollBounceBehavior(.basedOnSize)
         .pageBackground()
+        .presentationDetents([.height(contentHeight)])
+        .presentationDragIndicator(.visible)
     }
 }
 
