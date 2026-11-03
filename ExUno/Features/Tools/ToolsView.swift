@@ -331,11 +331,22 @@ struct ConverterTool: View {
                 .pickerStyle(.wheel).frame(height: 100)
             }
         case .date, .calendar:
-            HStack {
-                DatePicker("Date", selection: selected(\.date), displayedComponents: .date)
-                    .datePickerStyle(.compact).tint(Theme.accent)
-                    .font(.headline)
-                Button("Today", action: useCurrentValue).disabled(followsClock)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    Button("Yesterday") { selectDay(offset: -1) }
+                    dateSelector
+                    Button("Today", action: useCurrentValue).disabled(followsClock)
+                    Button("Tomorrow") { selectDay(offset: 1) }
+                }
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Button("Yesterday") { selectDay(offset: -1) }
+                        Spacer()
+                        Button("Today", action: useCurrentValue).disabled(followsClock)
+                        Button("Tomorrow") { selectDay(offset: 1) }
+                    }
+                    dateSelector
+                }
             }.frame(minHeight: 44)
         case .phone:
             BigField(text: $input.text, placeholder: "06 12 34 56 78", keyboard: .phonePad)
@@ -374,6 +385,19 @@ struct ConverterTool: View {
         case .verbs:
             EmptyView()
         }
+    }
+
+    private var dateSelector: some View {
+        DatePicker("Date", selection: selected(\.date), displayedComponents: .date)
+            .labelsHidden()
+            .datePickerStyle(.compact).tint(Theme.accent)
+            .font(.headline)
+    }
+
+    private func selectDay(offset: Int) {
+        followsClock = false
+        input.date = Calendar.current.date(byAdding: .day, value: offset, to: Date()) ?? Date()
+        TouchFeedback.tick()
     }
 
     @ViewBuilder
